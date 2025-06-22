@@ -1,81 +1,116 @@
 // controllers/authController.js
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
-import pool from "../config/db.js";
+import AuthService from "../services/authService.js";
 
 // Inscription d'utilisateur
 export const register = async (req, res) => {
-    const { username, email, password } = req.body;
+    const { username, email, password, confirmPassword } = req.body;
+
+    // Validation des champs améliorée
+    if (!username?.trim() || !email?.trim() || !password || !confirmPassword) {
+        return res.status(400).json({ message: "Tous les champs sont obligatoires" });
+    }
+
+    // Vérification que les mots de passe correspondent
+    if (password !== confirmPassword) {
+        return res.status(400).json({ message: "Les mots de passe ne correspondent pas" });
+    }
 
     try {
-        // Vérifier si l'utilisateur existe déjà
-        const userExists = await pool.query(
-            "SELECT * FROM users WHERE email = $1 OR username = $2",
-            [email, username]
-        );
+        console.log(`[AUTH CTRL] Tentative d'inscription pour ${email}`);
 
-        if (userExists.rows.length > 0) {
-            return res.status(400).json({ message: "Cet utilisateur existe déjà" });
-        }
+        // Utiliser le service d'authentification pour l'inscription
+        const newUser = await AuthService.register({ username, email, password });
 
-        // Hacher le mot de passe
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
+        // Générer un token JWT avec le service
+        const token = AuthService.generateToken(newUser);
 
-        // Créer l'utilisateur
-        const newUser = await pool.query(
-            "INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING id, username, email, is_admin",
-            [username, email, hashedPassword]
-        );
+        console.log(`[AUTH CTRL] Inscription réussie pour ${email}`);
 
-        // Générer JWT
-        const token = jwt.sign(
-            { id: newUser.rows[0].id, isAdmin: newUser.rows[0].is_admin },
-            process.env.JWT_SECRET,
-            { expiresIn: "1d" }
-        );
-
+        // Renvoyer les informations utilisateur et le token
         res.status(201).json({
-            user: newUser.rows[0],
+            user: {
+                id: newUser.id,
+                username: newUser.username,
+                email: newUser.email,
+                isAdmin: newUser.is_admin
+            },
             token
         });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Erreur serveur" });
+        console.error(`[AUTH CTRL] Erreur d'inscription: ${error.message}`);
+
+        // Gestion des erreurs spécifiques
+        if (error.message === "Cet utilisateur existe déjà") {
+            return res.status(400).json({ message: error.message });
+        }
+
+        res.status(500).json({ message: "Erreur serveur lors de l'inscription" });
     }
 };
 
 // Connexion d'utilisateur
 export const login = async (req, res) => {
+    console.log("[AUTH CTRL] Tentative de connexion reçue");
     const { email, password } = req.body;
 
+    // Validation des champs améliorée
+    if (!email?.trim() || !password) {
+        console.log("[AUTH CTRL] Validation échouée: email ou mot de passe manquant");
+        return res.status(400).json({ message: "Email et mot de passe requis" });
+    }
+
     try {
-        const user = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+        console.log(`[AUTH CTRL] Traitement de la connexion pour ${email}`);
 
-        if (user.rows.length === 0) {
-            return res.status(400).json({ message: "Email ou mot de passe incorrect" });
-        }
+        // Utiliser le service d'authentification pour la connexion
+        const user = await AuthService.login(email, password);
 
-        const validPassword = await bcrypt.compare(password, user.rows[0].password);
+        // Générer un token JWT avec le service
+        const token = AuthService.generateToken(user);
 
-        if (!validPassword) {
-            return res.status(400).json({ message: "Email ou mot de passe incorrect" });
-        }
+        console.log(`[AUTH CTRL] Connexion réussie pour ${email}`);
 
-        const token = jwt.sign(
-            { id: user.rows[0].id, isAdmin: user.rows[0].is_admin },
-            process.env.JWT_SECRET,
-            { expiresIn: "1d" }
-        );
-
-        const { password: _, ...userWithoutPassword } = user.rows[0];
-
+        // Renvoyer les informations utilisateur et le token
         res.status(200).json({
-            user: userWithoutPassword,
+            user: {
+                id: user.id,
+                username: user.username,
+                email: user.email,
+                isAdmin: user.is_admin
+            },
             token
         });
     } catch (error) {
-        console.error(error);
+        console.error(`[AUTH CTRL] Erreur de connexion: ${error.message}`);
+
+        // Message d'erreur générique pour la sécurité
+        res.status(400).json({ message: "Email ou mot de passe incorrect" });
+    }
+};
+
+// Récupérer les informations de l'utilisateur actuel
+export const getCurrentUser = async (req, res) => {
+    try {
+        console.log(`[AUTH CTRL] Récupération des données utilisateur`);
+
+        // L'utilisateur est déjà disponible dans req.user via le middleware d'authentification
+        const user = req.user;
+
+        if (!user) {
+            console.log(`[AUTH CTRL] Aucun utilisateur trouvé dans la requête`);
+            return res.status(404).json({ message: "Utilisateur non trouvé" });
+        }
+
+        console.log(`[AUTH CTRL] Données utilisateur récupérées pour ID: ${user.id}`);
+
+        res.status(200).json({
+            id: user.id,
+            username: user.username,
+            email: user.email,
+            isAdmin: user.isAdmin
+        });
+    } catch (error) {
+        console.error(`[AUTH CTRL] Erreur lors de la récupération des données utilisateur: ${error.message}`);
         res.status(500).json({ message: "Erreur serveur" });
     }
 };

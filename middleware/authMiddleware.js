@@ -1,45 +1,63 @@
-// middleware/authMiddleware.js
 import jwt from "jsonwebtoken";
-import pool from "../config/db.js";
+import AuthService from "../services/authService.js";
 
+// Vérification du token
 export const protect = async (req, res, next) => {
     let token;
 
-    if (
-        req.headers.authorization &&
-        req.headers.authorization.startsWith("Bearer")
-    ) {
+    console.log('[AUTH MIDDLEWARE] Vérification du token');
+
+    if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
         try {
-            // Récupérer le token
+            // Extraire le token du header Authorization
             token = req.headers.authorization.split(" ")[1];
 
-            // Vérifier le token
-            const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-            // Récupérer l'utilisateur
-            const user = await pool.query("SELECT id, username, email, is_admin FROM users WHERE id = $1", [decoded.id]);
-
-            if (user.rows.length === 0) {
-                return res.status(401).json({ message: "Non autorisé, utilisateur non trouvé" });
+            if (!token) {
+                console.log('[AUTH MIDDLEWARE] Token manquant après "Bearer"');
+                return res.status(401).json({ message: "Token invalide ou mal formaté" });
             }
 
-            req.user = user.rows[0];
-            next();
-        } catch (error) {
-            console.error(error);
-            res.status(401).json({ message: "Non autorisé, token invalide" });
-        }
-    }
+            // Vérifier et décoder le token
+            try {
+                const decoded = jwt.verify(token, process.env.JWT_SECRET);
+                console.log(`[AUTH MIDDLEWARE] Token valide pour l'utilisateur ID: ${decoded.id}`);
 
-    if (!token) {
-        res.status(401).json({ message: "Non autorisé, pas de token" });
+                // Ajouter les informations de l'utilisateur à la requête
+                req.user = decoded;
+                next();
+            } catch (jwtError) {
+                console.error('[AUTH MIDDLEWARE] Erreur JWT:', jwtError.message);
+
+                if (jwtError.name === 'TokenExpiredError') {
+                    return res.status(401).json({ message: "Session expirée, veuillez vous reconnecter" });
+                }
+
+                return res.status(401).json({ message: "Token invalide" });
+            }
+        } catch (error) {
+            console.error('[AUTH MIDDLEWARE] Erreur générale:', error.message);
+            res.status(401).json({ message: "Erreur d'authentification" });
+        }
+    } else {
+        console.log('[AUTH MIDDLEWARE] Aucun token fourni dans les headers');
+        res.status(401).json({ message: "Accès non autorisé, token manquant" });
     }
 };
 
+// Middleware pour vérifier si l'utilisateur est admin
 export const admin = (req, res, next) => {
-    if (req.user && req.user.is_admin) {
+    console.log(`[AUTH MIDDLEWARE] Vérification des droits admin pour l'utilisateur ID: ${req.user?.id}`);
+
+    if (!req.user) {
+        console.log('[AUTH MIDDLEWARE] Aucun utilisateur trouvé dans la requête');
+        return res.status(401).json({ message: "Authentification requise" });
+    }
+
+    if (req.user.isAdmin) {
+        console.log('[AUTH MIDDLEWARE] Droits admin confirmés');
         next();
     } else {
-        res.status(403).json({ message: "Non autorisé, réservé aux administrateurs" });
+        console.log('[AUTH MIDDLEWARE] Droits admin refusés');
+        res.status(403).json({ message: "Accès réservé aux administrateurs" });
     }
 };

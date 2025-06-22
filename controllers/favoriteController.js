@@ -1,5 +1,5 @@
 // controllers/favoriteController.js
-import pool from "../config/db.js";
+import FavoriteService from "../services/favoriteService.js";
 
 // Ajouter une production aux favoris
 export const addFavorite = async (req, res) => {
@@ -7,32 +7,21 @@ export const addFavorite = async (req, res) => {
     const userId = req.user.id;
 
     try {
-        // Vérifier si la production existe
-        const production = await pool.query("SELECT * FROM productions WHERE id = $1", [productionId]);
-
-        if (production.rows.length === 0) {
-            return res.status(404).json({ message: "Production non trouvée" });
-        }
-
-        // Vérifier si déjà dans les favoris
-        const existingFavorite = await pool.query(
-            "SELECT * FROM favorites WHERE user_id = $1 AND production_id = $2",
-            [userId, productionId]
-        );
-
-        if (existingFavorite.rows.length > 0) {
-            return res.status(400).json({ message: "Cette production est déjà dans vos favoris" });
-        }
-
-        // Ajouter aux favoris
-        const result = await pool.query(
-            "INSERT INTO favorites (user_id, production_id) VALUES ($1, $2) RETURNING *",
-            [userId, productionId]
-        );
-
-        res.status(201).json(result.rows[0]);
+        // Utiliser le service de favoris pour ajouter une production aux favoris
+        const newFavorite = await FavoriteService.addToFavorites(userId, productionId);
+        res.status(201).json(newFavorite);
     } catch (error) {
         console.error(error);
+
+        // Gérer les erreurs spécifiques
+        if (error.message === "Production non trouvée") {
+            return res.status(404).json({ message: error.message });
+        } else if (error.message === "Utilisateur non trouvé") {
+            return res.status(404).json({ message: error.message });
+        } else if (error.message === "Cette production est déjà dans vos favoris") {
+            return res.status(400).json({ message: error.message });
+        }
+
         res.status(500).json({ message: "Erreur serveur" });
     }
 };
@@ -42,12 +31,9 @@ export const getUserFavorites = async (req, res) => {
     const userId = req.user.id;
 
     try {
-        const result = await pool.query(
-            "SELECT p.* FROM favorites f JOIN productions p ON f.production_id = p.id WHERE f.user_id = $1",
-            [userId]
-        );
-
-        res.status(200).json(result.rows);
+        // Utiliser le service de favoris pour récupérer les favoris d'un utilisateur
+        const productions = await FavoriteService.getUserFavorites(userId);
+        res.status(200).json(productions);
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Erreur serveur" });
@@ -60,16 +46,30 @@ export const removeFavorite = async (req, res) => {
     const userId = req.user.id;
 
     try {
-        const result = await pool.query(
-            "DELETE FROM favorites WHERE user_id = $1 AND production_id = $2 RETURNING *",
-            [userId, productionId]
-        );
+        // Utiliser le service de favoris pour supprimer un favori
+        await FavoriteService.removeFromFavorites(userId, productionId);
+        res.status(200).json({ message: "Production retirée des favoris avec succès" });
+    } catch (error) {
+        console.error(error);
 
-        if (result.rows.length === 0) {
-            return res.status(404).json({ message: "Favori non trouvé" });
+        // Gérer l'erreur spécifique
+        if (error.message === "Cette production n'est pas dans vos favoris") {
+            return res.status(404).json({ message: error.message });
         }
 
-        res.status(200).json({ message: "Favori supprimé avec succès" });
+        res.status(500).json({ message: "Erreur serveur" });
+    }
+};
+
+// Vérifier si une production est en favori pour un utilisateur
+export const checkFavorite = async (req, res) => {
+    const { productionId } = req.params;
+    const userId = req.user.id;
+
+    try {
+        // Utiliser le service de favoris pour vérifier si une production est en favori
+        const isFavorite = await FavoriteService.isFavorite(userId, productionId);
+        res.status(200).json({ isFavorite });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Erreur serveur" });

@@ -1,101 +1,106 @@
 // controllers/productionController.js
-import pool from "../config/db.js";
+import ProductionService from '../services/productionService.js';
 
-// Récupérer toutes les productions
-export const getProductions = async (req, res) => {
+export const getAllProductions = async (req, res) => {
+    console.log('[PRODUCTION CTRL] Requête reçue sur /api/productions');
     try {
-        const result = await pool.query("SELECT * FROM productions ORDER BY created_at DESC");
-        res.status(200).json(result.rows);
+        // Récupérer les paramètres de la requête pour la pagination et le tri
+        const { limit, offset, category, sortBy, sortOrder } = req.query;
+        console.log('[PRODUCTION CTRL] Appel à ProductionService.getAllProductions avec params:', { limit, offset, category, sortBy, sortOrder });
+        // Utiliser le service pour récupérer les productions
+        const productions = await ProductionService.getAllProductions({
+            limit: parseInt(limit) || 10,
+            offset: parseInt(offset) || 0,
+            category,
+            sortBy: sortBy || 'created_at',
+            sortOrder: sortOrder || 'DESC'
+        });
+        console.log('[PRODUCTION CTRL] Productions récupérées:', productions && productions.length);
+        res.status(200).json(productions);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Erreur serveur" });
+        console.error('[PRODUCTION CTRL] Erreur:', error);
+        res.status(500).json({ message: 'Erreur lors de la récupération des productions' });
     }
 };
 
-// Récupérer une production par ID
 export const getProductionById = async (req, res) => {
-    const { id } = req.params;
-
     try {
-        const result = await pool.query("SELECT * FROM productions WHERE id = $1", [id]);
+        const { id } = req.params;
 
-        if (result.rows.length === 0) {
-            return res.status(404).json({ message: "Production non trouvée" });
-        }
-
-        res.status(200).json(result.rows[0]);
+        // Utiliser le service pour récupérer une production par ID
+        const production = await ProductionService.getProductionById(id);
+        res.status(200).json(production);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: "Erreur serveur" });
+
+        // Gérer l'erreur spécifique
+        if (error.message === "Production non trouvée") {
+            return res.status(404).json({ message: error.message });
+        }
+
+        res.status(500).json({ message: 'Erreur lors de la récupération de la production' });
     }
 };
 
-// Créer une nouvelle production (admin seulement)
 export const createProduction = async (req, res) => {
-    const { title, description, release_date } = req.body;
-    const cover_image = req.file ? `/uploads/${req.file.filename}` : null;
-
     try {
-        const result = await pool.query(
-            "INSERT INTO productions (title, description, cover_image, release_date) VALUES ($1, $2, $3, $4) RETURNING *",
-            [title, description, cover_image, release_date]
+        const { title, description, genre } = req.body;
+
+        // Récupérer le fichier audio uploadé
+        const file = req.files?.audio?.[0] || null;
+
+        // Utiliser le service pour créer une production
+        const newProduction = await ProductionService.createProduction(
+            {
+                title,
+                description,
+                genre,
+                image_url: req.files?.image?.[0] ? `/uploads/${req.files.image[0].filename}` : null
+            },
+            file
         );
 
-        res.status(201).json(result.rows[0]);
+        res.status(201).json(newProduction);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Erreur serveur" });
+        console.error('Erreur lors de la création de la production:', error);
+        res.status(500).json({ message: 'Erreur lors de la création de la production' });
     }
 };
 
-// Mettre à jour une production (admin seulement)
 export const updateProduction = async (req, res) => {
-    const { id } = req.params;
-    const { title, description, release_date } = req.body;
-    const cover_image = req.file ? `/uploads/${req.file.filename}` : undefined;
-
     try {
-        // Récupérer les données actuelles
-        const currentProduction = await pool.query("SELECT * FROM productions WHERE id = $1", [id]);
+        const { id } = req.params;
+        const updateData = req.body;
+        const file = req.files?.audio?.[0] || null;
 
-        if (currentProduction.rows.length === 0) {
-            return res.status(404).json({ message: "Production non trouvée" });
+        // Utiliser le service pour mettre à jour une production
+        const updatedProduction = await ProductionService.updateProduction(id, updateData, file);
+        res.status(200).json(updatedProduction);
+    } catch (error) {
+        console.error('Erreur lors de la mise à jour de la production:', error);
+
+        if (error.message === "Production non trouvée") {
+            return res.status(404).json({ message: error.message });
         }
 
-        const updateFields = {
-            title: title || currentProduction.rows[0].title,
-            description: description || currentProduction.rows[0].description,
-            cover_image: cover_image || currentProduction.rows[0].cover_image,
-            release_date: release_date || currentProduction.rows[0].release_date,
-            updated_at: new Date()
-        };
-
-        const result = await pool.query(
-            "UPDATE productions SET title = $1, description = $2, cover_image = $3, release_date = $4, updated_at = $5 WHERE id = $6 RETURNING *",
-            [updateFields.title, updateFields.description, updateFields.cover_image, updateFields.release_date, updateFields.updated_at, id]
-        );
-
-        res.status(200).json(result.rows[0]);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Erreur serveur" });
+        res.status(500).json({ message: 'Erreur lors de la mise à jour de la production' });
     }
 };
 
-// Supprimer une production (admin seulement)
 export const deleteProduction = async (req, res) => {
-    const { id } = req.params;
-
     try {
-        const result = await pool.query("DELETE FROM productions WHERE id = $1 RETURNING *", [id]);
+        const { id } = req.params;
 
-        if (result.rows.length === 0) {
-            return res.status(404).json({ message: "Production non trouvée" });
+        // Utiliser le service pour supprimer une production
+        await ProductionService.deleteProduction(id);
+        res.status(200).json({ message: 'Production supprimée avec succès' });
+    } catch (error) {
+        console.error('Erreur lors de la suppression de la production:', error);
+
+        if (error.message === "Production non trouvée") {
+            return res.status(404).json({ message: error.message });
         }
 
-        res.status(200).json({ message: "Production supprimée avec succès" });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Erreur serveur" });
+        res.status(500).json({ message: 'Erreur lors de la suppression de la production' });
     }
 };

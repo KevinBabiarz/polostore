@@ -1,0 +1,9 @@
+# Node
+node_modules/
+client/node_modules/
+npm-debug.log
+yarn-error.log
+.env
+.DS_Store
+*.iml
+
