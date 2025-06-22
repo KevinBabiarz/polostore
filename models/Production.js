@@ -16,6 +16,10 @@ const Production = sequelize.define('Production', {
       notEmpty: true
     }
   },
+  artist: {
+    type: DataTypes.STRING(255),
+    allowNull: true
+  },
   description: {
     type: DataTypes.TEXT,
     allowNull: true
@@ -39,20 +43,52 @@ const Production = sequelize.define('Production', {
   }
 }, {
   tableName: 'productions',
-  timestamps: false, // car nous utilisons created_at manuellement
-  underscored: true
+  timestamps: false,
+  underscored: true,
+  // Optimisation des requêtes Sequelize avec tous les index
+  indexes: [
+    { fields: ['title'] },
+    { fields: ['artist'] },
+    { fields: ['genre'] },
+    { fields: ['created_at'] }
+  ]
 });
 
-// Méthodes statiques
+// Méthodes statiques optimisées comme dans le modèle User
 Production.findByGenre = async function(genre) {
-  return await Production.findAll({ where: { genre } });
+  try {
+    return await Production.findAll({
+      where: { genre },
+      order: [['created_at', 'DESC']]
+    });
+  } catch (error) {
+    console.error("[PRODUCTION MODEL] Erreur lors de la recherche par genre:", error);
+    return [];
+  }
 };
 
 Production.findLatest = async function(limit = 10) {
-  return await Production.findAll({
-    order: [['created_at', 'DESC']],
-    limit
-  });
+  try {
+    return await Production.findAll({
+      order: [['created_at', 'DESC']],
+      limit: parseInt(limit)
+    });
+  } catch (error) {
+    console.error("[PRODUCTION MODEL] Erreur lors de la récupération des productions récentes:", error);
+    return [];
+  }
+};
+
+Production.findByArtist = async function(artist) {
+  try {
+    return await Production.findAll({
+      where: { artist },
+      order: [['created_at', 'DESC']]
+    });
+  } catch (error) {
+    console.error("[PRODUCTION MODEL] Erreur lors de la recherche par artiste:", error);
+    return [];
+  }
 };
 
 export default Production;

@@ -2,8 +2,12 @@ import UserService from "../services/userService.js";
 
 export const getUsers = async (req, res) => {
     try {
+        console.log('[USER CTRL] Requête reçue sur /api/users');
+
         // Récupérer les paramètres de la requête
         const { limit, offset, sortBy, sortOrder, search } = req.query;
+
+        console.log('[USER CTRL] Paramètres reçus:', { limit, offset, sortBy, sortOrder, search });
 
         // Options pour le service
         const options = {
@@ -17,6 +21,8 @@ export const getUsers = async (req, res) => {
         // Utiliser le service utilisateur pour récupérer les utilisateurs
         const users = await UserService.getAllUsers(options);
 
+        console.log(`[USER CTRL] ${users.length} utilisateurs récupérés`);
+
         // Transformer la réponse pour correspondre à la structure attendue par le frontend
         const formattedUsers = users.map(user => ({
             id: user.id,
@@ -28,17 +34,20 @@ export const getUsers = async (req, res) => {
 
         res.status(200).json(formattedUsers);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Erreur serveur" });
+        console.error('[USER CTRL] Erreur:', error);
+        res.status(500).json({ message: "Erreur serveur lors de la récupération des utilisateurs" });
     }
 };
 
 export const getUserById = async (req, res) => {
     try {
         const { id } = req.params;
+        console.log(`[USER CTRL] Recherche de l'utilisateur ID ${id}`);
 
         // Utiliser le service utilisateur pour récupérer un utilisateur par ID
         const user = await UserService.getUserById(id);
+
+        console.log(`[USER CTRL] Utilisateur ID ${id} trouvé`);
 
         // Transformer la réponse pour correspondre à la structure attendue
         const formattedUser = {
@@ -51,13 +60,13 @@ export const getUserById = async (req, res) => {
 
         res.status(200).json(formattedUser);
     } catch (error) {
-        console.error(error);
+        console.error('[USER CTRL] Erreur:', error);
 
         if (error.message === "Utilisateur non trouvé") {
             return res.status(404).json({ message: error.message });
         }
 
-        res.status(500).json({ message: "Erreur serveur" });
+        res.status(500).json({ message: "Erreur serveur lors de la récupération de l'utilisateur" });
     }
 };
 

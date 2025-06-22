@@ -1,486 +1,530 @@
-import React, { useState, useEffect } from 'react';
+// src/pages/admin/UserManagement.js
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Container, Typography, Box, Paper, Table, TableBody, TableCell,
-  TableContainer, TableHead, TableRow, TablePagination, IconButton,
-  Button, TextField, InputAdornment, Dialog, DialogActions,
-  DialogContent, DialogContentText, DialogTitle, Chip, Alert,
-  FormControlLabel, Switch, CircularProgress, Tooltip, Divider,
-  Grid, Card, CardContent, TableSortLabel
+  Box,
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  IconButton,
+  Tooltip,
+  TextField,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Chip,
+  InputAdornment,
+  TablePagination,
+  CircularProgress,
+  Alert
 } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import BlockIcon from '@mui/icons-material/Block';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
-import PersonIcon from '@mui/icons-material/Person';
-import { getUsers, changeUserRole, enableUser, disableUser, deleteUser } from '../../services/userService';
+import {
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  PersonAdd as PersonAddIcon,
+  AdminPanelSettings as AdminIcon,
+  Person as UserIcon,
+  Block as BlockIcon,
+  CheckCircle as CheckCircleIcon,
+  Search as SearchIcon,
+  Refresh as RefreshIcon
+} from '@mui/icons-material';
+import * as userService from '../../services/userService';
+import { useAuth } from '../../contexts/AuthContext';
 
 const UserManagement = () => {
-  // États
+  const { user: currentUser } = useAuth();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // État pour la pagination
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [totalCount, setTotalCount] = useState(0);
+  const [totalUsers, setTotalUsers] = useState(0);
+
+  // État pour la recherche et le tri
   const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState('created_at');
+  const [sortOrder, setSortOrder] = useState('DESC');
+
+  // État pour le modal d'édition
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
-  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
-  const [openRoleDialog, setOpenRoleDialog] = useState(false);
-  const [openStatusDialog, setOpenStatusDialog] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
-  const [orderBy, setOrderBy] = useState('createdAt'); // Par défaut, tri par date de création
-  const [order, setOrder] = useState('desc'); // Par défaut, ordre décroissant
+  const [editFormData, setEditFormData] = useState({
+    username: '',
+    email: '',
+    isAdmin: false,
+    isActive: true
+  });
 
-  // Chargement initial des utilisateurs
-  useEffect(() => {
-    fetchUsers();
-  }, [page, rowsPerPage, searchTerm, orderBy, order]);
+  // État pour le modal de confirmation de suppression
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
 
-  // Fonction pour récupérer les utilisateurs
-  const fetchUsers = async () => {
+  // Fonction pour charger les utilisateurs
+  const loadUsers = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await getUsers(page + 1, rowsPerPage, searchTerm, orderBy, order);
+      setError(null);
 
-      // Adaptation des données pour qu'elles fonctionnent avec le composant existant
-      let adaptedUsers = [];
+      // Convertir la page pour l'API (MUI est 0-based, API est 1-based)
+      const apiPage = page + 1;
 
-      if (response && Array.isArray(response)) {
-        // Si la réponse est un tableau d'utilisateurs
-        adaptedUsers = response.map(user => ({
-          ...user,
-          // Conversion du champ is_admin en role pour compatibilité avec le frontend
-          role: user.is_admin ? 'admin' : 'user',
-          // Assurer que l'ID est correctement mappé
-          _id: user.id || user._id,
-          // Par défaut, considérer l'utilisateur comme actif s'il n'y a pas de champ isActive
-          isActive: user.isActive === undefined ? true : user.isActive
-        }));
-        setTotalCount(adaptedUsers.length);
-      } else if (response && response.users) {
-        // Si la réponse a la structure { users: [...], totalCount: n }
-        adaptedUsers = response.users.map(user => ({
-          ...user,
-          role: user.is_admin ? 'admin' : 'user',
-          _id: user.id || user._id,
-          isActive: user.isActive === undefined ? true : user.isActive
-        }));
-        setTotalCount(response.totalCount || adaptedUsers.length);
+      const response = await userService.getUsers(
+        apiPage,
+        rowsPerPage,
+        searchTerm,
+        sortBy,
+        sortOrder
+      );
+
+      // Vérifier si la réponse est un tableau ou un objet avec une propriété "users"
+      if (response) {
+        if (Array.isArray(response)) {
+          // Si la réponse est directement un tableau d'utilisateurs
+          setUsers(response);
+          setTotalUsers(response.length);
+          console.log('Utilisateurs chargés:', response.length);
+        } else if (response.users) {
+          // Si la réponse est un objet avec une propriété users
+          setUsers(response.users);
+          setTotalUsers(response.totalCount || response.users.length);
+          console.log('Utilisateurs chargés:', response.users.length);
+        } else {
+          // Aucun format reconnu
+          console.error('Format de réponse non reconnu:', response);
+          setUsers([]);
+          setTotalUsers(0);
+        }
+      } else {
+        setUsers([]);
+        setTotalUsers(0);
       }
-
-      console.log("Utilisateurs adaptés:", adaptedUsers);
-      setUsers(adaptedUsers);
     } catch (err) {
-      console.error("Erreur lors du chargement des utilisateurs:", err);
-      setError("Impossible de charger la liste des utilisateurs: " + (err.message || "Erreur inconnue"));
+      console.error('Erreur lors du chargement des utilisateurs:', err);
+      setError('Impossible de charger les utilisateurs. Veuillez réessayer plus tard.');
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, rowsPerPage, searchTerm, sortBy, sortOrder]);
 
-  // Gestionnaires d'événements pour la pagination
+  // Charger les utilisateurs au montage et lorsque les paramètres changent
+  useEffect(() => {
+    loadUsers();
+  }, [loadUsers]);
+
+  // Gestion des changements de page
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
 
+  // Gestion des changements de lignes par page
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
 
-  // Gestionnaire de recherche
-  const handleSearchChange = (event) => {
-    setSearchTerm(event.target.value);
-    setPage(0);
-  };
-
-  // Gestionnaire de tri
-  const handleSort = (property) => () => {
-    const isAsc = orderBy === property && order === 'asc';
-    setOrder(isAsc ? 'desc' : 'asc');
-    setOrderBy(property);
-  };
-
-  // Fonctions pour les actions sur les utilisateurs
-  const handleOpenDeleteDialog = (user) => {
-    setSelectedUser(user);
-    setOpenDeleteDialog(true);
-  };
-
-  const handleCloseDeleteDialog = () => {
-    setOpenDeleteDialog(false);
-    setSelectedUser(null);
-  };
-
-  const handleConfirmDelete = async () => {
+  // Ouvrir le dialogue d'édition
+  const handleEditUser = async (userId) => {
     try {
-      await deleteUser(selectedUser._id);
-      setSuccessMessage(`Utilisateur ${selectedUser.name || selectedUser.email} supprimé avec succès`);
-      fetchUsers();
+      setLoading(true);
+      const userData = await userService.getUserById(userId);
+
+      setSelectedUser(userData);
+      setEditFormData({
+        username: userData.username || '',
+        email: userData.email || '',
+        isAdmin: userData.isAdmin || userData.role === 'admin' || false,
+        isActive: userData.isActive !== false // true par défaut si non défini
+      });
+      setEditDialogOpen(true);
     } catch (err) {
-      setError(`Erreur lors de la suppression: ${err.message}`);
+      console.error("Erreur lors de la récupération des détails de l'utilisateur:", err);
+      setError("Impossible de récupérer les détails de l'utilisateur");
     } finally {
-      handleCloseDeleteDialog();
+      setLoading(false);
     }
   };
 
-  const handleOpenRoleDialog = (user) => {
-    setSelectedUser(user);
-    setOpenRoleDialog(true);
+  // Gérer les changements dans le formulaire d'édition
+  const handleFormChange = (e) => {
+    const { name, value, checked } = e.target;
+    const newValue = name === 'isAdmin' || name === 'isActive' ? checked : value;
+
+    setEditFormData({
+      ...editFormData,
+      [name]: newValue
+    });
   };
 
-  const handleCloseRoleDialog = () => {
-    setOpenRoleDialog(false);
-    setSelectedUser(null);
-  };
+  // Sauvegarder les changements d'un utilisateur
+  const handleSaveUser = async () => {
+    if (!selectedUser) return;
 
-  const handleConfirmRoleChange = async () => {
     try {
-      const newRole = selectedUser.role === 'admin' ? 'user' : 'admin';
-      await changeUserRole(selectedUser._id, newRole);
-      setSuccessMessage(`Rôle modifié en ${newRole} pour ${selectedUser.name || selectedUser.email}`);
-      fetchUsers();
-    } catch (err) {
-      setError(`Erreur lors du changement de rôle: ${err.message}`);
-    } finally {
-      handleCloseRoleDialog();
-    }
-  };
+      setLoading(true);
+      await userService.updateUser(selectedUser.id, editFormData);
 
-  const handleOpenStatusDialog = (user) => {
-    setSelectedUser(user);
-    setOpenStatusDialog(true);
-  };
-
-  const handleCloseStatusDialog = () => {
-    setOpenStatusDialog(false);
-    setSelectedUser(null);
-  };
-
-  const handleConfirmStatusChange = async () => {
-    try {
-      if (selectedUser.isActive) {
-        await disableUser(selectedUser._id);
-        setSuccessMessage(`Compte de ${selectedUser.name || selectedUser.email} désactivé`);
-      } else {
-        await enableUser(selectedUser._id);
-        setSuccessMessage(`Compte de ${selectedUser.name || selectedUser.email} réactivé`);
+      // Mettre à jour le rôle si nécessaire
+      if (editFormData.isAdmin !== (selectedUser.isAdmin || selectedUser.role === 'admin')) {
+        await userService.changeUserRole(selectedUser.id, editFormData.isAdmin);
       }
-      fetchUsers();
+
+      // Mettre à jour le statut si nécessaire
+      if (editFormData.isActive !== selectedUser.isActive) {
+        if (editFormData.isActive) {
+          await userService.enableUser(selectedUser.id);
+        } else {
+          await userService.disableUser(selectedUser.id);
+        }
+      }
+
+      setEditDialogOpen(false);
+      loadUsers(); // Recharger la liste des utilisateurs
     } catch (err) {
-      setError(`Erreur lors du changement de statut: ${err.message}`);
+      console.error("Erreur lors de la mise à jour de l'utilisateur:", err);
+      setError("Impossible de mettre à jour l'utilisateur");
     } finally {
-      handleCloseStatusDialog();
+      setLoading(false);
     }
   };
 
-  // Effacer les messages après un délai
-  useEffect(() => {
-    if (successMessage) {
-      const timer = setTimeout(() => {
-        setSuccessMessage('');
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [successMessage]);
+  // Ouvrir le dialogue de confirmation de suppression
+  const handleDeleteClick = (user) => {
+    setUserToDelete(user);
+    setDeleteDialogOpen(true);
+  };
 
-  useEffect(() => {
-    if (error) {
-      const timer = setTimeout(() => {
-        setError(null);
-      }, 5000);
-      return () => clearTimeout(timer);
+  // Confirmer la suppression d'un utilisateur
+  const handleConfirmDelete = async () => {
+    if (!userToDelete) return;
+
+    try {
+      setLoading(true);
+      await userService.deleteUser(userToDelete.id);
+
+      setDeleteDialogOpen(false);
+      loadUsers(); // Recharger la liste des utilisateurs
+    } catch (err) {
+      console.error("Erreur lors de la suppression de l'utilisateur:", err);
+      setError("Impossible de supprimer l'utilisateur");
+    } finally {
+      setLoading(false);
     }
-  }, [error]);
+  };
+
+  // Changer rapidement le statut d'activation d'un utilisateur
+  const handleToggleStatus = async (user) => {
+    try {
+      setLoading(true);
+      if (user.isActive) {
+        await userService.disableUser(user.id);
+      } else {
+        await userService.enableUser(user.id);
+      }
+      loadUsers(); // Recharger la liste des utilisateurs
+    } catch (err) {
+      console.error("Erreur lors du changement de statut:", err);
+      setError("Impossible de changer le statut de l'utilisateur");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Changer rapidement le rôle d'un utilisateur
+  const handleToggleAdmin = async (user) => {
+    const isCurrentlyAdmin = user.isAdmin || user.role === 'admin';
+    try {
+      setLoading(true);
+      await userService.changeUserRole(user.id, !isCurrentlyAdmin);
+      loadUsers(); // Recharger la liste des utilisateurs
+    } catch (err) {
+      console.error("Erreur lors du changement de rôle:", err);
+      setError("Impossible de changer le rôle de l'utilisateur");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <Box sx={{ padding: 3 }}>
       <Typography variant="h4" component="h1" gutterBottom>
-        Gestion des Utilisateurs
+        Gestion des utilisateurs
       </Typography>
 
-      {/* Statistiques des utilisateurs */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ bgcolor: 'primary.light', color: 'white' }}>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>Total Utilisateurs</Typography>
-              <Typography variant="h3">{totalCount}</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>Utilisateurs Actifs</Typography>
-              <Typography variant="h3">{users.filter(user => user.isActive).length}</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>Administrateurs</Typography>
-              <Typography variant="h3">{users.filter(user => user.role === 'admin').length}</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>Désactivés</Typography>
-              <Typography variant="h3">{users.filter(user => !user.isActive).length}</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
+      {/* Barre de recherche et filtres */}
+      <Box sx={{ display: 'flex', mb: 2, gap: 2, flexWrap: 'wrap' }}>
+        <TextField
+          label="Rechercher"
+          variant="outlined"
+          size="small"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          sx={{ flexGrow: 1, minWidth: '200px' }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon />
+              </InputAdornment>
+            ),
+          }}
+        />
 
-      {/* Messages de succès ou d'erreur */}
-      {successMessage && (
-        <Alert severity="success" sx={{ mb: 2 }} onClose={() => setSuccessMessage('')}>
-          {successMessage}
-        </Alert>
-      )}
+        <FormControl size="small" variant="outlined" sx={{ minWidth: 120 }}>
+          <InputLabel id="sort-by-label">Trier par</InputLabel>
+          <Select
+            labelId="sort-by-label"
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            label="Trier par"
+          >
+            <MenuItem value="created_at">Date de création</MenuItem>
+            <MenuItem value="username">Nom d'utilisateur</MenuItem>
+            <MenuItem value="email">Email</MenuItem>
+          </Select>
+        </FormControl>
 
+        <FormControl size="small" variant="outlined" sx={{ minWidth: 120 }}>
+          <InputLabel id="order-label">Ordre</InputLabel>
+          <Select
+            labelId="order-label"
+            value={sortOrder}
+            onChange={(e) => setSortOrder(e.target.value)}
+            label="Ordre"
+          >
+            <MenuItem value="ASC">Ascendant</MenuItem>
+            <MenuItem value="DESC">Descendant</MenuItem>
+          </Select>
+        </FormControl>
+
+        <Button
+          variant="outlined"
+          startIcon={<RefreshIcon />}
+          onClick={() => loadUsers()}
+        >
+          Actualiser
+        </Button>
+      </Box>
+
+      {/* Messages d'erreur */}
       {error && (
-        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
+        <Alert severity="error" sx={{ mb: 2 }}>
           {error}
         </Alert>
       )}
 
-      {/* Barre d'outils */}
-      <Paper sx={{ p: 2, mb: 2 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
-          <TextField
-            label="Rechercher des utilisateurs"
-            variant="outlined"
-            size="small"
-            value={searchTerm}
-            onChange={handleSearchChange}
-            sx={{ minWidth: 300 }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon />
-                </InputAdornment>
-              ),
-            }}
-          />
-          <Button
-            variant="contained"
-            onClick={fetchUsers}
-            disabled={loading}
-          >
-            Actualiser
-          </Button>
-        </Box>
-      </Paper>
-
       {/* Tableau des utilisateurs */}
       <TableContainer component={Paper}>
-        <Table>
+        <Table sx={{ minWidth: 650 }} aria-label="tableau des utilisateurs">
           <TableHead>
-            <TableRow sx={{ bgcolor: 'primary.main', '& th': { color: 'white' } }}>
-              <TableCell>
-                <TableSortLabel
-                  active={orderBy === 'name'}
-                  direction={orderBy === 'name' ? order : 'asc'}
-                  onClick={handleSort('name')}
-                  sx={{ color: 'white !important' }}
-                >
-                  Nom
-                </TableSortLabel>
-              </TableCell>
-              <TableCell>
-                <TableSortLabel
-                  active={orderBy === 'email'}
-                  direction={orderBy === 'email' ? order : 'asc'}
-                  onClick={handleSort('email')}
-                  sx={{ color: 'white !important' }}
-                >
-                  Email
-                </TableSortLabel>
-              </TableCell>
-              <TableCell>
-                <TableSortLabel
-                  active={orderBy === 'createdAt'}
-                  direction={orderBy === 'createdAt' ? order : 'asc'}
-                  onClick={handleSort('createdAt')}
-                  sx={{ color: 'white !important' }}
-                >
-                  Inscrit le
-                </TableSortLabel>
-              </TableCell>
-              <TableCell align="center">Rôle</TableCell>
-              <TableCell align="center">Statut</TableCell>
+            <TableRow>
+              <TableCell>Utilisateur</TableCell>
+              <TableCell>Email</TableCell>
+              <TableCell>Rôle</TableCell>
+              <TableCell>Statut</TableCell>
+              <TableCell>Date de création</TableCell>
               <TableCell align="center">Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {loading ? (
+            {loading && !users.length ? (
               <TableRow>
-                <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
+                <TableCell colSpan={6} align="center">
                   <CircularProgress />
-                  <Typography variant="body2" sx={{ mt: 1 }}>
-                    Chargement des utilisateurs...
-                  </Typography>
                 </TableCell>
               </TableRow>
             ) : users.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
-                  <Typography variant="body1">
-                    Aucun utilisateur trouvé.
-                  </Typography>
+                <TableCell colSpan={6} align="center">
+                  Aucun utilisateur trouvé
                 </TableCell>
               </TableRow>
             ) : (
-              users.map((user) => (
-                <TableRow key={user._id} hover>
-                  <TableCell>{user.name || '—'}</TableCell>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell>
-                    {new Date(user.createdAt).toLocaleDateString('fr-FR', {
-                      day: '2-digit',
-                      month: '2-digit',
-                      year: 'numeric'
-                    })}
-                  </TableCell>
-                  <TableCell align="center">
-                    <Chip
-                      icon={user.role === 'admin' ? <AdminPanelSettingsIcon /> : <PersonIcon />}
-                      label={user.role === 'admin' ? 'Admin' : 'Utilisateur'}
-                      color={user.role === 'admin' ? 'secondary' : 'default'}
-                      variant={user.role === 'admin' ? 'filled' : 'outlined'}
-                    />
-                  </TableCell>
-                  <TableCell align="center">
-                    <Chip
-                      icon={user.isActive ? <CheckCircleIcon /> : <BlockIcon />}
-                      label={user.isActive ? 'Actif' : 'Inactif'}
-                      color={user.isActive ? 'success' : 'error'}
-                      variant={user.isActive ? 'filled' : 'outlined'}
-                    />
-                  </TableCell>
-                  <TableCell align="center">
-                    <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                      <Tooltip title="Changer le rôle">
-                        <IconButton
-                          onClick={() => handleOpenRoleDialog(user)}
-                          color="primary"
-                          size="small"
-                        >
-                          {user.role === 'admin' ? <PersonIcon /> : <AdminPanelSettingsIcon />}
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title={user.isActive ? 'Désactiver' : 'Activer'}>
-                        <IconButton
-                          onClick={() => handleOpenStatusDialog(user)}
-                          color={user.isActive ? 'error' : 'success'}
-                          size="small"
-                        >
-                          {user.isActive ? <BlockIcon /> : <CheckCircleIcon />}
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Supprimer">
-                        <IconButton
-                          onClick={() => handleOpenDeleteDialog(user)}
-                          color="error"
-                          size="small"
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      </Tooltip>
-                    </Box>
-                  </TableCell>
-                </TableRow>
-              ))
+              users.map((user) => {
+                const isAdmin = user.isAdmin || user.role === 'admin';
+                return (
+                  <TableRow key={user.id}>
+                    <TableCell>{user.username}</TableCell>
+                    <TableCell>{user.email}</TableCell>
+                    <TableCell>
+                      <Chip
+                        icon={isAdmin ? <AdminIcon /> : <UserIcon />}
+                        label={isAdmin ? 'Admin' : 'Utilisateur'}
+                        color={isAdmin ? 'primary' : 'default'}
+                        size="small"
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        icon={user.isActive ? <CheckCircleIcon /> : <BlockIcon />}
+                        label={user.isActive ? 'Actif' : 'Inactif'}
+                        color={user.isActive ? 'success' : 'error'}
+                        size="small"
+                      />
+                    </TableCell>
+                    <TableCell>
+                      {new Date(user.createdAt).toLocaleDateString('fr-FR')}
+                    </TableCell>
+                    <TableCell align="center">
+                      <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                        {/* Ne pas permettre les actions sur son propre compte */}
+                        {currentUser && user.id !== currentUser.id && (
+                          <>
+                            <Tooltip title="Modifier">
+                              <IconButton onClick={() => handleEditUser(user.id)} size="small">
+                                <EditIcon />
+                              </IconButton>
+                            </Tooltip>
+
+                            <Tooltip title={isAdmin ? "Rétrograder" : "Promouvoir admin"}>
+                              <IconButton
+                                onClick={() => handleToggleAdmin(user)}
+                                size="small"
+                                color={isAdmin ? "default" : "primary"}
+                              >
+                                <AdminIcon />
+                              </IconButton>
+                            </Tooltip>
+
+                            <Tooltip title={user.isActive ? "Désactiver" : "Activer"}>
+                              <IconButton
+                                onClick={() => handleToggleStatus(user)}
+                                size="small"
+                                color={user.isActive ? "error" : "success"}
+                              >
+                                {user.isActive ? <BlockIcon /> : <CheckCircleIcon />}
+                              </IconButton>
+                            </Tooltip>
+
+                            <Tooltip title="Supprimer">
+                              <IconButton
+                                onClick={() => handleDeleteClick(user)}
+                                size="small"
+                                color="error"
+                              >
+                                <DeleteIcon />
+                              </IconButton>
+                            </Tooltip>
+                          </>
+                        )}
+                        {currentUser && user.id === currentUser.id && (
+                          <Typography variant="caption" color="textSecondary">
+                            Compte courant
+                          </Typography>
+                        )}
+                      </Box>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
             )}
           </TableBody>
         </Table>
-        <TablePagination
-          rowsPerPageOptions={[5, 10, 25]}
-          component="div"
-          count={totalCount}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-          labelRowsPerPage="Lignes par page:"
-          labelDisplayedRows={({ from, to, count }) => `${from}-${to} sur ${count}`}
-        />
       </TableContainer>
 
-      {/* Boîte de dialogue de confirmation pour la suppression */}
-      <Dialog
-        open={openDeleteDialog}
-        onClose={handleCloseDeleteDialog}
-      >
-        <DialogTitle>Confirmer la suppression</DialogTitle>
+      {/* Pagination */}
+      <TablePagination
+        component="div"
+        count={totalUsers}
+        page={page}
+        onPageChange={handleChangePage}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+        labelRowsPerPage="Lignes par page:"
+        labelDisplayedRows={({ from, to, count }) =>
+          `${from}-${to} sur ${count !== -1 ? count : `plus de ${to}`}`}
+      />
+
+      {/* Modal d'édition */}
+      <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Modifier l'utilisateur</DialogTitle>
         <DialogContent>
-          <DialogContentText>
-            Êtes-vous sûr de vouloir supprimer l'utilisateur{' '}
-            <strong>{selectedUser?.name || selectedUser?.email}</strong> ?
-            <br />
-            Cette action est irréversible.
-          </DialogContentText>
+          <TextField
+            autoFocus
+            margin="dense"
+            name="username"
+            label="Nom d'utilisateur"
+            type="text"
+            fullWidth
+            variant="outlined"
+            value={editFormData.username}
+            onChange={handleFormChange}
+            sx={{ mb: 2 }}
+          />
+          <TextField
+            margin="dense"
+            name="email"
+            label="Email"
+            type="email"
+            fullWidth
+            variant="outlined"
+            value={editFormData.email}
+            onChange={handleFormChange}
+            sx={{ mb: 2 }}
+          />
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Typography component="label" htmlFor="isAdmin" sx={{ mr: 1 }}>
+                Administrateur
+              </Typography>
+              <input
+                type="checkbox"
+                id="isAdmin"
+                name="isAdmin"
+                checked={editFormData.isAdmin}
+                onChange={handleFormChange}
+              />
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Typography component="label" htmlFor="isActive" sx={{ mr: 1 }}>
+                Actif
+              </Typography>
+              <input
+                type="checkbox"
+                id="isActive"
+                name="isActive"
+                checked={editFormData.isActive}
+                onChange={handleFormChange}
+              />
+            </Box>
+          </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDeleteDialog}>Annuler</Button>
+          <Button onClick={() => setEditDialogOpen(false)}>Annuler</Button>
+          <Button onClick={handleSaveUser} color="primary" variant="contained">
+            Enregistrer
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Modal de confirmation de suppression */}
+      <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
+        <DialogTitle>Confirmer la suppression</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Êtes-vous sûr de vouloir supprimer l'utilisateur "{userToDelete?.username}" ?
+            Cette action est irréversible.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteDialogOpen(false)}>Annuler</Button>
           <Button onClick={handleConfirmDelete} color="error" variant="contained">
             Supprimer
           </Button>
         </DialogActions>
       </Dialog>
-
-      {/* Boîte de dialogue de confirmation pour le changement de rôle */}
-      <Dialog
-        open={openRoleDialog}
-        onClose={handleCloseRoleDialog}
-      >
-        <DialogTitle>Changer le rôle</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            {selectedUser?.role === 'admin'
-              ? `Rétrograder ${selectedUser?.name || selectedUser?.email} au rôle d'utilisateur ?`
-              : `Promouvoir ${selectedUser?.name || selectedUser?.email} au rôle d'administrateur ?`}
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseRoleDialog}>Annuler</Button>
-          <Button onClick={handleConfirmRoleChange} color="primary" variant="contained">
-            Confirmer
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Boîte de dialogue de confirmation pour le changement de statut */}
-      <Dialog
-        open={openStatusDialog}
-        onClose={handleCloseStatusDialog}
-      >
-        <DialogTitle>Changer le statut</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            {selectedUser?.isActive
-              ? `Désactiver le compte de ${selectedUser?.name || selectedUser?.email} ?`
-              : `Réactiver le compte de ${selectedUser?.name || selectedUser?.email} ?`}
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseStatusDialog}>Annuler</Button>
-          <Button
-            onClick={handleConfirmStatusChange}
-            color={selectedUser?.isActive ? "error" : "success"}
-            variant="contained"
-          >
-            {selectedUser?.isActive ? "Désactiver" : "Réactiver"}
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Container>
+    </Box>
   );
 };
 

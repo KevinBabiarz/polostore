@@ -17,26 +17,33 @@ export const ProductionService = {
      * @returns {Promise<Object[]>} Liste des productions
      */
     getAllProductions: async (options = {}) => {
-        console.log("[PROD] Récupération des productions avec options:", options);
+        console.log("[PROD SERVICE] Récupération des productions avec options:", options);
 
         try {
-            const { limit = 10, offset = 0, category = null, sortBy = 'created_at', sortOrder = 'DESC' } = options;
+            let { limit = 10, offset = 0, category = null, sortBy = 'created_at', sortOrder = 'DESC' } = options;
 
-            const query = {
-                order: [[sortBy, sortOrder]],
-                limit,
-                offset
-            };
+            // Correction : si sortBy vaut 'latest', on utilise 'created_at'
+            if (sortBy === 'latest') sortBy = 'created_at';
 
+            // Si un genre est spécifié, utiliser la méthode statique du modèle
             if (category) {
-                query.where = { category };
+                console.log(`[PROD SERVICE] Recherche par genre: ${category}`);
+                return await Production.findByGenre(category);
             }
 
+            // Sinon, faire une requête personnalisée
+            const query = {
+                order: [[sortBy, sortOrder]],
+                limit: parseInt(limit),
+                offset: parseInt(offset)
+            };
+
+            console.log(`[PROD SERVICE] Exécution de la requête avec limit=${limit}, offset=${offset}`);
             const productions = await Production.findAll(query);
-            console.log(`[PROD] ${productions.length} productions récupérées avec succès`);
+            console.log(`[PROD SERVICE] ${productions.length} productions récupérées avec succès`);
             return productions;
         } catch (error) {
-            console.error("[PROD] Erreur lors de la récupération des productions:", error.message);
+            console.error("[PROD SERVICE] Erreur lors de la récupération des productions:", error.message);
             throw error;
         }
     },
@@ -47,18 +54,20 @@ export const ProductionService = {
      * @returns {Promise<Object>} La production trouvée
      */
     getProductionById: async (id) => {
-        console.log(`[PROD] Recherche de la production avec l'ID: ${id}`);
+        console.log(`[PROD SERVICE] Recherche de la production avec l'ID: ${id}`);
 
         try {
             const production = await Production.findByPk(id);
 
             if (!production) {
+                console.log(`[PROD SERVICE] Production non trouvée avec l'ID: ${id}`);
                 throw new Error("Production non trouvée");
             }
 
+            console.log(`[PROD SERVICE] Production trouvée avec l'ID: ${id}`);
             return production;
         } catch (error) {
-            console.error(`[PROD] Erreur lors de la récupération de la production ${id}:`, error.message);
+            console.error(`[PROD SERVICE] Erreur lors de la récupération de la production ${id}:`, error.message);
             throw error;
         }
     },
@@ -66,29 +75,27 @@ export const ProductionService = {
     /**
      * Crée une nouvelle production
      * @param {Object} productionData - Données de la production
-     * @param {Object} file - Fichier audio uploadé
      * @returns {Promise<Object>} La production créée
      */
-    createProduction: async (productionData, file) => {
-        console.log("[PROD] Création d'une nouvelle production:", productionData.title);
+    createProduction: async (productionData) => {
+        console.log("[PROD SERVICE] Données reçues pour la création:", JSON.stringify(productionData));
 
         try {
-            let fileUrl = null;
-
-            if (file) {
-                fileUrl = `/uploads/${file.filename}`;
-            }
-
-            const newProduction = await Production.create({
+            // Vérification et gestion des valeurs par défaut pour les champs obligatoires
+            const dataToCreate = {
                 ...productionData,
-                audio_url: fileUrl,
+                title: productionData.title || 'Sans titre',
                 created_at: new Date()
-            });
+            };
 
-            console.log(`[PROD] Production créée avec succès, ID: ${newProduction.id}`);
+            console.log("[PROD SERVICE] Données prêtes pour création:", JSON.stringify(dataToCreate));
+
+            const newProduction = await Production.create(dataToCreate);
+
+            console.log(`[PROD SERVICE] Production créée avec succès, ID: ${newProduction.id}`);
             return newProduction;
         } catch (error) {
-            console.error("[PROD] Erreur lors de la création de la production:", error.message);
+            console.error("[PROD SERVICE] Erreur lors de la création de la production:", error.message);
             throw error;
         }
     },
@@ -97,40 +104,42 @@ export const ProductionService = {
      * Met à jour une production existante
      * @param {number} id - ID de la production à mettre à jour
      * @param {Object} updateData - Nouvelles données
-     * @param {Object} file - Nouveau fichier audio (optionnel)
      * @returns {Promise<Object>} La production mise à jour
      */
-    updateProduction: async (id, updateData, file) => {
-        console.log(`[PROD] Mise à jour de la production ID ${id}`);
+    updateProduction: async (id, updateData) => {
+        console.log(`[PROD SERVICE] Mise à jour de la production ID ${id}`);
 
         try {
             const production = await Production.findByPk(id);
 
             if (!production) {
+                console.log(`[PROD SERVICE] Production non trouvée avec l'ID: ${id}`);
                 throw new Error("Production non trouvée");
             }
 
-            // Si un nouveau fichier est uploadé, supprimer l'ancien et mettre à jour l'URL
-            if (file) {
-                if (production.audio_url) {
+            // Gestion du fichier audio si un nouveau fichier est envoyé
+            if (updateData.audio_url && production.audio_url &&
+                updateData.audio_url !== production.audio_url) {
+                // Suppression de l'ancien fichier
+                try {
                     const oldFilePath = path.join(__dirname, '..', 'public', production.audio_url);
-
-                    // Supprimer l'ancien fichier s'il existe
                     if (fs.existsSync(oldFilePath)) {
                         fs.unlinkSync(oldFilePath);
+                        console.log(`[PROD SERVICE] Ancien fichier audio supprimé: ${oldFilePath}`);
                     }
+                } catch (fileError) {
+                    console.error(`[PROD SERVICE] Erreur lors de la suppression du fichier audio:`, fileError);
+                    // On continue malgré l'erreur de suppression du fichier
                 }
-
-                updateData.audio_url = `/uploads/${file.filename}`;
             }
 
             // Mettre à jour la production
             await production.update(updateData);
-            console.log(`[PROD] Production mise à jour avec succès, ID: ${id}`);
+            console.log(`[PROD SERVICE] Production mise à jour avec succès, ID: ${id}`);
 
             return production;
         } catch (error) {
-            console.error(`[PROD] Erreur lors de la mise à jour de la production ${id}:`, error.message);
+            console.error(`[PROD SERVICE] Erreur lors de la mise à jour de la production ${id}:`, error.message);
             throw error;
         }
     },
@@ -141,31 +150,50 @@ export const ProductionService = {
      * @returns {Promise<boolean>} Succès de la suppression
      */
     deleteProduction: async (id) => {
-        console.log(`[PROD] Suppression de la production ID ${id}`);
+        console.log(`[PROD SERVICE] Suppression de la production ID ${id}`);
 
         try {
             const production = await Production.findByPk(id);
 
             if (!production) {
+                console.log(`[PROD SERVICE] Production non trouvée avec l'ID: ${id}`);
                 throw new Error("Production non trouvée");
             }
 
-            // Supprimer le fichier audio associé s'il existe
+            // Suppression des fichiers associés
             if (production.audio_url) {
-                const filePath = path.join(__dirname, '..', 'public', production.audio_url);
+                try {
+                    const audioPath = path.join(__dirname, '..', 'public', production.audio_url);
+                    if (fs.existsSync(audioPath)) {
+                        fs.unlinkSync(audioPath);
+                        console.log(`[PROD SERVICE] Fichier audio supprimé: ${audioPath}`);
+                    }
+                } catch (fileError) {
+                    console.error(`[PROD SERVICE] Erreur lors de la suppression du fichier audio:`, fileError);
+                    // On continue malgré l'erreur de suppression du fichier
+                }
+            }
 
-                if (fs.existsSync(filePath)) {
-                    fs.unlinkSync(filePath);
+            if (production.image_url) {
+                try {
+                    const imagePath = path.join(__dirname, '..', 'public', production.image_url);
+                    if (fs.existsSync(imagePath)) {
+                        fs.unlinkSync(imagePath);
+                        console.log(`[PROD SERVICE] Fichier image supprimé: ${imagePath}`);
+                    }
+                } catch (fileError) {
+                    console.error(`[PROD SERVICE] Erreur lors de la suppression de l'image:`, fileError);
+                    // On continue malgré l'erreur de suppression du fichier
                 }
             }
 
             // Supprimer la production de la base de données
             await production.destroy();
-            console.log(`[PROD] Production supprimée avec succès, ID: ${id}`);
+            console.log(`[PROD SERVICE] Production supprimée avec succès, ID: ${id}`);
 
             return true;
         } catch (error) {
-            console.error(`[PROD] Erreur lors de la suppression de la production ${id}:`, error.message);
+            console.error(`[PROD SERVICE] Erreur lors de la suppression de la production ${id}:`, error.message);
             throw error;
         }
     }

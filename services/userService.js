@@ -13,32 +13,41 @@ export const UserService = {
      * @returns {Promise<Object[]>} Liste des utilisateurs
      */
     getAllUsers: async (options = {}) => {
-        const {
-            limit = 10,
-            offset = 0,
-            sortBy = 'created_at',
-            sortOrder = 'DESC',
-            search = null
-        } = options;
+        console.log("[USER SERVICE] Récupération des utilisateurs avec options:", options);
 
-        const query = {
-            attributes: { exclude: ['password'] }, // Exclure le mot de passe des résultats
-            order: [[sortBy, sortOrder]],
-            limit,
-            offset
-        };
+        try {
+            const {
+                limit = 10,
+                offset = 0,
+                sortBy = 'created_at',
+                sortOrder = 'DESC',
+                search = null
+            } = options;
 
-        // Ajouter une recherche par username ou email si nécessaire
-        if (search) {
-            query.where = {
-                [Op.or]: [
-                    { username: { [Op.like]: `%${search}%` } },
-                    { email: { [Op.like]: `%${search}%` } }
-                ]
+            const query = {
+                attributes: { exclude: ['password'] }, // Exclure le mot de passe des résultats
+                order: [[sortBy, sortOrder]],
+                limit,
+                offset
             };
-        }
 
-        return await User.findAll(query);
+            // Ajouter une recherche par username ou email si nécessaire
+            if (search) {
+                query.where = {
+                    [Op.or]: [
+                        { username: { [Op.like]: `%${search}%` } },
+                        { email: { [Op.like]: `%${search}%` } }
+                    ]
+                };
+            }
+
+            const users = await User.findAll(query);
+            console.log(`[USER SERVICE] ${users.length} utilisateurs récupérés avec succès`);
+            return users;
+        } catch (error) {
+            console.error("[USER SERVICE] Erreur lors de la récupération des utilisateurs:", error.message);
+            throw error;
+        }
     },
 
     /**
@@ -47,15 +56,24 @@ export const UserService = {
      * @returns {Promise<Object>} L'utilisateur trouvé
      */
     getUserById: async (id) => {
-        const user = await User.findByPk(id, {
-            attributes: { exclude: ['password'] } // Exclure le mot de passe
-        });
+        console.log(`[USER SERVICE] Recherche de l'utilisateur avec l'ID: ${id}`);
 
-        if (!user) {
-            throw new Error("Utilisateur non trouvé");
+        try {
+            const user = await User.findByPk(id, {
+                attributes: { exclude: ['password'] } // Exclure le mot de passe
+            });
+
+            if (!user) {
+                console.log(`[USER SERVICE] Utilisateur non trouvé avec l'ID: ${id}`);
+                throw new Error("Utilisateur non trouvé");
+            }
+
+            console.log(`[USER SERVICE] Utilisateur trouvé avec l'ID: ${id}`);
+            return user;
+        } catch (error) {
+            console.error(`[USER SERVICE] Erreur lors de la récupération de l'utilisateur ${id}:`, error.message);
+            throw error;
         }
-
-        return user;
     },
 
     /**

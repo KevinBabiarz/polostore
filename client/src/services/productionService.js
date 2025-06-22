@@ -80,14 +80,10 @@ export const getProductionById = async (id) => {
 // Fonction pour créer une nouvelle production
 export const createProduction = async (productionData) => {
     try {
-        const formData = new FormData();
-
-        // Ajouter chaque champ au formData
-        for (const key in productionData) {
-            if (productionData[key] !== null && productionData[key] !== undefined) {
-                formData.append(key, productionData[key]);
-            }
-        }
+        // Vérifier si productionData est déjà un FormData
+        const formData = productionData instanceof FormData
+            ? productionData
+            : createFormDataFromObject(productionData);
 
         const response = await api.post('/productions', formData, {
             headers: {
@@ -103,6 +99,17 @@ export const createProduction = async (productionData) => {
         console.error('Erreur lors de la création de la production:', error);
         throw error;
     }
+};
+
+// Fonction utilitaire pour créer un FormData à partir d'un objet
+const createFormDataFromObject = (data) => {
+    const formData = new FormData();
+    for (const key in data) {
+        if (data[key] !== null && data[key] !== undefined) {
+            formData.append(key, data[key]);
+        }
+    }
+    return formData;
 };
 
 // Fonction pour mettre à jour une production existante

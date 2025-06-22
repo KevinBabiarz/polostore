@@ -54,6 +54,21 @@ app.use(helmet({
 // Augmenter la taille limite des requêtes pour éviter les problèmes avec les uploads
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Middleware pour analyser le corps des requêtes multipart
+import multer from 'multer';
+const upload = multer();
+app.use((req, res, next) => {
+  // Ne pas appliquer multer aux routes qui ont déjà leur propre middleware multer
+  if (req.path.startsWith('/api/productions') && (req.method === 'POST' || req.method === 'PUT')) {
+    // Ces routes ont leur propre configuration multer
+    return next();
+  }
+
+  // Appliquer multer.none() pour les autres routes, pour parser les champs form-data mais pas les fichiers
+  upload.none()(req, res, next);
+});
+
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 // Créer le dossier uploads s'il n'existe pas

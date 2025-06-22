@@ -2,11 +2,14 @@
 import ProductionService from '../services/productionService.js';
 
 export const getAllProductions = async (req, res) => {
-    console.log('[PRODUCTION CTRL] Requête reçue sur /api/productions');
+    console.log('[PROD CTRL] Requête reçue sur /api/productions');
     try {
         // Récupérer les paramètres de la requête pour la pagination et le tri
         const { limit, offset, category, sortBy, sortOrder } = req.query;
-        console.log('[PRODUCTION CTRL] Appel à ProductionService.getAllProductions avec params:', { limit, offset, category, sortBy, sortOrder });
+
+        console.log('[PROD CTRL] Appel à ProductionService.getAllProductions avec params:',
+            { limit, offset, category, sortBy, sortOrder });
+
         // Utiliser le service pour récupérer les productions
         const productions = await ProductionService.getAllProductions({
             limit: parseInt(limit) || 10,
@@ -15,10 +18,11 @@ export const getAllProductions = async (req, res) => {
             sortBy: sortBy || 'created_at',
             sortOrder: sortOrder || 'DESC'
         });
-        console.log('[PRODUCTION CTRL] Productions récupérées:', productions && productions.length);
+
+        console.log('[PROD CTRL] Productions récupérées:', productions.length);
         res.status(200).json(productions);
     } catch (error) {
-        console.error('[PRODUCTION CTRL] Erreur:', error);
+        console.error('[PROD CTRL] Erreur:', error);
         res.status(500).json({ message: 'Erreur lors de la récupération des productions' });
     }
 };
@@ -26,12 +30,15 @@ export const getAllProductions = async (req, res) => {
 export const getProductionById = async (req, res) => {
     try {
         const { id } = req.params;
+        console.log(`[PROD CTRL] Recherche de la production ID ${id}`);
 
         // Utiliser le service pour récupérer une production par ID
         const production = await ProductionService.getProductionById(id);
+        console.log(`[PROD CTRL] Production ID ${id} trouvée`);
+
         res.status(200).json(production);
     } catch (error) {
-        console.error(error);
+        console.error(`[PROD CTRL] Erreur:`, error);
 
         // Gérer l'erreur spécifique
         if (error.message === "Production non trouvée") {
@@ -44,40 +51,91 @@ export const getProductionById = async (req, res) => {
 
 export const createProduction = async (req, res) => {
     try {
-        const { title, description, genre } = req.body;
+        console.log('[PROD CTRL] Requête de création reçue');
+        console.log('[PROD CTRL] req.body:', req.body);
+        console.log('[PROD CTRL] req.files:', req.files);
 
-        // Récupérer le fichier audio uploadé
-        const file = req.files?.audio?.[0] || null;
+        // Validation des données requises
+        const { title, artist } = req.body;
+
+        if (!title?.trim()) {
+            console.log('[PROD CTRL] Validation échouée: titre manquant');
+            return res.status(400).json({ message: "Le titre est obligatoire" });
+        }
+
+        // Récupération des champs du formulaire
+        const description = req.body.description || '';
+        const genre = req.body.genre || '';
+        const release_date = req.body.release_date || null;
+
+        console.log('[PROD CTRL] Champs extraits:', { title, artist, description, genre, release_date });
+
+        // Gestion des fichiers - vérification de tous les noms possibles des champs
+        const audioFile = req.files?.audio?.[0] || req.files?.audio_files?.[0] || null;
+        const imageFile = req.files?.image?.[0] || req.files?.cover_image?.[0] || null;
+
+        console.log('[PROD CTRL] Fichiers extraits:', {
+            audioFile: audioFile ? audioFile.filename : 'aucun',
+            imageFile: imageFile ? imageFile.filename : 'aucun'
+        });
+
+        // Construction des URLs
+        const imageUrl = imageFile ? `/uploads/${imageFile.filename}` : null;
+        const audioUrl = audioFile ? `/uploads/${audioFile.filename}` : null;
+
+        // Préparation des données pour le service
+        const productionData = {
+            title,
+            artist: artist || '',
+            description,
+            genre,
+            release_date,
+            image_url: imageUrl,
+            audio_url: audioUrl
+        };
 
         // Utiliser le service pour créer une production
-        const newProduction = await ProductionService.createProduction(
-            {
-                title,
-                description,
-                genre,
-                image_url: req.files?.image?.[0] ? `/uploads/${req.files.image[0].filename}` : null
-            },
-            file
-        );
+        const newProduction = await ProductionService.createProduction(productionData);
 
+        console.log('[PROD CTRL] Production créée avec succès:', newProduction.id);
         res.status(201).json(newProduction);
     } catch (error) {
-        console.error('Erreur lors de la création de la production:', error);
-        res.status(500).json({ message: 'Erreur lors de la création de la production' });
+        console.error('[PROD CTRL] Erreur lors de la création de la production:', error);
+        res.status(500).json({ message: 'Erreur lors de la création de la production: ' + error.message });
     }
 };
 
 export const updateProduction = async (req, res) => {
     try {
         const { id } = req.params;
-        const updateData = req.body;
-        const file = req.files?.audio?.[0] || null;
+
+        console.log(`[PROD CTRL] Requête de mise à jour pour production ID ${id}`);
+        console.log('[PROD CTRL] req.body:', req.body);
+        console.log('[PROD CTRL] req.files:', req.files);
+
+        // Préparation des données à mettre à jour
+        const updateData = { ...req.body };
+
+        // Gestion des fichiers
+        const audioFile = req.files?.audio?.[0] || req.files?.audio_files?.[0] || null;
+        const imageFile = req.files?.image?.[0] || req.files?.cover_image?.[0] || null;
+
+        // Construction des URLs si des fichiers sont fournis
+        if (imageFile) {
+            updateData.image_url = `/uploads/${imageFile.filename}`;
+        }
+
+        if (audioFile) {
+            updateData.audio_url = `/uploads/${audioFile.filename}`;
+        }
 
         // Utiliser le service pour mettre à jour une production
-        const updatedProduction = await ProductionService.updateProduction(id, updateData, file);
+        const updatedProduction = await ProductionService.updateProduction(id, updateData);
+        console.log(`[PROD CTRL] Production ID ${id} mise à jour avec succès`);
+
         res.status(200).json(updatedProduction);
     } catch (error) {
-        console.error('Erreur lors de la mise à jour de la production:', error);
+        console.error(`[PROD CTRL] Erreur lors de la mise à jour:`, error);
 
         if (error.message === "Production non trouvée") {
             return res.status(404).json({ message: error.message });
@@ -90,12 +148,15 @@ export const updateProduction = async (req, res) => {
 export const deleteProduction = async (req, res) => {
     try {
         const { id } = req.params;
+        console.log(`[PROD CTRL] Requête de suppression pour production ID ${id}`);
 
         // Utiliser le service pour supprimer une production
         await ProductionService.deleteProduction(id);
+        console.log(`[PROD CTRL] Production ID ${id} supprimée avec succès`);
+
         res.status(200).json({ message: 'Production supprimée avec succès' });
     } catch (error) {
-        console.error('Erreur lors de la suppression de la production:', error);
+        console.error(`[PROD CTRL] Erreur lors de la suppression:`, error);
 
         if (error.message === "Production non trouvée") {
             return res.status(404).json({ message: error.message });
