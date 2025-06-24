@@ -10,7 +10,7 @@ import {
     DialogActions, CircularProgress, Alert, Grid, Paper,
     Divider, Rating, Avatar, IconButton, Tooltip, Skeleton,
     useTheme, useMediaQuery, Fade, Grow, Zoom, Breadcrumbs, Link,
-    Stack, Tabs, Tab, Snackbar
+    Stack, Tabs, Tab, Snackbar, LinearProgress, Slider
 } from '@mui/material';
 import {
     Favorite, FavoriteBorder, Edit, Delete, ArrowBack,
@@ -19,6 +19,147 @@ import {
     NavigateNext, Description, Comment, ThumbUp, Album
 } from '@mui/icons-material';
 import config from '../../config/config';
+
+// Composant pour afficher la barre de progression
+const ProgressBar = ({ audioRef, isPlaying }) => {
+    const [progress, setProgress] = useState(0);
+    const [isDragging, setIsDragging] = useState(false);
+    const theme = useTheme();
+
+    useEffect(() => {
+        const audioElement = audioRef.current;
+        if (!audioElement) return;
+
+        // Mettre à jour la progression pendant la lecture
+        const updateProgress = () => {
+            if (!isDragging && audioElement.duration) {
+                const percentage = (audioElement.currentTime / audioElement.duration) * 100;
+                setProgress(percentage);
+            }
+        };
+
+        const interval = setInterval(updateProgress, 500);
+        audioElement.addEventListener('timeupdate', updateProgress);
+
+        return () => {
+            clearInterval(interval);
+            audioElement.removeEventListener('timeupdate', updateProgress);
+        };
+    }, [audioRef, isDragging]);
+
+    const handleProgressChange = (event, newValue) => {
+        setProgress(newValue);
+        setIsDragging(true);
+    };
+
+    const handleProgressChangeCommitted = (event, newValue) => {
+        if (audioRef.current && audioRef.current.duration) {
+            const newTime = (newValue / 100) * audioRef.current.duration;
+            audioRef.current.currentTime = newTime;
+        }
+        setIsDragging(false);
+    };
+
+    return (
+        <Slider
+            value={progress}
+            onChange={handleProgressChange}
+            onChangeCommitted={handleProgressChangeCommitted}
+            sx={{
+                height: 8,
+                padding: '8px 0',
+                borderRadius: 4,
+                color: theme.palette.primary.main,
+                '& .MuiSlider-thumb': {
+                    width: 16,
+                    height: 16,
+                    transition: 'width 0.2s, height 0.2s',
+                    '&:hover, &.Mui-active': {
+                        width: 20,
+                        height: 20,
+                    },
+                    backgroundColor: '#fff',
+                    border: `2px solid ${theme.palette.primary.main}`,
+                    boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
+                    opacity: isPlaying ? 1 : 0,
+                    '&:hover': {
+                        opacity: 1,
+                        boxShadow: '0 0 0 8px rgba(63, 81, 181, 0.16)'
+                    }
+                },
+                '& .MuiSlider-track': {
+                    border: 'none',
+                    height: 8,
+                    borderRadius: 4,
+                    background: `linear-gradient(90deg, ${theme.palette.secondary.main} 0%, ${theme.palette.primary.main} 100%)`,
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                },
+                '& .MuiSlider-rail': {
+                    opacity: 0.5,
+                    backgroundColor: theme.palette.grey[300],
+                    height: 8,
+                    borderRadius: 4,
+                },
+            }}
+        />
+    );
+};
+
+// Composant pour afficher le temps
+const TimeDisplay = ({ audioRef, isPlaying }) => {
+    const [currentTime, setCurrentTime] = useState('0:00');
+    const [duration, setDuration] = useState('0:00');
+
+    useEffect(() => {
+        const audioElement = audioRef.current;
+        if (!audioElement) return;
+
+        const updateTime = () => {
+            // Formatter le temps actuel
+            const currentMinutes = Math.floor(audioElement.currentTime / 60);
+            const currentSeconds = Math.floor(audioElement.currentTime % 60).toString().padStart(2, '0');
+            setCurrentTime(`${currentMinutes}:${currentSeconds}`);
+
+            // Formatter la durée totale
+            if (audioElement.duration && !isNaN(audioElement.duration)) {
+                const durationMinutes = Math.floor(audioElement.duration / 60);
+                const durationSeconds = Math.floor(audioElement.duration % 60).toString().padStart(2, '0');
+                setDuration(`${durationMinutes}:${durationSeconds}`);
+            }
+        };
+
+        // Mise à jour initiale
+        updateTime();
+
+        // Configurer les écouteurs d'événements
+        audioElement.addEventListener('timeupdate', updateTime);
+        audioElement.addEventListener('loadedmetadata', updateTime);
+
+        return () => {
+            audioElement.removeEventListener('timeupdate', updateTime);
+            audioElement.removeEventListener('loadedmetadata', updateTime);
+        };
+    }, [audioRef]);
+
+    return (
+        <Box sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            mt: 0.5,
+            px: 0.5,
+            fontSize: '0.7rem',
+            color: 'text.secondary',
+            fontWeight: 'medium'
+        }}>
+            <Typography variant="caption" fontFamily="monospace">
+                {currentTime}
+            </Typography>
+            <Typography variant="caption" fontFamily="monospace">
+                {duration}
+            </Typography>
+        </Box>
+    );
+};
 
 const ProductionDetail = () => {
     const { id } = useParams();
@@ -278,53 +419,7 @@ const ProductionDetail = () => {
 
     return (
         <Container maxWidth="lg" sx={{ py: { xs: 4, md: 5 } }}>
-            {/* Player audio ou bloc placeholder, design plus intégré */}
-            <Box sx={{
-                display: 'flex',
-                alignItems: 'center',
-                mb: 3,
-                p: { xs: 1, sm: 2 },
-                bgcolor: 'background.default',
-                borderRadius: 3,
-                boxShadow: 0,
-                border: '1px solid',
-                borderColor: 'divider',
-                maxWidth: 600,
-                mx: 'auto',
-                mt: 2
-            }}>
-                <Box sx={{ flex: 1 }}>
-                    {audioUrl ? (
-                        <audio
-                            id="production-audio"
-                            src={audioUrl}
-                            ref={audioRef}
-                            onEnded={handleAudioEnd}
-                            controls
-                            style={{ width: '100%', background: 'transparent', borderRadius: 8, outline: 'none', boxShadow: 'none' }}
-                        />
-                    ) : (
-                        <Box sx={{ width: '100%', textAlign: 'center', color: 'text.secondary', fontWeight: 'bold', fontSize: '1.1rem', py: 2 }}>
-                            Pas d'audio pour cette production
-                        </Box>
-                    )}
-                </Box>
-                <IconButton
-                    onClick={() => {
-                        if (!audioUrl) {
-                            setSnackbarMessage("Pas d'audio");
-                            setSnackbarOpen(true);
-                        } else {
-                            handlePlayPause();
-                        }
-                    }}
-                    color="primary"
-                    sx={{ ml: 2, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', boxShadow: 0, '&:hover': { bgcolor: 'grey.100' } }}
-                    disabled={!audioUrl}
-                >
-                    {isPlaying ? <Pause /> : <PlayArrow />}
-                </IconButton>
-            </Box>
+            {/* Suppression du player audio qui était ici et qui sera déplacé */}
 
             <Fade in={true} timeout={800}>
                 <Box>
@@ -371,9 +466,13 @@ const ProductionDetail = () => {
                                         alignItems: 'center',
                                         justifyContent: 'center',
                                         background: production.image_url
-                                            ? production.image_url.startsWith('/api/')
+                                            ? production.image_url.startsWith('http')
                                               ? `url(${production.image_url}) center/cover`
-                                              : `url(${config.UPLOADS_URL}${production.image_url}) center/cover`
+                                              : production.image_url.startsWith('/api/')
+                                                ? `url(${production.image_url}) center/cover`
+                                                : production.image_url.startsWith('/uploads/')
+                                                  ? `url(/api${production.image_url}) center/cover`
+                                                  : `url(/api/uploads/${production.image_url}) center/cover`
                                             : 'linear-gradient(135deg, #6a1b9a 0%, #4a148c 100%)',
                                         '&::before': production.image_url && {
                                             content: '""',
@@ -483,6 +582,100 @@ const ProductionDetail = () => {
                                         }}>
                                             {production.description}
                                         </Typography>
+                                    )}
+
+                                    {/* Lecteur audio placé dans la partie droite */}
+                                    {audioUrl && (
+                                        <Box sx={{
+                                            mt: 2,
+                                            mb: 3,
+                                            p: 2,
+                                            borderRadius: 3,
+                                            background: 'linear-gradient(145deg, rgba(255,255,255,0.8) 0%, rgba(240,242,245,0.9) 100%)',
+                                            border: '1px solid',
+                                            borderColor: 'divider',
+                                            boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+                                            position: 'relative',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            overflow: 'hidden'
+                                        }}>
+                                            <Box sx={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'space-between',
+                                                mb: 2
+                                            }}>
+                                                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                                    <MusicNote fontSize="small" sx={{ mr: 1, color: theme.palette.primary.main }} />
+                                                    <Typography variant="subtitle1" fontWeight="bold" color="primary.main">
+                                                        Écouter un extrait
+                                                    </Typography>
+                                                </Box>
+                                            </Box>
+
+                                            {/* Lecteur audio personnalisé sans les contrôles HTML par défaut */}
+                                            <Box sx={{
+                                                position: 'relative',
+                                                width: '100%',
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                alignItems: 'center'
+                                            }}>
+                                                {/* Audio élément caché */}
+                                                <audio
+                                                    id="production-audio"
+                                                    ref={audioRef}
+                                                    src={audioUrl}
+                                                    onEnded={handleAudioEnd}
+                                                    style={{ display: 'none' }}
+                                                />
+
+                                                {/* Interface personnalisée */}
+                                                <Box sx={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    width: '100%',
+                                                    position: 'relative',
+                                                    gap: 2
+                                                }}>
+                                                    {/* Bouton play/pause */}
+                                                    <IconButton
+                                                        onClick={handlePlayPause}
+                                                        color="primary"
+                                                        sx={{
+                                                            bgcolor: theme.palette.primary.main,
+                                                            color: 'white',
+                                                            '&:hover': {
+                                                                bgcolor: theme.palette.primary.dark
+                                                            },
+                                                            width: 40,
+                                                            height: 40,
+                                                            boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
+                                                            transition: 'all 0.2s ease',
+                                                            flexShrink: 0
+                                                        }}
+                                                    >
+                                                        {isPlaying ? <Pause /> : <PlayArrow />}
+                                                    </IconButton>
+
+                                                    {/* Conteneur barre de progression et temps */}
+                                                    <Box sx={{
+                                                        flex: 1,
+                                                        display: 'flex',
+                                                        flexDirection: 'column',
+                                                        width: '100%',
+                                                        position: 'relative'
+                                                    }}>
+                                                        {/* Composant personnalisé pour la barre de progression */}
+                                                        <ProgressBar audioRef={audioRef} isPlaying={isPlaying} />
+
+                                                        {/* Affichage du temps */}
+                                                        <TimeDisplay audioRef={audioRef} isPlaying={isPlaying} />
+                                                    </Box>
+                                                </Box>
+                                            </Box>
+                                        </Box>
                                     )}
 
                                     <Box sx={{ mt: 'auto' }}>
