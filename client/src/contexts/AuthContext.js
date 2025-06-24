@@ -37,6 +37,10 @@ export const AuthProvider = ({ children }) => {
     };
 
     useEffect(() => {
+        // Supprimer le token pour forcer la connexion à chaque démarrage de l'application
+        localStorage.removeItem('token');
+        delete api.defaults.headers.common['Authorization'];
+
         // Vérifier si l'utilisateur est déjà connecté au chargement
         const checkLoggedIn = async () => {
             const token = localStorage.getItem('token');

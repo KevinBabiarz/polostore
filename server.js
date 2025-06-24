@@ -69,14 +69,6 @@ app.use((req, res, next) => {
   upload.none()(req, res, next);
 });
 
-app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
-
-// Créer le dossier uploads s'il n'existe pas
-const dir = './public/uploads';
-if (!fs.existsSync(dir)){
-    fs.mkdirSync(dir, { recursive: true });
-}
-
 // Middleware pour déboguer les requêtes
 app.use((req, res, next) => {
   if (!req.path.startsWith('/uploads/')) {
@@ -84,6 +76,74 @@ app.use((req, res, next) => {
   }
   next();
 });
+
+// Fonction d'aide pour déterminer le type MIME correct pour les fichiers audio
+const getAudioMimeType = (filename) => {
+  const ext = path.extname(filename).toLowerCase();
+  switch (ext) {
+    case '.mp3': return 'audio/mpeg';
+    case '.wav': return 'audio/wav';
+    case '.ogg': return 'audio/ogg';
+    case '.flac': return 'audio/flac';
+    case '.aac': return 'audio/aac';
+    default: return 'application/octet-stream';
+  }
+};
+
+// Middleware personnalisé pour servir les fichiers statiques avec les en-têtes appropriés
+app.use('/uploads', (req, res, next) => {
+  const filePath = path.join(__dirname, 'public/uploads', req.path);
+
+  // Vérifier si le fichier existe
+  fs.stat(filePath, (err, stats) => {
+    if (err || !stats.isFile()) {
+      console.log(`[STATIC] Fichier non trouvé: ${filePath}`);
+      return next();
+    }
+
+    // Déterminer le type MIME pour les fichiers audio
+    if (req.path.match(/\.(mp3|wav|ogg|flac|aac)$/i)) {
+      const mimeType = getAudioMimeType(req.path);
+      console.log(`[STATIC] Servir fichier audio: ${req.path}, type MIME: ${mimeType}`);
+      res.setHeader('Content-Type', mimeType);
+      res.setHeader('Accept-Ranges', 'bytes');
+    }
+
+    // Servir le fichier
+    res.sendFile(filePath);
+  });
+});
+
+// Configuration améliorée pour les uploads via /api/uploads
+app.use('/api/uploads', (req, res, next) => {
+  const filePath = path.join(__dirname, 'public/uploads', req.path.replace(/^\/+/, ''));
+  console.log(`[API] Tentative d'accès au fichier: ${filePath}`);
+
+  // Vérifier si le fichier existe
+  fs.stat(filePath, (err, stats) => {
+    if (err || !stats.isFile()) {
+      console.log(`[API] Fichier non trouvé: ${filePath}`);
+      return res.status(404).send('Fichier non trouvé');
+    }
+
+    // Déterminer le type MIME pour les fichiers audio
+    if (req.path.match(/\.(mp3|wav|ogg|flac|aac)$/i)) {
+      const mimeType = getAudioMimeType(req.path);
+      console.log(`[API] Servir fichier audio via API: ${req.path}, type MIME: ${mimeType}`);
+      res.setHeader('Content-Type', mimeType);
+      res.setHeader('Accept-Ranges', 'bytes');
+    }
+
+    // Servir le fichier
+    res.sendFile(filePath);
+  });
+});
+
+// Créer le dossier uploads s'il n'existe pas
+const dir = './public/uploads';
+if (!fs.existsSync(dir)){
+    fs.mkdirSync(dir, { recursive: true });
+}
 
 // Initialiser la base de données
 const initializeDatabase = async () => {
@@ -143,34 +203,22 @@ if (process.env.NODE_ENV === 'production') {
   app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
   });
-} else {
-  const clientBuildPath = path.join(__dirname, 'client/build');
-  if (fs.existsSync(clientBuildPath)) {
-    app.use(express.static(clientBuildPath));
-    app.get('/', (req, res) => {
-      res.sendFile(path.join(clientBuildPath, 'index.html'));
-    });
-  } else {
-    app.get("/", (req, res) => {
-      res.send("API pour le site de productions musicales - Mode développement");
-    });
-  }
 }
 
-// Démarrer le serveur après l'initialisation de la base de données
-async function startServer() {
+// Démarrage du serveur
+const startServer = async () => {
   try {
-    console.log('--- AVANT INITIALISATION DB ---');
+    // Initialisation de la base de données
     await initializeDatabase();
-    console.log('--- APRES INITIALISATION DB ---');
+
+    // Démarrage du serveur Express
     app.listen(port, () => {
       console.log(`✅ Serveur démarré avec succès sur le port ${port} en mode ${process.env.NODE_ENV || 'développement'}`);
     });
-  } catch (error) {
-    console.error("❌ Impossible de démarrer le serveur :", error.message);
+  } catch (err) {
+    console.error("Erreur fatale:", err);
     process.exit(1);
   }
-}
+};
 
-console.log('--- DEMARRAGE SERVER.JS ---');
 startServer();

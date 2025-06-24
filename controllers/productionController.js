@@ -79,9 +79,21 @@ export const createProduction = async (req, res) => {
             imageFile: imageFile ? imageFile.filename : 'aucun'
         });
 
-        // Construction des URLs
-        const imageUrl = imageFile ? `/uploads/${imageFile.filename}` : null;
-        const audioUrl = audioFile ? `/uploads/${audioFile.filename}` : null;
+        // Construction des URLs de manière sécurisée
+        let imageUrl = null;
+        let audioUrl = null;
+
+        if (imageFile && imageFile.filename) {
+            // S'assurer que l'URL commence par un slash et est accessible depuis le client
+            imageUrl = `/api/uploads/${imageFile.filename}`;
+            console.log('[PROD CTRL] URL de l\'image créée:', imageUrl);
+        }
+
+        if (audioFile && audioFile.filename) {
+            // S'assurer que l'URL commence par un slash et est accessible depuis le client
+            audioUrl = `/api/uploads/${audioFile.filename}`;
+            console.log('[PROD CTRL] URL de l\'audio créée:', audioUrl);
+        }
 
         // Préparation des données pour le service
         const productionData = {
@@ -122,11 +134,11 @@ export const updateProduction = async (req, res) => {
 
         // Construction des URLs si des fichiers sont fournis
         if (imageFile) {
-            updateData.image_url = `/uploads/${imageFile.filename}`;
+            updateData.image_url = `/api/uploads/${imageFile.filename}`;
         }
 
         if (audioFile) {
-            updateData.audio_url = `/uploads/${audioFile.filename}`;
+            updateData.audio_url = `/api/uploads/${audioFile.filename}`;
         }
 
         // Utiliser le service pour mettre à jour une production

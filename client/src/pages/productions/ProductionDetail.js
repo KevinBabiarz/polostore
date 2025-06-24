@@ -1,5 +1,5 @@
 // src/pages/productions/ProductionDetail.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { getProductionById, deleteProduction } from '../../services/productionService';
@@ -10,11 +10,11 @@ import {
     DialogActions, CircularProgress, Alert, Grid, Paper,
     Divider, Rating, Avatar, IconButton, Tooltip, Skeleton,
     useTheme, useMediaQuery, Fade, Grow, Zoom, Breadcrumbs, Link,
-    Stack, Tabs, Tab
+    Stack, Tabs, Tab, Snackbar
 } from '@mui/material';
 import {
     Favorite, FavoriteBorder, Edit, Delete, ArrowBack,
-    MusicNote, PlayArrow, ShoppingCart, Share, Download,
+    MusicNote, PlayArrow, Pause, ShoppingCart, Share, Download,
     AccessTime, CalendarToday, Person, Category, AttachMoney,
     NavigateNext, Description, Comment, ThumbUp, Album
 } from '@mui/icons-material';
@@ -30,8 +30,13 @@ const ProductionDetail = () => {
     const [isFavorite, setIsFavorite] = useState(false);
     const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
     const [tabValue, setTabValue] = useState(0);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [audioUrl, setAudioUrl] = useState('');
+    const [snackbarOpen, setSnackbarOpen] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState('');
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+    const audioRef = useRef(null);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -39,6 +44,26 @@ const ProductionDetail = () => {
                 setLoading(true);
                 const data = await getProductionById(id);
                 setProduction(data);
+
+                // Log complet des données pour débugger
+                console.log('Production complète:', data);
+
+                // Correction : ne pas mettre d'audio par défaut
+                if (data && data.audio_url) {
+                    let audioSrc;
+                    if (data.audio_url.startsWith('http')) {
+                        audioSrc = data.audio_url;
+                    } else if (data.audio_url.startsWith('/api/')) {
+                        audioSrc = data.audio_url;
+                    } else if (data.audio_url.startsWith('/')) {
+                        audioSrc = data.audio_url;
+                    } else {
+                        audioSrc = `/api/uploads/${data.audio_url}`;
+                    }
+                    setAudioUrl(audioSrc);
+                } else {
+                    setAudioUrl(''); // Pas d'audio
+                }
 
                 if (user) {
                     const favoriteStatus = await checkIsFavorite(id);
@@ -91,6 +116,82 @@ const ProductionDetail = () => {
     const handleTabChange = (event, newValue) => {
         setTabValue(newValue);
     };
+
+    // Gestion simple de l'audio sans dépendance sur les références React
+    const handlePlayPause = () => {
+        // Vérifier d'abord si un audioUrl est défini
+        if (!audioUrl) {
+            console.log("Aucun fichier audio disponible pour cette production");
+            setSnackbarMessage("Aucun fichier audio disponible pour cette production");
+            setSnackbarOpen(true);
+            return;
+        }
+
+        const audio = document.getElementById('production-audio');
+
+        if (!audio) {
+            console.error("Élément audio non trouvé dans le DOM");
+            setSnackbarMessage("Erreur: Lecteur audio non disponible");
+            setSnackbarOpen(true);
+            return;
+        }
+
+        console.log("État actuel:", audio.paused ? "pausé" : "en lecture");
+
+        if (audio.paused) {
+            // Essayer de jouer l'audio
+            const playPromise = audio.play();
+
+            if (playPromise !== undefined) {
+                playPromise
+                    .then(() => {
+                        console.log("Lecture audio démarrée avec succès");
+                        setIsPlaying(true);
+                    })
+                    .catch(error => {
+                        console.error("Erreur lors de la lecture audio:", error);
+                        setSnackbarMessage("Erreur lors de la lecture: " + (error.message || "fichier audio non supporté"));
+                        setSnackbarOpen(true);
+                    });
+            }
+        } else {
+            audio.pause();
+            setIsPlaying(false);
+            console.log("Audio mis en pause");
+        }
+    };
+
+    const handleAudioEnd = () => {
+        console.log("Lecture audio terminée");
+        setIsPlaying(false);
+    };
+
+    // Gérer la fermeture du snackbar de notification
+    const handleSnackbarClose = () => {
+        setSnackbarOpen(false);
+    };
+
+    // Capturer les événements audio pour synchroniser l'état
+    useEffect(() => {
+        const audioElement = document.getElementById('production-audio');
+        if (!audioElement) return;
+
+        const onPlay = () => setIsPlaying(true);
+        const onPause = () => setIsPlaying(false);
+        const onEnded = () => setIsPlaying(false);
+
+        audioElement.addEventListener('play', onPlay);
+        audioElement.addEventListener('pause', onPause);
+        audioElement.addEventListener('ended', onEnded);
+
+        return () => {
+            if (audioElement) {
+                audioElement.removeEventListener('play', onPlay);
+                audioElement.removeEventListener('pause', onPause);
+                audioElement.removeEventListener('ended', onEnded);
+            }
+        };
+    }, [audioUrl]);
 
     if (loading || authLoading) {
         return (
@@ -177,6 +278,54 @@ const ProductionDetail = () => {
 
     return (
         <Container maxWidth="lg" sx={{ py: { xs: 4, md: 5 } }}>
+            {/* Player audio ou bloc placeholder, design plus intégré */}
+            <Box sx={{
+                display: 'flex',
+                alignItems: 'center',
+                mb: 3,
+                p: { xs: 1, sm: 2 },
+                bgcolor: 'background.default',
+                borderRadius: 3,
+                boxShadow: 0,
+                border: '1px solid',
+                borderColor: 'divider',
+                maxWidth: 600,
+                mx: 'auto',
+                mt: 2
+            }}>
+                <Box sx={{ flex: 1 }}>
+                    {audioUrl ? (
+                        <audio
+                            id="production-audio"
+                            src={audioUrl}
+                            ref={audioRef}
+                            onEnded={handleAudioEnd}
+                            controls
+                            style={{ width: '100%', background: 'transparent', borderRadius: 8, outline: 'none', boxShadow: 'none' }}
+                        />
+                    ) : (
+                        <Box sx={{ width: '100%', textAlign: 'center', color: 'text.secondary', fontWeight: 'bold', fontSize: '1.1rem', py: 2 }}>
+                            Pas d'audio pour cette production
+                        </Box>
+                    )}
+                </Box>
+                <IconButton
+                    onClick={() => {
+                        if (!audioUrl) {
+                            setSnackbarMessage("Pas d'audio");
+                            setSnackbarOpen(true);
+                        } else {
+                            handlePlayPause();
+                        }
+                    }}
+                    color="primary"
+                    sx={{ ml: 2, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', boxShadow: 0, '&:hover': { bgcolor: 'grey.100' } }}
+                    disabled={!audioUrl}
+                >
+                    {isPlaying ? <Pause /> : <PlayArrow />}
+                </IconButton>
+            </Box>
+
             <Fade in={true} timeout={800}>
                 <Box>
                     {/* Fil d'Ariane */}
@@ -222,7 +371,9 @@ const ProductionDetail = () => {
                                         alignItems: 'center',
                                         justifyContent: 'center',
                                         background: production.image_url
-                                            ? `url(${config.UPLOADS_URL}${production.image_url}) center/cover`
+                                            ? production.image_url.startsWith('/api/')
+                                              ? `url(${production.image_url}) center/cover`
+                                              : `url(${config.UPLOADS_URL}${production.image_url}) center/cover`
                                             : 'linear-gradient(135deg, #6a1b9a 0%, #4a148c 100%)',
                                         '&::before': production.image_url && {
                                             content: '""',
@@ -233,7 +384,8 @@ const ProductionDetail = () => {
                                         }
                                     }}
                                 >
-                                    {!production.image_url && (
+                                    {/* Affiche l'icône MusicNote SEULEMENT si pas d'image ET il y a un audio */}
+                                    {!production.image_url && audioUrl && (
                                         <MusicNote
                                             sx={{
                                                 fontSize: { xs: 80, md: 120 },
@@ -241,51 +393,6 @@ const ProductionDetail = () => {
                                                 opacity: 0.8,
                                                 position: 'relative',
                                                 zIndex: 2
-                                            }}
-                                        />
-                                    )}
-
-                                    {/* Bouton de lecture superposé */}
-                                    <Box
-                                        sx={{
-                                            position: 'absolute',
-                                            bottom: 20,
-                                            right: 20,
-                                            zIndex: 2
-                                        }}
-                                    >
-                                        <Tooltip title="Écouter un extrait">
-                                            <IconButton
-                                                sx={{
-                                                    bgcolor: 'white',
-                                                    color: 'primary.main',
-                                                    boxShadow: 3,
-                                                    p: { xs: 1.5, md: 2 },
-                                                    '&:hover': {
-                                                        bgcolor: 'white',
-                                                        transform: 'scale(1.1)',
-                                                    },
-                                                    transition: 'all 0.2s',
-                                                    opacity: 0.9
-                                                }}
-                                            >
-                                                <PlayArrow fontSize="large" />
-                                            </IconButton>
-                                        </Tooltip>
-                                    </Box>
-
-                                    {/* Badge du genre */}
-                                    {production.genre && (
-                                        <Chip
-                                            label={production.genre}
-                                            sx={{
-                                                position: 'absolute',
-                                                top: 16,
-                                                left: 16,
-                                                zIndex: 2,
-                                                bgcolor: 'rgba(0,0,0,0.6)',
-                                                color: 'white',
-                                                fontWeight: 'bold'
                                             }}
                                         />
                                     )}
@@ -570,8 +677,12 @@ const ProductionDetail = () => {
                                                     <Typography variant="body2" color="text.secondary" sx={{ mr: 2 }}>
                                                         {track.duration || '3:45'}
                                                     </Typography>
-                                                    <IconButton size="small">
-                                                        <PlayArrow fontSize="small" />
+                                                    <IconButton
+                                                        size="small"
+                                                        onClick={handlePlayPause}
+                                                        title="Écouter ce titre"
+                                                    >
+                                                        {isPlaying ? <Pause fontSize="small" /> : <PlayArrow fontSize="small" />}
                                                     </IconButton>
                                                 </Box>
                                             </Paper>
@@ -697,6 +808,16 @@ const ProductionDetail = () => {
                             </Button>
                         </DialogActions>
                     </Dialog>
+
+                    {/* Snackbar pour les notifications */}
+                    <Snackbar
+                        open={snackbarOpen}
+                        onClose={handleSnackbarClose}
+                        message={snackbarMessage}
+                        autoHideDuration={4000}
+                        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                        sx={{ borderRadius: 2 }}
+                    />
                 </Box>
             </Fade>
         </Container>

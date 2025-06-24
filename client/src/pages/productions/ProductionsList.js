@@ -16,11 +16,13 @@ import {
     Sort as SortIcon,
     FavoriteBorder as FavoriteIcon,
     MusicNote as MusicNoteIcon,
-    PlayArrow, Explore, ArrowForwardIos,
+    PlayArrow, Pause, Explore, ArrowForwardIos,
     CheckCircle, NewReleases, TrendingUp
 } from '@mui/icons-material';
 import config from '../../config/config';
 import { useAuth } from '../../contexts/AuthContext';
+import AudioPlayer from '../../components/productions/AudioPlayer';
+import SimpleAudioPlayer from '../../components/productions/SimpleAudioPlayer';
 
 const ProductionsList = () => {
     // États
@@ -36,10 +38,14 @@ const ProductionsList = () => {
     const [priceRange, setPriceRange] = useState('all');
     const [releaseDateRange, setReleaseDateRange] = useState('all');
     const [filtersExpanded, setFiltersExpanded] = useState(false);
+    const [playingAudioId, setPlayingAudioId] = useState(null);
     const { isAuthenticated } = useAuth();
     const theme = useTheme();
     const navigate = useNavigate();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
+    // Référence à l'élément audio actuel
+    const audioRef = React.useRef(null);
 
     // Débounce pour la recherche
     useEffect(() => {
@@ -106,6 +112,19 @@ const ProductionsList = () => {
 
     const handleProductionClick = (id) => {
         navigate(`/productions/${id}`);
+    };
+
+    const handlePlayPause = (id, audioUrl) => {
+        if (playingAudioId === id) {
+            // Si l'audio est déjà en cours de lecture, on le met en pause
+            setPlayingAudioId(null);
+            audioRef.current.pause();
+        } else {
+            // Sinon, on joue le nouvel audio
+            setPlayingAudioId(id);
+            audioRef.current.src = audioUrl;
+            audioRef.current.play();
+        }
     };
 
     // Afficher un état de chargement avec des squelettes
@@ -391,10 +410,10 @@ const ProductionsList = () => {
                                                 onChange={(e) => setReleaseDateRange(e.target.value)}
                                                 sx={{ borderRadius: 10 }}
                                             >
-                                                <MenuItem value="all">Toutes les dates</MenuItem>
-                                                <MenuItem value="thisWeek">Cette semaine</MenuItem>
-                                                <MenuItem value="thisMonth">Ce mois-ci</MenuItem>
-                                                <MenuItem value="thisYear">Cette année</MenuItem>
+                                                <MenuItem value="all">Toutes dates</MenuItem>
+                                                <MenuItem value="last_week">Cette semaine</MenuItem>
+                                                <MenuItem value="last_month">Ce mois-ci</MenuItem>
+                                                <MenuItem value="last_year">Cette année</MenuItem>
                                             </Select>
                                         </FormControl>
                                     </Grid>
@@ -403,189 +422,26 @@ const ProductionsList = () => {
                         </Grid>
                     </Card>
 
-                    {/* Résultats de recherche */}
-                    {productions.length > 0 ? (
-                        <>
-                            <Zoom in={true} timeout={600}>
-                                <Grid container spacing={3}>
-                                    {productions.map((production) => (
-                                        <Grid item xs={12} sm={6} md={4} key={production.id}>
-                                            <Card
-                                                elevation={2}
-                                                sx={{
-                                                    height: '100%',
-                                                    display: 'flex',
-                                                    flexDirection: 'column',
-                                                    transition: 'transform 0.2s, box-shadow 0.2s',
-                                                    borderRadius: 3,
-                                                    overflow: 'hidden',
-                                                    '&:hover': {
-                                                        transform: 'translateY(-8px)',
-                                                        boxShadow: 6
-                                                    },
-                                                    cursor: 'pointer'
-                                                }}
-                                                onClick={() => handleProductionClick(production.id)}
-                                            >
-                                                <Box sx={{ position: 'relative' }}>
-                                                    {/* Image ou bloc coloré */}
-                                                    <Box
-                                                        sx={{
-                                                            height: 180,
-                                                            bgcolor: 'primary.main',
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            justifyContent: 'center',
-                                                            position: 'relative',
-                                                            background: production.image_url
-                                                                ? `url(${config.UPLOADS_URL}${production.image_url}) center/cover`
-                                                                : 'linear-gradient(135deg, #6a1b9a 0%, #4a148c 100%)'
-                                                        }}
-                                                    >
-                                                        {!production.image_url && (
-                                                            <MusicNoteIcon sx={{ fontSize: 80, color: 'white', opacity: 0.8 }} />
-                                                        )}
-
-                                                        {/* Badge de genre */}
-                                                        {production.genre && (
-                                                            <Chip
-                                                                label={production.genre}
-                                                                size="small"
-                                                                sx={{
-                                                                    position: 'absolute',
-                                                                    top: 12,
-                                                                    left: 12,
-                                                                    bgcolor: 'rgba(0,0,0,0.6)',
-                                                                    color: 'white',
-                                                                    fontWeight: 'medium',
-                                                                    zIndex: 1
-                                                                }}
-                                                            />
-                                                        )}
-
-                                                        {/* Bouton de lecture */}
-                                                        <IconButton
-                                                            sx={{
-                                                                position: 'absolute',
-                                                                bottom: 10,
-                                                                right: 10,
-                                                                bgcolor: 'white',
-                                                                color: 'primary.main',
-                                                                '&:hover': { bgcolor: 'white', transform: 'scale(1.1)' },
-                                                                zIndex: 1,
-                                                                boxShadow: 2
-                                                            }}
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                // Code pour lire l'audio
-                                                            }}
-                                                        >
-                                                            <PlayArrow />
-                                                        </IconButton>
-                                                    </Box>
-                                                </Box>
-
-                                                <CardContent sx={{ flexGrow: 1, p: 2.5 }}>
-                                                    <Typography variant="h6" fontWeight="bold" gutterBottom noWrap>
-                                                        {production.title}
-                                                    </Typography>
-
-                                                    <Typography variant="body2" color="text.secondary" gutterBottom>
-                                                        par {production.artist || 'Artiste inconnu'}
-                                                    </Typography>
-
-                                                    <Typography
-                                                        variant="body2"
-                                                        color="text.secondary"
-                                                        sx={{
-                                                            mt: 1.5,
-                                                            overflow: 'hidden',
-                                                            textOverflow: 'ellipsis',
-                                                            display: '-webkit-box',
-                                                            WebkitLineClamp: 2,
-                                                            WebkitBoxOrient: 'vertical'
-                                                        }}
-                                                    >
-                                                        {production.description || "Aucune description disponible pour cette production."}
-                                                    </Typography>
-                                                </CardContent>
-
-                                                <CardActions
-                                                    sx={{
-                                                        display: 'flex',
-                                                        justifyContent: 'space-between',
-                                                        alignItems: 'center',
-                                                        px: 2.5,
-                                                        pb: 2.5
-                                                    }}
-                                                >
-                                                    <Typography
-                                                        variant="subtitle1"
-                                                        fontWeight="bold"
-                                                        color="primary.main"
-                                                    >
-                                                        {production.price ? `${production.price} €` : 'Gratuit'}
-                                                    </Typography>
-
-                                                    <Button
-                                                        variant="outlined"
-                                                        endIcon={<ArrowForwardIos sx={{ fontSize: '0.8rem' }} />}
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleProductionClick(production.id);
-                                                        }}
-                                                        sx={{
-                                                            borderRadius: 10,
-                                                            textTransform: 'none',
-                                                            fontWeight: 'medium'
-                                                        }}
-                                                    >
-                                                        Détails
-                                                    </Button>
-                                                </CardActions>
-                                            </Card>
-                                        </Grid>
-                                    ))}
-                                </Grid>
-                            </Zoom>
-
-                            {/* Pagination */}
-                            {totalPages > 1 && (
-                                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-                                    <Pagination
-                                        count={totalPages}
-                                        page={page}
-                                        onChange={handlePageChange}
-                                        color="primary"
-                                        size={isMobile ? "medium" : "large"}
-                                        showFirstButton
-                                        showLastButton
-                                        sx={{
-                                            '& .MuiPaginationItem-root': {
-                                                borderRadius: 2
-                                            }
-                                        }}
-                                    />
-                                </Box>
-                            )}
-                        </>
-                    ) : (
+                    {/* Liste des productions */}
+                    {productions.length === 0 ? (
                         <Paper
-                            elevation={1}
+                            elevation={0}
                             sx={{
-                                p: 4,
+                                py: 6,
+                                px: 3,
                                 textAlign: 'center',
                                 borderRadius: 3,
-                                backgroundColor: 'background.paper',
-                                mt: 3
+                                bgcolor: 'background.paper',
+                                border: '1px dashed',
+                                borderColor: 'divider'
                             }}
                         >
                             <MusicNoteIcon sx={{ fontSize: 60, color: 'text.secondary', opacity: 0.5, mb: 2 }} />
-                            <Typography variant="h6" gutterBottom>
+                            <Typography variant="h6" color="text.secondary" gutterBottom>
                                 Aucune production trouvée
                             </Typography>
-                            <Typography variant="body2" color="text.secondary" paragraph>
-                                Essayez de modifier vos critères de recherche ou de filtrage.
+                            <Typography variant="body2" color="text.secondary" sx={{ mb: 3, maxWidth: 500, mx: 'auto' }}>
+                                Aucune production ne correspond à vos critères de recherche. Essayez de modifier vos filtres ou consultez notre catalogue complet.
                             </Typography>
                             <Button
                                 variant="outlined"
@@ -597,16 +453,181 @@ const ProductionsList = () => {
                                     setPriceRange('all');
                                     setReleaseDateRange('all');
                                 }}
-                                sx={{
-                                    mt: 1,
-                                    borderRadius: 10,
-                                    textTransform: 'none'
-                                }}
+                                sx={{ borderRadius: 10, px: 3 }}
                             >
                                 Réinitialiser les filtres
                             </Button>
                         </Paper>
+                    ) : (
+                        <Grid container spacing={3}>
+                            {productions.map((production) => (
+                                <Grid item xs={12} sm={6} md={4} key={production.id}>
+                                    <Grow in={true} timeout={500 + productions.indexOf(production) * 100}>
+                                        <Card
+                                            sx={{
+                                                height: '100%',
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                borderRadius: 3,
+                                                overflow: 'hidden',
+                                                transition: 'transform 0.3s, box-shadow 0.3s',
+                                                '&:hover': {
+                                                    transform: 'translateY(-4px)',
+                                                    boxShadow: theme.shadows[6]
+                                                }
+                                            }}
+                                        >
+                                            <Box sx={{ position: 'relative' }}>
+                                                <CardMedia
+                                                    component="img"
+                                                    height="200"
+                                                    image={production.coverImage ?
+                                                        (production.coverImage.startsWith('http') ?
+                                                        production.coverImage :
+                                                        `/api/uploads/${production.coverImage.split('/').pop()}`) :
+                                                        '/images/vinyl-record.svg'}
+                                                    alt={production.title}
+                                                    sx={{ objectFit: 'cover' }}
+                                                    onError={(e) => {
+                                                        // Remplacer par une image par défaut en cas d'erreur
+                                                        e.target.onerror = null;
+                                                        e.target.src = '/images/vinyl-record.svg';
+                                                    }}
+                                                />
+                                                <Box
+                                                    sx={{
+                                                        position: 'absolute',
+                                                        bottom: 0,
+                                                        width: '100%',
+                                                        height: '70px',
+                                                        background: 'linear-gradient(to top, rgba(0,0,0,0.7), rgba(0,0,0,0))',
+                                                        display: 'flex',
+                                                        alignItems: 'flex-end',
+                                                        p: 1
+                                                    }}
+                                                >
+                                                    <Chip
+                                                        label={production.genre}
+                                                        color="primary"
+                                                        size="small"
+                                                        sx={{
+                                                            bgcolor: 'rgba(33, 150, 243, 0.85)',
+                                                            fontWeight: 'medium'
+                                                        }}
+                                                    />
+                                                </Box>
+                                            </Box>
+
+                                            <CardContent sx={{ p: 2, flexGrow: 1 }}>
+                                                <Typography
+                                                    variant="h6"
+                                                    component="h2"
+                                                    gutterBottom
+                                                    sx={{
+                                                        fontWeight: 'bold',
+                                                        cursor: 'pointer',
+                                                        '&:hover': { color: 'primary.main' }
+                                                    }}
+                                                    onClick={() => handleProductionClick(production.id)}
+                                                >
+                                                    {production.title}
+                                                </Typography>
+
+                                                <Typography
+                                                    variant="subtitle2"
+                                                    color="text.secondary"
+                                                    gutterBottom
+                                                >
+                                                    {production.artist || 'Artiste inconnu'}
+                                                </Typography>
+
+                                                <Typography
+                                                    variant="body2"
+                                                    color="text.secondary"
+                                                    sx={{
+                                                        mt: 1,
+                                                        overflow: 'hidden',
+                                                        textOverflow: 'ellipsis',
+                                                        display: '-webkit-box',
+                                                        WebkitLineClamp: 2,
+                                                        WebkitBoxOrient: 'vertical',
+                                                        minHeight: '40px'
+                                                    }}
+                                                >
+                                                    {production.description}
+                                                </Typography>
+
+                                                {/* Lecteur audio avec bouton visible */}
+                                                {production.audio_url && (
+                                                    <Box sx={{ mt: 2 }}>
+                                                        <Typography variant="subtitle2" color="primary.main" mb={1}>
+                                                            Écouter un extrait
+                                                        </Typography>
+                                                        <SimpleAudioPlayer
+                                                            src={production.audio_url.startsWith('http')
+                                                                ? production.audio_url
+                                                                : production.audio_url.startsWith('/api/')
+                                                                    ? production.audio_url
+                                                                    : `/api/uploads/${production.audio_url.split('/').pop()}`}
+                                                        />
+                                                    </Box>
+                                                )}
+                                            </CardContent>
+
+                                            <CardActions sx={{ p: 2, pt: 0, justifyContent: 'space-between' }}>
+                                                <Typography
+                                                    variant="h6"
+                                                    color="primary.main"
+                                                    sx={{ fontWeight: 'bold' }}
+                                                >
+                                                    {production.price === 0 ? 'Gratuit' : `${production.price}€`}
+                                                </Typography>
+
+                                                <Button
+                                                    variant="contained"
+                                                    color="primary"
+                                                    size="small"
+                                                    endIcon={<ArrowForwardIos />}
+                                                    onClick={() => handleProductionClick(production.id)}
+                                                    sx={{
+                                                        borderRadius: 10,
+                                                        px: 2,
+                                                        boxShadow: 2
+                                                    }}
+                                                >
+                                                    Détails
+                                                </Button>
+                                            </CardActions>
+                                        </Card>
+                                    </Grow>
+                                </Grid>
+                            ))}
+                        </Grid>
                     )}
+
+                    {/* Pagination */}
+                    {totalPages > 1 && (
+                        <Box sx={{ mt: 5, display: 'flex', justifyContent: 'center' }}>
+                            <Pagination
+                                count={totalPages}
+                                page={page}
+                                onChange={handlePageChange}
+                                color="primary"
+                                size={isMobile ? "small" : "medium"}
+                                siblingCount={isMobile ? 0 : 1}
+                                showFirstButton={!isMobile}
+                                showLastButton={!isMobile}
+                                sx={{
+                                    '& .MuiPaginationItem-root': {
+                                        borderRadius: '50%',
+                                    }
+                                }}
+                            />
+                        </Box>
+                    )}
+
+                    {/* Audio élément caché pour les prévisualisations */}
+                    <audio ref={audioRef} style={{ display: 'none' }} />
                 </Box>
             </Fade>
         </Container>
