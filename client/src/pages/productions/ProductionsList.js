@@ -477,23 +477,37 @@ const ProductionsList = () => {
                                                 }
                                             }}
                                         >
-                                            <Box sx={{ position: 'relative' }}>
+                                            {/* Container pour l'image avec une hauteur fixe et un overflow hidden pour garantir la consistance */}
+                                            <Box
+                                                sx={{
+                                                    position: 'relative',
+                                                    paddingTop: '56.25%' /* Ratio 16:9 */,
+                                                    overflow: 'hidden',
+                                                }}
+                                            >
+                                                {/* Image absolument positionnée pour maintenir le ratio */}
                                                 <CardMedia
                                                     component="img"
-                                                    height="200"
-                                                    image={production.coverImage ?
-                                                        (production.coverImage.startsWith('http') ?
-                                                        production.coverImage :
-                                                        `/api/uploads/${production.coverImage.split('/').pop()}`) :
+                                                    image={production.image_url ?
+                                                        (production.image_url.startsWith('http') ?
+                                                        production.image_url :
+                                                        `/uploads/${production.image_url.split('/').pop()}`) :
                                                         '/images/vinyl-record.svg'}
                                                     alt={production.title}
-                                                    sx={{ objectFit: 'cover' }}
+                                                    sx={{
+                                                        position: 'absolute',
+                                                        top: 0,
+                                                        left: 0,
+                                                        width: '100%',
+                                                        height: '100%',
+                                                        objectFit: 'cover',
+                                                    }}
                                                     onError={(e) => {
-                                                        // Remplacer par une image par défaut en cas d'erreur
                                                         e.target.onerror = null;
                                                         e.target.src = '/images/vinyl-record.svg';
                                                     }}
                                                 />
+                                                {/* Overlay pour le genre */}
                                                 <Box
                                                     sx={{
                                                         position: 'absolute',
