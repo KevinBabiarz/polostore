@@ -1,6 +1,6 @@
 // src/pages/ProductionsList.js
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { getProductions } from '../../services/productionService';
 import {
     Container, Typography, Box, Grid, Card, CardContent,
@@ -33,15 +33,14 @@ const ProductionsList = () => {
     const [totalPages, setTotalPages] = useState(1);
     const [searchTerm, setSearchTerm] = useState('');
     const [searchDebounce, setSearchDebounce] = useState('');
-    const [genre, setGenre] = useState('');
-    const [sortBy, setSortBy] = useState('latest');
-    const [priceRange, setPriceRange] = useState('all');
+    const [genre, setGenre] = useState('');  // Valeur vide = "Tous"
     const [releaseDateRange, setReleaseDateRange] = useState('all');
     const [filtersExpanded, setFiltersExpanded] = useState(false);
     const [playingAudioId, setPlayingAudioId] = useState(null);
     const { isAuthenticated } = useAuth();
     const theme = useTheme();
     const navigate = useNavigate();
+    const location = useLocation();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
     // Référence à l'élément audio actuel
@@ -68,8 +67,6 @@ const ProductionsList = () => {
                     limit: 9,
                     search: searchDebounce,
                     genre: genre || undefined,
-                    sortBy,
-                    priceRange,
                     releaseDateRange
                 };
 
@@ -85,7 +82,7 @@ const ProductionsList = () => {
         };
 
         loadProductions();
-    }, [page, searchDebounce, genre, sortBy, priceRange, releaseDateRange]);
+    }, [page, searchDebounce, genre, releaseDateRange]);
 
     const handlePageChange = (event, value) => {
         setPage(value);
@@ -94,11 +91,6 @@ const ProductionsList = () => {
 
     const handleGenreChange = (e) => {
         setGenre(e.target.value);
-        setPage(1);
-    };
-
-    const handleSortChange = (e) => {
-        setSortBy(e.target.value);
         setPage(1);
     };
 
@@ -126,6 +118,44 @@ const ProductionsList = () => {
             audioRef.current.play();
         }
     };
+
+    // Fonction pour réinitialiser tous les filtres
+    const handleResetFilters = useCallback(() => {
+        setSearchTerm('');
+        setGenre('');
+        setReleaseDateRange('all');
+        setPage(1);
+    }, []);
+
+    // Synchroniser l'état des filtres avec l'URL
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+
+        const initialPage = parseInt(params.get('page')) || 1;
+        const initialSearch = params.get('search') || '';
+        const initialGenre = params.get('genre') || '';
+        const initialReleaseDateRange = params.get('release_date') || 'all';
+
+        setPage(initialPage);
+        setSearchTerm(initialSearch);
+        setGenre(initialGenre);
+        setReleaseDateRange(initialReleaseDateRange);
+    }, [location.search]);
+
+    // Mettre à jour l'URL lors du changement de page ou de filtres
+    useEffect(() => {
+        const params = new URLSearchParams();
+
+        if (searchDebounce) params.set('search', searchDebounce);
+        if (genre) params.set('genre', genre);
+        if (releaseDateRange !== 'all') params.set('release_date', releaseDateRange);
+        params.set('page', page);
+
+        navigate({
+            pathname: location.pathname,
+            search: params.toString(),
+        });
+    }, [searchDebounce, genre, releaseDateRange, page, navigate, location.pathname]);
 
     // Afficher un état de chargement avec des squelettes
     if (loading) {
@@ -250,20 +280,6 @@ const ProductionsList = () => {
                             }}
                         >
                             <Chip
-                                icon={<NewReleases fontSize="small" />}
-                                label="Nouveautés"
-                                color={sortBy === 'latest' ? "primary" : "default"}
-                                onClick={() => setSortBy('latest')}
-                                sx={{ fontWeight: 'medium', px: 1 }}
-                            />
-                            <Chip
-                                icon={<TrendingUp fontSize="small" />}
-                                label="Populaires"
-                                color={sortBy === 'popular' ? "primary" : "default"}
-                                onClick={() => setSortBy('popular')}
-                                sx={{ fontWeight: 'medium', px: 1 }}
-                            />
-                            <Chip
                                 icon={<MusicNoteIcon fontSize="small" />}
                                 label="Tous les genres"
                                 color={!genre ? "primary" : "default"}
@@ -278,14 +294,14 @@ const ProductionsList = () => {
                         elevation={2}
                         sx={{
                             mb: 4,
-                            p: 2,
+                            p: { xs: 2, md: 3 },
                             borderRadius: 3,
                             bgcolor: 'background.paper'
                         }}
                     >
                         <Grid container spacing={2} alignItems="center">
                             {/* Barre de recherche */}
-                            <Grid item xs={12} sm={filtersExpanded ? 12 : 6} md={filtersExpanded ? 6 : 6}>
+                            <Grid item xs={12} sm={filtersExpanded ? 12 : 9} md={filtersExpanded ? 12 : 9}>
                                 <TextField
                                     fullWidth
                                     placeholder="Rechercher une production..."
@@ -317,13 +333,13 @@ const ProductionsList = () => {
                             {/* Filtres de base toujours visibles */}
                             {!filtersExpanded && (
                                 <>
-                                    <Grid item xs={6} sm={3} md={3}>
+                                    <Grid item xs={12} sm={3} md={3}>
                                         <FormControl fullWidth size="small" sx={{ bgcolor: 'background.default', borderRadius: 2 }}>
-                                            <InputLabel>Genre</InputLabel>
                                             <Select
                                                 value={genre}
-                                                label="Genre"
+                                                displayEmpty
                                                 onChange={handleGenreChange}
+                                                renderValue={(selected) => selected === '' ? 'Tous' : selected}
                                                 sx={{ borderRadius: 10 }}
                                             >
                                                 <MenuItem value="">Tous</MenuItem>
@@ -336,69 +352,34 @@ const ProductionsList = () => {
                                             </Select>
                                         </FormControl>
                                     </Grid>
-
-                                    <Grid item xs={6} sm={3} md={3}>
-                                        <FormControl fullWidth size="small" sx={{ bgcolor: 'background.default', borderRadius: 2 }}>
-                                            <InputLabel>Trier par</InputLabel>
-                                            <Select
-                                                value={sortBy}
-                                                label="Trier par"
-                                                onChange={handleSortChange}
-                                                sx={{ borderRadius: 10 }}
-                                            >
-                                                <MenuItem value="latest">Plus récents</MenuItem>
-                                                <MenuItem value="popular">Plus populaires</MenuItem>
-                                                <MenuItem value="price_asc">Prix croissant</MenuItem>
-                                                <MenuItem value="price_desc">Prix décroissant</MenuItem>
-                                            </Select>
-                                        </FormControl>
-                                    </Grid>
                                 </>
                             )}
 
-                            {/* Bouton pour afficher plus de filtres */}
-                            <Grid
-                                item
-                                xs={12}
-                                sx={{
-                                    display: 'flex',
-                                    justifyContent: 'center',
-                                    mt: filtersExpanded ? 1 : 0
-                                }}
-                            >
-                                <Button
-                                    color="inherit"
-                                    size="small"
-                                    onClick={toggleFilters}
-                                    startIcon={<FilterListIcon />}
-                                    sx={{
-                                        textTransform: 'none',
-                                        fontSize: '0.875rem'
-                                    }}
-                                >
-                                    {filtersExpanded ? 'Moins de filtres' : 'Plus de filtres'}
-                                </Button>
-                            </Grid>
-
-                            {/* Filtres supplémentaires */}
+                            {/* Section expanded filters */}
                             {filtersExpanded && (
                                 <>
-                                    <Grid item xs={12} sm={6} md={3}>
-                                        <FormControl fullWidth size="small" sx={{ bgcolor: 'background.default', borderRadius: 2 }}>
-                                            <InputLabel>Prix</InputLabel>
-                                            <Select
-                                                value={priceRange}
-                                                label="Prix"
-                                                onChange={(e) => setPriceRange(e.target.value)}
-                                                sx={{ borderRadius: 10 }}
-                                            >
-                                                <MenuItem value="all">Tous les prix</MenuItem>
-                                                <MenuItem value="free">Gratuits</MenuItem>
-                                                <MenuItem value="under10">Moins de 10€</MenuItem>
-                                                <MenuItem value="10to50">10€ - 50€</MenuItem>
-                                                <MenuItem value="over50">Plus de 50€</MenuItem>
-                                            </Select>
-                                        </FormControl>
+                                    <Grid item xs={12} md={6}>
+                                        <Grid container spacing={2}>
+                                            <Grid item xs={12} sm={6}>
+                                                <FormControl fullWidth size="small" sx={{ bgcolor: 'background.default', borderRadius: 2 }}>
+                                                    <Select
+                                                        value={genre}
+                                                        displayEmpty
+                                                        onChange={handleGenreChange}
+                                                        renderValue={(selected) => selected === '' ? 'Tous' : selected}
+                                                        sx={{ borderRadius: 10 }}
+                                                    >
+                                                        <MenuItem value="">Tous</MenuItem>
+                                                        <MenuItem value="Rock">Rock</MenuItem>
+                                                        <MenuItem value="Hip-Hop">Hip-Hop</MenuItem>
+                                                        <MenuItem value="Jazz">Jazz</MenuItem>
+                                                        <MenuItem value="Classique">Classique</MenuItem>
+                                                        <MenuItem value="Electronic">Electronic</MenuItem>
+                                                        <MenuItem value="Pop">Pop</MenuItem>
+                                                    </Select>
+                                                </FormControl>
+                                            </Grid>
+                                        </Grid>
                                     </Grid>
 
                                     <Grid item xs={12} sm={6} md={3}>
@@ -418,6 +399,88 @@ const ProductionsList = () => {
                                         </FormControl>
                                     </Grid>
                                 </>
+                            )}
+
+                            {/* Boutons de contrôle des filtres */}
+                            <Grid
+                                item
+                                xs={12}
+                                sx={{
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    mt: 1,
+                                    borderTop: filtersExpanded ? 1 : 0,
+                                    borderColor: 'divider',
+                                    pt: filtersExpanded ? 2 : 0
+                                }}
+                            >
+                                <Stack direction="row" spacing={2} alignItems="center">
+                                    <Button
+                                        color="inherit"
+                                        size="small"
+                                        onClick={toggleFilters}
+                                        startIcon={<FilterListIcon />}
+                                        sx={{
+                                            textTransform: 'none',
+                                            fontSize: '0.875rem'
+                                        }}
+                                    >
+                                        {filtersExpanded ? 'Moins de filtres' : 'Plus de filtres'}
+                                    </Button>
+
+                                    {(searchTerm || genre || releaseDateRange !== 'all') && (
+                                        <Button
+                                            color="error"
+                                            size="small"
+                                            variant="outlined"
+                                            onClick={handleResetFilters}
+                                            startIcon={<ClearIcon />}
+                                            sx={{
+                                                textTransform: 'none',
+                                                fontSize: '0.875rem',
+                                                borderRadius: 10
+                                            }}
+                                        >
+                                            Effacer les filtres
+                                        </Button>
+                                    )}
+                                </Stack>
+                            </Grid>
+
+                            {/* Affichage des filtres actifs */}
+                            {(searchTerm || genre || releaseDateRange !== 'all') && (
+                                <Grid item xs={12}>
+                                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
+                                        {searchTerm && (
+                                            <Chip
+                                                label={`Recherche: ${searchTerm}`}
+                                                size="small"
+                                                onDelete={() => setSearchTerm('')}
+                                                color="primary"
+                                                variant="outlined"
+                                            />
+                                        )}
+                                        {genre && (
+                                            <Chip
+                                                label={`Genre: ${genre}`}
+                                                size="small"
+                                                onDelete={() => setGenre('')}
+                                                color="primary"
+                                                variant="outlined"
+                                            />
+                                        )}
+                                        {releaseDateRange !== 'all' && (
+                                            <Chip
+                                                label={releaseDateRange === 'last_week' ? 'Date: Cette semaine' :
+                                                       releaseDateRange === 'last_month' ? 'Date: Ce mois-ci' : 'Date: Cette année'}
+                                                size="small"
+                                                onDelete={() => setReleaseDateRange('all')}
+                                                color="primary"
+                                                variant="outlined"
+                                            />
+                                        )}
+                                    </Box>
+                                </Grid>
                             )}
                         </Grid>
                     </Card>
@@ -446,13 +509,7 @@ const ProductionsList = () => {
                             <Button
                                 variant="outlined"
                                 color="primary"
-                                onClick={() => {
-                                    setSearchTerm('');
-                                    setGenre('');
-                                    setSortBy('latest');
-                                    setPriceRange('all');
-                                    setReleaseDateRange('all');
-                                }}
+                                onClick={handleResetFilters}
                                 sx={{ borderRadius: 10, px: 3 }}
                             >
                                 Réinitialiser les filtres

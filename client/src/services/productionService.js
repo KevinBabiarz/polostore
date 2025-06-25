@@ -5,36 +5,37 @@ import api from './api';
 const cache = {
     productions: new Map(), // Map des productions par page/params
     productionDetails: new Map(), // Map des détails de production par ID
-    TTL: 5 * 60 * 1000, // TTL de 5 minutes
+    TTL: 2 * 60 * 1000, // TTL de 2 minutes (réduit pour le développement)
 };
 
-// Fonction pour récupérer toutes les productions
-export const getProductions = async (page = 1, limit = 10, search = '', genre = '', sortBy = 'latest') => {
+// Fonction pour récupérer toutes les productions avec filtres
+export const getProductions = async (page = 1, options = {}) => {
     try {
-        // Si limit est un objet (options), on extrait les paramètres
-        let params = { page };
-        if (typeof limit === 'object') {
-            params = { ...params, ...limit };
-        } else {
-            params.limit = limit;
-        }
+        // Construction des paramètres de requête
+        const params = { page, limit: options.limit || 9 };
 
-        // Ajout des autres paramètres si présents
-        if (search) params.search = search;
-        if (genre) params.genre = genre;
-        if (sortBy) params.sortBy = sortBy;
+        // Ajouter uniquement les filtres dont nous avons besoin
+        if (options.search) params.search = options.search;
+        // Envoi du genre même s'il est vide (pour l'option "Tous")
+        if (options.genre !== undefined) params.genre = options.genre;
+        if (options.sortBy) params.sortBy = options.sortBy;
+        if (options.releaseDateRange && options.releaseDateRange !== 'all') params.releaseDateRange = options.releaseDateRange;
 
         // Création d'une clé de cache basée sur les paramètres
         const cacheKey = JSON.stringify(params);
+        console.log("Requête avec paramètres:", params);
 
-        // Vérification du cache
-        const cachedData = cache.productions.get(cacheKey);
-        if (cachedData && (Date.now() - cachedData.timestamp < cache.TTL)) {
-            return cachedData.data;
-        }
+        // Vérification du cache (désactivé temporairement pour le debug)
+        // const cachedData = cache.productions.get(cacheKey);
+        // if (cachedData && (Date.now() - cachedData.timestamp < cache.TTL)) {
+        //     console.log("Résultats depuis le cache");
+        //     return cachedData.data;
+        // }
 
         // Utilisation de l'API avec le préfixe /api géré par l'instance api
+        console.log("Appel API pour récupérer les productions");
         const response = await api.get('/productions', { params });
+        console.log("Réponse API reçue:", response.data);
 
         // Mise en cache des données
         if (response.data) {

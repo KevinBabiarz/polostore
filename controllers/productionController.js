@@ -4,23 +4,37 @@ import ProductionService from '../services/productionService.js';
 export const getAllProductions = async (req, res) => {
     console.log('[PROD CTRL] Requête reçue sur /api/productions');
     try {
-        // Récupérer les paramètres de la requête pour la pagination et le tri
-        const { limit, offset, category, sortBy, sortOrder } = req.query;
+        // Récupérer tous les paramètres de filtre de la requête
+        const {
+            page,
+            limit,
+            offset,
+            search,
+            genre,
+            category,
+            sortBy,
+            sortOrder,
+            priceRange,
+            releaseDateRange
+        } = req.query;
 
-        console.log('[PROD CTRL] Appel à ProductionService.getAllProductions avec params:',
-            { limit, offset, category, sortBy, sortOrder });
+        console.log('[PROD CTRL] Paramètres de requête reçus:', req.query);
 
-        // Utiliser le service pour récupérer les productions
-        const productions = await ProductionService.getAllProductions({
+        // Utiliser le service pour récupérer les productions avec tous les filtres
+        const result = await ProductionService.getAllProductions({
+            page: parseInt(page) || 1,
             limit: parseInt(limit) || 10,
             offset: parseInt(offset) || 0,
-            category,
-            sortBy: sortBy || 'created_at',
-            sortOrder: sortOrder || 'DESC'
+            search,
+            genre: genre || category, // Support des deux paramètres pour compatibilité
+            sortBy: sortBy || 'latest',
+            sortOrder: sortOrder || 'DESC',
+            priceRange: priceRange || 'all',
+            releaseDateRange: releaseDateRange || 'all'
         });
 
-        console.log('[PROD CTRL] Productions récupérées:', productions.length);
-        res.status(200).json(productions);
+        console.log(`[PROD CTRL] Productions récupérées: ${result.productions?.length || 0} sur ${result.totalCount || 0}`);
+        res.status(200).json(result);
     } catch (error) {
         console.error('[PROD CTRL] Erreur:', error);
         res.status(500).json({ message: 'Erreur lors de la récupération des productions' });

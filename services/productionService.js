@@ -1,5 +1,6 @@
 // services/productionService.js
 import Production from '../models/Production.js';
+import { Op } from 'sequelize';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -20,28 +21,141 @@ export const ProductionService = {
         console.log("[PROD SERVICE] Récupération des productions avec options:", options);
 
         try {
-            let { limit = 10, offset = 0, category = null, sortBy = 'created_at', sortOrder = 'DESC' } = options;
+            let {
+                limit = 10,
+                offset = 0,
+                page = 1,
+                genre = null,
+                search = null,
+                category = null, // pour compatibilité
+                sortBy = 'created_at',
+                sortOrder = 'DESC',
+                priceRange = 'all',
+                releaseDateRange = 'all'
+            } = options;
 
-            // Correction : si sortBy vaut 'latest', on utilise 'created_at'
-            if (sortBy === 'latest') sortBy = 'created_at';
-
-            // Si un genre est spécifié, utiliser la méthode statique du modèle
-            if (category) {
-                console.log(`[PROD SERVICE] Recherche par genre: ${category}`);
-                return await Production.findByGenre(category);
+            // Calculer l'offset à partir de la page si fournie
+            if (page && page > 1) {
+                offset = (page - 1) * limit;
             }
 
-            // Sinon, faire une requête personnalisée
+            // Gestion sécurisée des options de tri
+            let orderField = 'created_at'; // Champ par défaut
+            let orderDirection = 'DESC';   // Direction par défaut
+
+            // Options de tri sécurisées basées sur les champs existants
+            switch (sortBy) {
+                case 'latest':
+                    orderField = 'created_at';
+                    orderDirection = 'DESC';
+                    break;
+                case 'popular':
+                    // Comme "views" n'existe pas dans le modèle, on utilise created_at comme fallback
+                    orderField = 'created_at';
+                    orderDirection = 'DESC';
+                    break;
+                case 'price_asc':
+                    orderField = 'price';
+                    orderDirection = 'ASC';
+                    break;
+                case 'price_desc':
+                    orderField = 'price';
+                    orderDirection = 'DESC';
+                    break;
+                default:
+                    // Si sortBy est un nom de champ valide, l'utiliser directement
+                    const validFields = ['id', 'title', 'artist', 'genre', 'created_at', 'price'];
+                    if (validFields.includes(sortBy)) {
+                        orderField = sortBy;
+                        orderDirection = sortOrder || 'DESC';
+                    }
+            }
+
+            // Construction des conditions WHERE
+            const whereClause = {};
+
+            // Filtre par genre - traitement spécial pour la chaîne vide (qui signifie "Tous")
+            if ((genre !== null && genre !== undefined) || (category !== null && category !== undefined)) {
+                // Si genre est une chaîne vide, ne pas ajouter de filtre (équivalent à "Tous")
+                if (genre !== '' && category !== '') {
+                    whereClause.genre = genre || category;
+                }
+            }
+
+            // Filtre par recherche
+            if (search) {
+                whereClause[Op.or] = [
+                    { title: { [Op.like]: `%${search}%` } },
+                    { description: { [Op.like]: `%${search}%` } },
+                    { artist: { [Op.like]: `%${search}%` } }
+                ];
+            }
+
+            // Filtre par fourchette de prix
+            if (priceRange !== 'all') {
+                switch(priceRange) {
+                    case 'free':
+                        whereClause.price = 0;
+                        break;
+                    case 'under10':
+                        whereClause.price = { [Op.lt]: 10 };
+                        break;
+                    case '10to50':
+                        whereClause.price = { [Op.between]: [10, 50] };
+                        break;
+                    case 'over50':
+                        whereClause.price = { [Op.gt]: 50 };
+                        break;
+                }
+            }
+
+            // Filtre par date de sortie
+            if (releaseDateRange !== 'all') {
+                const now = new Date();
+                let dateLimit;
+
+                switch(releaseDateRange) {
+                    case 'last_week':
+                        dateLimit = new Date(now.setDate(now.getDate() - 7));
+                        break;
+                    case 'last_month':
+                        dateLimit = new Date(now.setMonth(now.getMonth() - 1));
+                        break;
+                    case 'last_year':
+                        dateLimit = new Date(now.setFullYear(now.getFullYear() - 1));
+                        break;
+                }
+
+                if (dateLimit) {
+                    whereClause.created_at = { [Op.gte]: dateLimit };
+                }
+            }
+
+            // Construction de la requête finale
             const query = {
-                order: [[sortBy, sortOrder]],
+                where: whereClause,
+                order: [[orderField, orderDirection]],
                 limit: parseInt(limit),
                 offset: parseInt(offset)
             };
 
-            console.log(`[PROD SERVICE] Exécution de la requête avec limit=${limit}, offset=${offset}`);
-            const productions = await Production.findAll(query);
-            console.log(`[PROD SERVICE] ${productions.length} productions récupérées avec succès`);
-            return productions;
+            console.log(`[PROD SERVICE] Exécution de la requête:`, JSON.stringify(query, null, 2));
+
+            // Exécution de la requête
+            const productions = await Production.findAndCountAll(query);
+
+            // Calcul du nombre total de pages
+            const totalPages = Math.ceil(productions.count / limit);
+
+            console.log(`[PROD SERVICE] ${productions.rows.length} productions récupérées sur ${productions.count} total`);
+
+            // Retourner les données paginées
+            return {
+                productions: productions.rows,
+                totalCount: productions.count,
+                totalPages,
+                currentPage: page || Math.floor(offset / limit) + 1
+            };
         } catch (error) {
             console.error("[PROD SERVICE] Erreur lors de la récupération des productions:", error.message);
             throw error;
