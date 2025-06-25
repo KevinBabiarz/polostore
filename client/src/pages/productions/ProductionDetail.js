@@ -10,13 +10,13 @@ import {
     DialogActions, CircularProgress, Alert, Grid, Paper,
     Divider, Rating, Avatar, IconButton, Tooltip, Skeleton,
     useTheme, useMediaQuery, Fade, Grow, Zoom, Breadcrumbs, Link,
-    Stack, Tabs, Tab, Snackbar, LinearProgress, Slider
+    Stack, Snackbar, LinearProgress, Slider
 } from '@mui/material';
 import {
     Favorite, FavoriteBorder, Edit, Delete, ArrowBack,
     MusicNote, PlayArrow, Pause, ShoppingCart, Share, Download,
     AccessTime, CalendarToday, Person, Category, AttachMoney,
-    NavigateNext, Description, Comment, ThumbUp, Album
+    NavigateNext
 } from '@mui/icons-material';
 import config from '../../config/config';
 
@@ -170,7 +170,6 @@ const ProductionDetail = () => {
     const [error, setError] = useState('');
     const [isFavorite, setIsFavorite] = useState(false);
     const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
-    const [tabValue, setTabValue] = useState(0);
     const [isPlaying, setIsPlaying] = useState(false);
     const [audioUrl, setAudioUrl] = useState('');
     const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -255,10 +254,6 @@ const ProductionDetail = () => {
             setError("Impossible de supprimer cette production");
         }
         setOpenConfirmDialog(false);
-    };
-
-    const handleTabChange = (event, newValue) => {
-        setTabValue(newValue);
     };
 
     // Gestion simple de l'audio sans dépendance sur les références React
@@ -771,251 +766,62 @@ const ProductionDetail = () => {
                             </Fade>
                         </Grid>
 
-                        {/* Contenu additionnel */}
-                        <Grid item xs={12}>
-                            <Grow in={true} timeout={1200}>
-                                <Card elevation={2} sx={{ borderRadius: 3, overflow: 'hidden', mt: { xs: 0, md: 2 } }}>
-                                    <Tabs
-                                        value={tabValue}
-                                        onChange={handleTabChange}
-                                        variant={isMobile ? "scrollable" : "fullWidth"}
-                                        scrollButtons={isMobile}
-                                        allowScrollButtonsMobile
-                                        sx={{
-                                            bgcolor: 'background.paper',
-                                            borderBottom: 1,
-                                            borderColor: 'divider',
-                                            '& .MuiTab-root': {
-                                                fontWeight: 'bold',
-                                                py: 2,
-                                                textTransform: 'none',
-                                                fontSize: { xs: '0.875rem', md: '1rem' }
-                                            }
-                                        }}
-                                    >
-                                        <Tab
-                                            icon={<Description sx={{ fontSize: isMobile ? '1.2rem' : '1.5rem' }} />}
-                                            iconPosition="start"
-                                            label="Description"
-                                        />
-                                        <Tab
-                                            icon={<Album sx={{ fontSize: isMobile ? '1.2rem' : '1.5rem' }} />}
-                                            iconPosition="start"
-                                            label="Titres"
-                                        />
-                                        <Tab
-                                            icon={<Comment sx={{ fontSize: isMobile ? '1.2rem' : '1.5rem' }} />}
-                                            iconPosition="start"
-                                            label="Commentaires"
-                                        />
-                                    </Tabs>
+                        {/* Suppression ici de la Grid item xs={12} qui contenait les onglets */}
 
-                                    {/* Contenu de l'onglet Description */}
-                                    <Box sx={{
-                                        p: { xs: 2.5, sm: 3 },
-                                        display: tabValue === 0 ? 'block' : 'none',
-                                        minHeight: 300
-                                    }}>
-                                        <Typography variant="h6" gutterBottom fontWeight="bold" color="primary.main">
-                                            À propos de cette production
-                                        </Typography>
-
-                                        <Typography variant="body1" paragraph>
-                                            {production.description ||
-                                            "Cette production musicale unique offre une expérience sonore exceptionnelle, mélangeant harmonieusement différents styles et influences. L'artiste a créé une œuvre qui captive l'auditeur dès les premières notes, transportant dans un univers musical riche et évocateur."}
-                                        </Typography>
-
-                                        <Typography variant="body1" paragraph>
-                                            Créée avec passion et expertise, cette production reflète le talent et la vision artistique unique de son créateur. Chaque élément a été soigneusement élaboré pour offrir une expérience d'écoute immersive et mémorable.
-                                        </Typography>
-
-                                        {production.additionalInfo && (
-                                            <Box sx={{ mt: 3 }}>
-                                                <Typography variant="h6" gutterBottom fontWeight="bold" color="primary.main">
-                                                    Informations complémentaires
-                                                </Typography>
-                                                <Typography variant="body1">
-                                                    {production.additionalInfo}
-                                                </Typography>
-                                            </Box>
-                                        )}
-                                    </Box>
-
-                                    {/* Contenu de l'onglet Titres */}
-                                    <Box sx={{ p: { xs: 2.5, sm: 3 }, display: tabValue === 1 ? 'block' : 'none' }}>
-                                        <Typography variant="h6" gutterBottom fontWeight="bold" color="primary.main">
-                                            Liste des titres
-                                        </Typography>
-
-                                        {(production.tracks || [1, 2, 3]).map((track, index) => (
-                                            <Paper
-                                                key={index}
-                                                elevation={0}
-                                                sx={{
-                                                    p: 2,
-                                                    mb: 1,
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'space-between',
-                                                    borderRadius: 1,
-                                                    bgcolor: index % 2 === 0 ? 'background.default' : 'background.paper'
-                                                }}
-                                            >
-                                                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                                    <Typography variant="body2" sx={{ mr: 2, color: 'text.secondary' }}>
-                                                        {index + 1}.
-                                                    </Typography>
-                                                    <Typography variant="body1" fontWeight="medium">
-                                                        {track.title || `Titre ${index + 1}`}
-                                                    </Typography>
-                                                </Box>
-                                                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                                    <Typography variant="body2" color="text.secondary" sx={{ mr: 2 }}>
-                                                        {track.duration || '3:45'}
-                                                    </Typography>
-                                                    <IconButton
-                                                        size="small"
-                                                        onClick={handlePlayPause}
-                                                        title="Écouter ce titre"
-                                                    >
-                                                        {isPlaying ? <Pause fontSize="small" /> : <PlayArrow fontSize="small" />}
-                                                    </IconButton>
-                                                </Box>
-                                            </Paper>
-                                        ))}
-                                    </Box>
-
-                                    {/* Contenu de l'onglet Commentaires */}
-                                    <Box sx={{ p: { xs: 2.5, sm: 3 }, display: tabValue === 2 ? 'block' : 'none' }}>
-                                        <Typography variant="h6" gutterBottom fontWeight="bold" color="primary.main">
-                                            Commentaires
-                                        </Typography>
-
-                                        {(production.comments || []).length > 0 ? (
-                                            (production.comments || []).map((comment, index) => (
-                                                <Paper
-                                                    key={index}
-                                                    elevation={1}
-                                                    sx={{ p: 2, mb: 2, borderRadius: 2 }}
-                                                >
-                                                    <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                                                        <Avatar sx={{ mr: 2 }}>
-                                                            {comment.authorName?.charAt(0) || 'U'}
-                                                        </Avatar>
-                                                        <Box sx={{ flex: 1 }}>
-                                                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
-                                                                <Typography variant="subtitle2" fontWeight="bold">
-                                                                    {comment.authorName || 'Utilisateur'}
-                                                                </Typography>
-                                                                <Typography variant="caption" color="text.secondary">
-                                                                    {comment.date || '01/01/2023'}
-                                                                </Typography>
-                                                            </Box>
-                                                            <Typography variant="body2">{comment.content}</Typography>
-                                                        </Box>
-                                                    </Box>
-                                                </Paper>
-                                            ))
-                                        ) : (
-                                            <Box sx={{ textAlign: 'center', py: 4 }}>
-                                                <Comment sx={{ fontSize: 40, color: 'text.secondary', opacity: 0.5, mb: 2 }} />
-                                                <Typography variant="body1" color="text.secondary" gutterBottom>
-                                                    Aucun commentaire pour le moment
-                                                </Typography>
-                                                <Typography variant="body2" color="text.secondary">
-                                                    Soyez le premier à donner votre avis sur cette production !
-                                                </Typography>
-                                                {user ? (
-                                                    <Button
-                                                        variant="contained"
-                                                        color="primary"
-                                                        sx={{ mt: 2, borderRadius: 4 }}
-                                                    >
-                                                        Ajouter un commentaire
-                                                    </Button>
-                                                ) : (
-                                                    <Button
-                                                        variant="outlined"
-                                                        color="primary"
-                                                        onClick={() => navigate('/login')}
-                                                        sx={{ mt: 2, borderRadius: 4 }}
-                                                    >
-                                                        Se connecter pour commenter
-                                                    </Button>
-                                                )}
-                                            </Box>
-                                        )}
-                                    </Box>
-                                </Card>
-                            </Grow>
-                        </Grid>
                     </Grid>
-
-                    {/* Bouton de retour */}
-                    <Box sx={{ mt: 4 }}>
-                        <Button
-                            variant="text"
-                            color="inherit"
-                            startIcon={<ArrowBack />}
-                            onClick={() => navigate('/productions')}
-                            sx={{
-                                fontWeight: 'medium',
-                                textTransform: 'none',
-                                borderRadius: 10,
-                                px: 2,
-                                py: 1
-                            }}
-                        >
-                            Retour aux productions
-                        </Button>
-                    </Box>
-
-                    {/* Dialogue de confirmation de suppression */}
-                    <Dialog
-                        open={openConfirmDialog}
-                        onClose={() => setOpenConfirmDialog(false)}
-                        PaperProps={{
-                            sx: { borderRadius: 2 }
-                        }}
-                    >
-                        <DialogTitle>
-                            Confirmer la suppression
-                        </DialogTitle>
-                        <DialogContent>
-                            <Typography>
-                                Êtes-vous sûr de vouloir supprimer <strong>{production.title}</strong> ? Cette action est irréversible.
-                            </Typography>
-                        </DialogContent>
-                        <DialogActions sx={{ p: 2 }}>
-                            <Button
-                                onClick={() => setOpenConfirmDialog(false)}
-                                variant="outlined"
-                                sx={{ borderRadius: 4 }}
-                            >
-                                Annuler
-                            </Button>
-                            <Button
-                                onClick={handleDelete}
-                                color="error"
-                                variant="contained"
-                                sx={{ borderRadius: 4 }}
-                            >
-                                Supprimer
-                            </Button>
-                        </DialogActions>
-                    </Dialog>
-
-                    {/* Snackbar pour les notifications */}
-                    <Snackbar
-                        open={snackbarOpen}
-                        onClose={handleSnackbarClose}
-                        message={snackbarMessage}
-                        autoHideDuration={4000}
-                        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-                        sx={{ borderRadius: 2 }}
-                    />
                 </Box>
             </Fade>
+
+            {/* Dialogue de confirmation suppression */}
+            <Dialog
+                open={openConfirmDialog}
+                onClose={() => setOpenConfirmDialog(false)}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+                PaperProps={{
+                    sx: {
+                        borderRadius: 3,
+                        p: 1
+                    }
+                }}
+            >
+                <DialogTitle id="alert-dialog-title" sx={{ fontWeight: 'bold' }}>
+                    Confirmer la suppression
+                </DialogTitle>
+                <DialogContent>
+                    <Typography variant="body1">
+                        Êtes-vous sûr de vouloir supprimer cette production ?
+                        Cette action est irréversible.
+                    </Typography>
+                </DialogContent>
+                <DialogActions sx={{ px: 3, pb: 2 }}>
+                    <Button
+                        onClick={() => setOpenConfirmDialog(false)}
+                        variant="outlined"
+                        sx={{ borderRadius: 10 }}
+                    >
+                        Annuler
+                    </Button>
+                    <Button
+                        onClick={handleDelete}
+                        variant="contained"
+                        color="error"
+                        sx={{ borderRadius: 10, ml: 2 }}
+                        autoFocus
+                    >
+                        Supprimer
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Snackbar pour les notifications */}
+            <Snackbar
+                open={snackbarOpen}
+                autoHideDuration={5000}
+                onClose={handleSnackbarClose}
+                message={snackbarMessage}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+            />
         </Container>
     );
 };
