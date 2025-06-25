@@ -10,7 +10,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import {
     Person, Email, Lock, Visibility, VisibilityOff,
-    HowToReg, ArrowBack, MusicNote, Check, ArrowForward
+    HowToReg, ArrowBack, Check, ArrowForward
 } from '@mui/icons-material';
 
 const Register = () => {
@@ -146,9 +146,6 @@ const Register = () => {
                                     position: 'relative'
                                 }}
                             >
-                                <Zoom in={true} timeout={1000}>
-                                    <MusicNote sx={{ fontSize: 40, position: 'absolute', left: 20, opacity: 0.7 }} />
-                                </Zoom>
                                 <Typography variant="h4" component="h1" align="center" fontWeight="bold">
                                     Créer un compte
                                 </Typography>

@@ -179,6 +179,9 @@ const ProductionDetail = () => {
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
     const audioRef = useRef(null);
 
+    // Vérifier si l'utilisateur est admin en appelant la fonction
+    const userIsAdmin = isAdmin();
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -734,7 +737,7 @@ const ProductionDetail = () => {
                                         </Box>
 
                                         {/* Actions administrateur */}
-                                        {isAdmin && (
+                                        {userIsAdmin && (
                                             <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
                                                 <Button
                                                     variant="outlined"

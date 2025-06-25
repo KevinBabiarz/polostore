@@ -157,6 +157,12 @@ const ProductionsList = () => {
         });
     }, [searchDebounce, genre, releaseDateRange, page, navigate, location.pathname]);
 
+    // Fonction pour tronquer les textes trop longs
+    const truncateText = (text, maxLength) => {
+        if (!text) return '';
+        return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+    };
+
     // Afficher un état de chargement avec des squelettes
     if (loading) {
         return (
@@ -249,7 +255,7 @@ const ProductionsList = () => {
     }
 
     return (
-        <Container maxWidth="lg" sx={{ py: { xs: 4, md: 5 } }}>
+        <Container maxWidth="xl" sx={{ py: { xs: 4, md: 5 } }}>
             <Fade in={true} timeout={800}>
                 <Box>
                     {/* En-tête avec titre et description */}
@@ -516,164 +522,199 @@ const ProductionsList = () => {
                             </Button>
                         </Paper>
                     ) : (
-                        <Grid container spacing={3}>
-                            {productions.map((production) => (
-                                <Grid item xs={12} sm={6} md={4} key={production.id}>
-                                    <Grow in={true} timeout={500 + productions.indexOf(production) * 100}>
-                                        <Card
-                                            sx={{
-                                                height: '100%',
-                                                display: 'flex',
-                                                flexDirection: 'column',
-                                                borderRadius: 3,
-                                                overflow: 'hidden',
-                                                transition: 'transform 0.3s, box-shadow 0.3s',
-                                                '&:hover': {
-                                                    transform: 'translateY(-4px)',
-                                                    boxShadow: theme.shadows[6]
-                                                }
-                                            }}
-                                        >
-                                            {/* Container pour l'image avec une hauteur fixe et un overflow hidden pour garantir la consistance */}
-                                            <Box
+                        <Box sx={{ width: '100%' }}>
+                            <Grid container spacing={3} sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
+                                {productions.map((production) => (
+                                    <Grid item xs={12} sm={6} md={3} lg={3} key={production.id} sx={{ width: { xs: '100%', sm: '45%', md: '23%' }, flex: '0 0 auto', mb: 3 }}>
+                                        <Grow in={true} timeout={500 + productions.indexOf(production) * 100}>
+                                            <Card
                                                 sx={{
-                                                    position: 'relative',
-                                                    paddingTop: '56.25%' /* Ratio 16:9 */,
+                                                    height: '450px', // Hauteur fixe pour toutes les cartes
+                                                    display: 'flex',
+                                                    flexDirection: 'column',
+                                                    borderRadius: 3,
                                                     overflow: 'hidden',
+                                                    transition: 'transform 0.3s, box-shadow 0.3s',
+                                                    width: '100%', // Assure une largeur égale
+                                                    maxWidth: '100%', // Limite la largeur maximale
+                                                    boxSizing: 'border-box', // Inclut le padding et la bordure dans la largeur
+                                                    '&:hover': {
+                                                        transform: 'translateY(-4px)',
+                                                        boxShadow: theme.shadows[6]
+                                                    }
                                                 }}
                                             >
-                                                {/* Image absolument positionnée pour maintenir le ratio */}
-                                                <CardMedia
-                                                    component="img"
-                                                    image={production.image_url ?
-                                                        (production.image_url.startsWith('http') ?
-                                                        production.image_url :
-                                                        `/uploads/${production.image_url.split('/').pop()}`) :
-                                                        '/images/vinyl-record.svg'}
-                                                    alt={production.title}
-                                                    sx={{
-                                                        position: 'absolute',
-                                                        top: 0,
-                                                        left: 0,
-                                                        width: '100%',
-                                                        height: '100%',
-                                                        objectFit: 'cover',
-                                                    }}
-                                                    onError={(e) => {
-                                                        e.target.onerror = null;
-                                                        e.target.src = '/images/vinyl-record.svg';
-                                                    }}
-                                                />
-                                                {/* Overlay pour le genre */}
+                                                {/* Container pour l'image avec une hauteur fixe */}
                                                 <Box
                                                     sx={{
-                                                        position: 'absolute',
-                                                        bottom: 0,
-                                                        width: '100%',
-                                                        height: '70px',
-                                                        background: 'linear-gradient(to top, rgba(0,0,0,0.7), rgba(0,0,0,0))',
-                                                        display: 'flex',
-                                                        alignItems: 'flex-end',
-                                                        p: 1
+                                                        position: 'relative',
+                                                        overflow: 'hidden',
+                                                        height: '150px', // Hauteur réduite de 180px à 150px
                                                     }}
                                                 >
-                                                    <Chip
-                                                        label={production.genre}
-                                                        color="primary"
-                                                        size="small"
+                                                    {/* Image absolument positionnée pour maintenir le ratio */}
+                                                    <CardMedia
+                                                        component="img"
+                                                        image={production.image_url ?
+                                                            (production.image_url.startsWith('http') ?
+                                                            production.image_url :
+                                                            `/uploads/${production.image_url.split('/').pop()}`) :
+                                                            '/images/vinyl-record.svg'}
+                                                        alt={production.title}
                                                         sx={{
-                                                            bgcolor: 'rgba(33, 150, 243, 0.85)',
-                                                            fontWeight: 'medium'
+                                                            position: 'absolute',
+                                                            top: 0,
+                                                            left: 0,
+                                                            width: '100%',
+                                                            height: '100%',
+                                                            objectFit: 'cover',
+                                                        }}
+                                                        onError={(e) => {
+                                                            e.target.onerror = null;
+                                                            e.target.src = '/images/vinyl-record.svg';
                                                         }}
                                                     />
-                                                </Box>
-                                            </Box>
-
-                                            <CardContent sx={{ p: 2, flexGrow: 1 }}>
-                                                <Typography
-                                                    variant="h6"
-                                                    component="h2"
-                                                    gutterBottom
-                                                    sx={{
-                                                        fontWeight: 'bold',
-                                                        cursor: 'pointer',
-                                                        '&:hover': { color: 'primary.main' }
-                                                    }}
-                                                    onClick={() => handleProductionClick(production.id)}
-                                                >
-                                                    {production.title}
-                                                </Typography>
-
-                                                <Typography
-                                                    variant="subtitle2"
-                                                    color="text.secondary"
-                                                    gutterBottom
-                                                >
-                                                    {production.artist || 'Artiste inconnu'}
-                                                </Typography>
-
-                                                <Typography
-                                                    variant="body2"
-                                                    color="text.secondary"
-                                                    sx={{
-                                                        mt: 1,
-                                                        overflow: 'hidden',
-                                                        textOverflow: 'ellipsis',
-                                                        display: '-webkit-box',
-                                                        WebkitLineClamp: 2,
-                                                        WebkitBoxOrient: 'vertical',
-                                                        minHeight: '40px'
-                                                    }}
-                                                >
-                                                    {production.description}
-                                                </Typography>
-
-                                                {/* Lecteur audio avec bouton visible */}
-                                                {production.audio_url && (
-                                                    <Box sx={{ mt: 2 }}>
-                                                        <Typography variant="subtitle2" color="primary.main" mb={1}>
-                                                            Écouter un extrait
-                                                        </Typography>
-                                                        <SimpleAudioPlayer
-                                                            src={production.audio_url.startsWith('http')
-                                                                ? production.audio_url
-                                                                : production.audio_url.startsWith('/api/')
-                                                                    ? production.audio_url
-                                                                    : `/api/uploads/${production.audio_url.split('/').pop()}`}
+                                                    {/* Overlay pour le genre */}
+                                                    <Box
+                                                        sx={{
+                                                            position: 'absolute',
+                                                            bottom: 0,
+                                                            width: '100%',
+                                                            height: '70px',
+                                                            background: 'linear-gradient(to top, rgba(0,0,0,0.7), rgba(0,0,0,0))',
+                                                            display: 'flex',
+                                                            alignItems: 'flex-end',
+                                                            p: 1
+                                                        }}
+                                                    >
+                                                        <Chip
+                                                            label={production.genre}
+                                                            color="primary"
+                                                            size="small"
+                                                            sx={{
+                                                                bgcolor: 'rgba(33, 150, 243, 0.85)',
+                                                                fontWeight: 'medium'
+                                                            }}
                                                         />
                                                     </Box>
-                                                )}
-                                            </CardContent>
+                                                </Box>
 
-                                            <CardActions sx={{ p: 2, pt: 0, justifyContent: 'space-between' }}>
-                                                <Typography
-                                                    variant="h6"
-                                                    color="primary.main"
-                                                    sx={{ fontWeight: 'bold' }}
-                                                >
-                                                    {production.price === 0 ? 'Gratuit' : `${production.price}€`}
-                                                </Typography>
+                                                <CardContent sx={{
+                                                    p: 2,
+                                                    flexGrow: 1,
+                                                    display: 'flex',
+                                                    flexDirection: 'column',
+                                                    width: '100%',
+                                                    maxWidth: '100%',
+                                                    overflow: 'hidden', // Empêche tout débordement
+                                                    boxSizing: 'border-box' // Inclut padding et border dans la largeur
+                                                }}>
+                                                    <Box sx={{
+                                                        minHeight: 120,
+                                                        flexGrow: 1,
+                                                        maxHeight: '180px',
+                                                        overflow: 'hidden',
+                                                        width: '100%',
+                                                        maxWidth: '100%',
+                                                        boxSizing: 'border-box' // Inclut le padding et la bordure dans la largeur
+                                                    }}>
+                                                        <Typography
+                                                            variant="h6"
+                                                            component="h2"
+                                                            gutterBottom
+                                                            noWrap={false}
+                                                            sx={{
+                                                                fontWeight: 'bold',
+                                                                cursor: 'pointer',
+                                                                '&:hover': { color: 'primary.main' },
+                                                                height: '60px',
+                                                                mb: 1,
+                                                                overflow: 'hidden',
+                                                                textOverflow: 'ellipsis',
+                                                                display: '-webkit-box',
+                                                                WebkitLineClamp: 2,
+                                                                WebkitBoxOrient: 'vertical',
+                                                                width: '100%',
+                                                                maxWidth: '100%',
+                                                                wordBreak: 'break-word', // Force la césure de mots
+                                                                wordWrap: 'break-word',
+                                                                whiteSpace: 'normal',
+                                                                boxSizing: 'border-box'
+                                                            }}
+                                                            onClick={() => handleProductionClick(production.id)}
+                                                        >
+                                                            {truncateText(production.title, 50)}
+                                                        </Typography>
 
-                                                <Button
-                                                    variant="contained"
-                                                    color="primary"
-                                                    size="small"
-                                                    endIcon={<ArrowForwardIos />}
-                                                    onClick={() => handleProductionClick(production.id)}
-                                                    sx={{
-                                                        borderRadius: 10,
-                                                        px: 2,
-                                                        boxShadow: 2
-                                                    }}
-                                                >
-                                                    Détails
-                                                </Button>
-                                            </CardActions>
-                                        </Card>
-                                    </Grow>
-                                </Grid>
-                            ))}
-                        </Grid>
+                                                        <Typography
+                                                            variant="subtitle2"
+                                                            color="text.secondary"
+                                                            sx={{ mb: 1, height: '24px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                                                        >
+                                                            {production.artist || 'Artiste inconnu'}
+                                                        </Typography>
+
+                                                        <Typography
+                                                            variant="body2"
+                                                            color="text.secondary"
+                                                            sx={{
+                                                                overflow: 'hidden',
+                                                                textOverflow: 'ellipsis',
+                                                                display: '-webkit-box',
+                                                                WebkitLineClamp: 3,
+                                                                WebkitBoxOrient: 'vertical',
+                                                                height: '60px'
+                                                            }}
+                                                        >
+                                                            {truncateText(production.description, 80)}
+                                                        </Typography>
+                                                    </Box>
+
+                                                    {/* Lecteur audio avec hauteur fixe */}
+                                                    <Box sx={{ height: 80, mt: 2 }}>
+                                                        {production.audio_url ? (
+                                                            <>
+                                                                <Typography variant="subtitle2" color="primary.main" mb={1}>
+                                                                    Écouter un extrait
+                                                                </Typography>
+                                                                <SimpleAudioPlayer
+                                                                    src={production.audio_url.startsWith('http')
+                                                                        ? production.audio_url
+                                                                        : production.audio_url.startsWith('/api/')
+                                                                            ? production.audio_url
+                                                                            : `/api/uploads/${production.audio_url.split('/').pop()}`}
+                                                                />
+                                                            </>
+                                                        ) : (
+                                                            <Box sx={{ height: '100%' }}> {/* Espace réservé quand pas d'audio */}
+                                                            </Box>
+                                                        )}
+                                                    </Box>
+                                                </CardContent>
+
+                                                <CardActions sx={{ p: 2, pt: 0, display: 'flex', justifyContent: 'center', height: '60px' }}>
+                                                    <Button
+                                                        variant="contained"
+                                                        color="primary"
+                                                        endIcon={<ArrowForwardIos />}
+                                                        onClick={() => handleProductionClick(production.id)}
+                                                        sx={{
+                                                            borderRadius: 10,
+                                                            px: 3,
+                                                            py: 1,
+                                                            boxShadow: 2,
+                                                            minWidth: '140px'
+                                                        }}
+                                                    >
+                                                        Détails
+                                                    </Button>
+                                                </CardActions>
+                                            </Card>
+                                        </Grow>
+                                    </Grid>
+                                ))}
+                            </Grid>
+                        </Box>
                     )}
 
                     {/* Pagination */}
