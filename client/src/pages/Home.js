@@ -13,11 +13,14 @@ import {
 } from '@mui/icons-material';
 import { isAuthenticated } from '../services/authService';
 import config from '../config/config';
+import { useAuth } from '../contexts/AuthContext';
 
 const Home = () => {
     const navigate = useNavigate();
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+    const { user } = useAuth();
+    const isUserLoggedIn = !!user;
 
     return (
         <Container maxWidth="lg" sx={{ py: { xs: 4, md: 8 } }}>
@@ -49,15 +52,17 @@ const Home = () => {
                         >
                             Explorer
                         </Button>
-                        <Button
-                            variant="outlined"
-                            size="large"
-                            color="primary"
-                            onClick={() => navigate('/register')}
-                            sx={{ borderRadius: 8, px: 4 }}
-                        >
-                            S'inscrire
-                        </Button>
+                        {!isUserLoggedIn && (
+                            <Button
+                                variant="outlined"
+                                size="large"
+                                color="primary"
+                                onClick={() => navigate('/register')}
+                                sx={{ borderRadius: 8, px: 4 }}
+                            >
+                                S'inscrire
+                            </Button>
+                        )}
                     </Stack>
                 </Box>
                 <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
@@ -99,22 +104,24 @@ const Home = () => {
                         </CardContent>
                     </Card>
                 </Grid>
-                <Grid item xs={12} md={4}>
-                    <Card elevation={3} sx={{ borderRadius: 4, textAlign: 'center', py: 4 }}>
-                        <Email color="secondary" sx={{ fontSize: 48, mb: 2 }} />
-                        <CardContent>
-                            <Typography variant="h6" fontWeight="bold" gutterBottom>
-                                Rejoignez la communauté
-                            </Typography>
-                            <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
-                                Inscrivez-vous pour sauvegarder vos favoris et recevoir nos nouveautés.
-                            </Typography>
-                            <Button variant="text" onClick={() => navigate('/register')} endIcon={<ArrowForward />}>
-                                S'inscrire
-                            </Button>
-                        </CardContent>
-                    </Card>
-                </Grid>
+                {!isUserLoggedIn && (
+                    <Grid item xs={12} md={4}>
+                        <Card elevation={3} sx={{ borderRadius: 4, textAlign: 'center', py: 4 }}>
+                            <Email color="secondary" sx={{ fontSize: 48, mb: 2 }} />
+                            <CardContent>
+                                <Typography variant="h6" fontWeight="bold" gutterBottom>
+                                    Rejoignez la communauté
+                                </Typography>
+                                <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
+                                    Inscrivez-vous pour sauvegarder vos favoris et recevoir nos nouveautés.
+                                </Typography>
+                                <Button variant="text" onClick={() => navigate('/register')} endIcon={<ArrowForward />}>
+                                    S'inscrire
+                                </Button>
+                            </CardContent>
+                        </Card>
+                    </Grid>
+                )}
             </Grid>
         </Container>
     );
