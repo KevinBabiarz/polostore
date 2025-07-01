@@ -19,65 +19,118 @@ const Home = () => {
     const navigate = useNavigate();
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+    const isSmallMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const { user } = useAuth();
     const isUserLoggedIn = !!user;
 
     return (
-        <Container maxWidth="lg" sx={{ py: { xs: 4, md: 8 } }}>
+        <Container maxWidth="lg" sx={{ py: { xs: 3, sm: 4, md: 8 } }}>
             <Box
                 sx={{
                     display: 'flex',
                     flexDirection: { xs: 'column', md: 'row' },
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    gap: 6,
-                    mb: 8
+                    gap: { xs: 3, sm: 4, md: 6 },
+                    mb: { xs: 4, sm: 6, md: 8 }
                 }}
             >
-                <Box sx={{ flex: 1, textAlign: { xs: 'center', md: 'left' } }}>
-                    <Typography variant="h2" fontWeight="bold" gutterBottom color="primary.main">
-                        Bienvenue sur PoloStore
+                <Box sx={{
+                    flex: 1,
+                    textAlign: { xs: 'center', md: 'left' },
+                    maxWidth: { xs: '100%', md: '50%' }
+                }}>
+                    <Typography
+                        variant={isSmallMobile ? "h3" : "h2"}
+                        fontWeight="bold"
+                        gutterBottom
+                        color="primary.main"
+                        sx={{ fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' } }}
+                    >
+                        Bienvenue sur PoloBeatsProd
                     </Typography>
-                    <Typography variant="h5" color="text.secondary" sx={{ mb: 3 }}>
+                    <Typography
+                        variant={isSmallMobile ? "body1" : "h5"}
+                        color="text.secondary"
+                        sx={{ mb: 3 }}
+                    >
                         La plateforme pour découvrir, écouter et acheter des productions musicales exclusives.
                     </Typography>
-                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent={{ xs: 'center', md: 'flex-start' }}>
+                    <Stack
+                        direction={{ xs: 'column', sm: 'row' }}
+                        spacing={2}
+                        justifyContent={{ xs: 'center', md: 'flex-start' }}
+                        sx={{ width: '100%' }}
+                    >
                         <Button
                             variant="contained"
-                            size="large"
+                            size={isSmallMobile ? "medium" : "large"}
                             color="primary"
                             endIcon={<ArrowForwardIos />}
                             onClick={() => navigate('/productions')}
-                            sx={{ borderRadius: 8, px: 4 }}
+                            sx={{
+                                borderRadius: 8,
+                                px: { xs: 2, sm: 3, md: 4 },
+                                width: { xs: '100%', sm: 'auto' }
+                            }}
                         >
                             Explorer
                         </Button>
                         {!isUserLoggedIn && (
                             <Button
                                 variant="outlined"
-                                size="large"
+                                size={isSmallMobile ? "medium" : "large"}
                                 color="primary"
                                 onClick={() => navigate('/register')}
-                                sx={{ borderRadius: 8, px: 4 }}
+                                sx={{
+                                    borderRadius: 8,
+                                    px: { xs: 2, sm: 3, md: 4 },
+                                    width: { xs: '100%', sm: 'auto' }
+                                }}
                             >
                                 S'inscrire
                             </Button>
                         )}
                     </Stack>
                 </Box>
-                <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
+                <Box sx={{
+                    flex: 1,
+                    display: 'flex',
+                    justifyContent: 'center',
+                    border: '1px solid #eaeaea',
+                    borderRadius: 2,
+                    overflow: 'hidden',
+                    boxShadow: 3,
+                    height: { xs: 300, sm: 350, md: 400 },
+                    width: '100%',
+                    maxWidth: { xs: '100%', sm: 500, md: 600 },
+                    margin: '0 auto'
+                }}>
                     <img
-                        src="/images/vinyl-record.svg"
-                        alt="Vinyle PoloStore"
-                        style={{ maxWidth: 320, width: '100%', height: 'auto', filter: 'drop-shadow(0 8px 32px rgba(0,0,0,0.12))' }}
+                        src="/images/COVER121BPM3000x3000.jpg"
+                        alt="Promotion en cours"
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                     />
                 </Box>
             </Box>
 
-            <Grid container spacing={4} justifyContent="center">
-                <Grid item xs={12} md={4}>
-                    <Card elevation={3} sx={{ borderRadius: 4, textAlign: 'center', py: 4 }}>
-                        <MusicNote color="primary" sx={{ fontSize: 48, mb: 2 }} />
+            <Grid container spacing={{ xs: 2, sm: 3, md: 4 }} justifyContent="center">
+                <Grid item xs={12} sm={10} md={8} lg={6}>
+                    <Card elevation={3} sx={{
+                        borderRadius: 4,
+                        textAlign: 'center',
+                        py: { xs: 2, md: 4 },
+                        height: '100%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center',
+                        maxWidth: 500,
+                        mx: 'auto',
+                        mb: 3
+                    }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2 }}>
+                            <MusicNote color="primary" sx={{ fontSize: { xs: 36, md: 48 } }} />
+                        </Box>
                         <CardContent>
                             <Typography variant="h6" fontWeight="bold" gutterBottom>
                                 Productions exclusives
@@ -91,9 +144,22 @@ const Home = () => {
                         </CardContent>
                     </Card>
                 </Grid>
-                <Grid item xs={12} md={4}>
-                    <Card elevation={3} sx={{ borderRadius: 4, textAlign: 'center', py: 4 }}>
-                        <CheckCircle color="success" sx={{ fontSize: 48, mb: 2 }} />
+                <Grid item xs={12} sm={10} md={8} lg={6}>
+                    <Card elevation={3} sx={{
+                        borderRadius: 4,
+                        textAlign: 'center',
+                        py: { xs: 2, md: 4 },
+                        height: '100%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center',
+                        maxWidth: 500,
+                        mx: 'auto',
+                        mb: 3
+                    }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2 }}>
+                            <CheckCircle color="success" sx={{ fontSize: { xs: 36, md: 48 } }} />
+                        </Box>
                         <CardContent>
                             <Typography variant="h6" fontWeight="bold" gutterBottom>
                                 Qualité professionnelle
@@ -105,9 +171,22 @@ const Home = () => {
                     </Card>
                 </Grid>
                 {!isUserLoggedIn && (
-                    <Grid item xs={12} md={4}>
-                        <Card elevation={3} sx={{ borderRadius: 4, textAlign: 'center', py: 4 }}>
-                            <Email color="secondary" sx={{ fontSize: 48, mb: 2 }} />
+                    <Grid item xs={12} sm={10} md={8} lg={6}>
+                        <Card elevation={3} sx={{
+                            borderRadius: 4,
+                            textAlign: 'center',
+                            py: { xs: 2, md: 4 },
+                            height: '100%',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'center',
+                            maxWidth: 500,
+                            mx: 'auto',
+                            mb: 3
+                        }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2 }}>
+                                <Email color="secondary" sx={{ fontSize: { xs: 36, md: 48 } }} />
+                            </Box>
                             <CardContent>
                                 <Typography variant="h6" fontWeight="bold" gutterBottom>
                                     Rejoignez la communauté

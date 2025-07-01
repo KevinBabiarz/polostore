@@ -1,5 +1,6 @@
 // controllers/authController.js
 import AuthService from "../services/authService.js";
+import logger from "../utils/logger.js";
 
 // Inscription d'utilisateur
 export const register = async (req, res) => {
@@ -16,31 +17,35 @@ export const register = async (req, res) => {
     }
 
     try {
-        console.log(`[AUTH CTRL] Tentative d'inscription pour ${email}`);
+        logger.info('Tentative d\'inscription', { email: email.toLowerCase() });
 
-        // Utiliser le service d'authentification pour l'inscription
-        const newUser = await AuthService.register({ username, email, password });
+        // Utiliser le service d'authentification sécurisé pour l'inscription
+        const result = await AuthService.register({
+            username: username.trim(),
+            email: email.toLowerCase().trim(),
+            password
+        });
 
-        // Générer un token JWT avec le service
-        const token = AuthService.generateToken(newUser);
-
-        console.log(`[AUTH CTRL] Inscription réussie pour ${email}`);
+        logger.info('Inscription réussie', { userId: result.user.id });
 
         // Renvoyer les informations utilisateur et le token
         res.status(201).json({
-            user: {
-                id: newUser.id,
-                username: newUser.username,
-                email: newUser.email,
-                isAdmin: newUser.is_admin
-            },
-            token
+            message: "Inscription réussie",
+            user: result.user,
+            token: result.token
         });
     } catch (error) {
-        console.error(`[AUTH CTRL] Erreur d'inscription: ${error.message}`);
+        logger.error('Erreur d\'inscription', {
+            email: email?.toLowerCase(),
+            error: error.message
+        });
 
         // Gestion des erreurs spécifiques
-        if (error.message === "Cet utilisateur existe déjà") {
+        if (error.message.includes("déjà utilisée") || error.message.includes("déjà pris")) {
+            return res.status(409).json({ message: error.message });
+        }
+
+        if (error.message.includes("8 caractères") || error.message.includes("invalide")) {
             return res.status(400).json({ message: error.message });
         }
 
@@ -50,67 +55,132 @@ export const register = async (req, res) => {
 
 // Connexion d'utilisateur
 export const login = async (req, res) => {
-    console.log("[AUTH CTRL] Tentative de connexion reçue");
     const { email, password } = req.body;
 
-    // Validation des champs améliorée
+    // Validation des champs
     if (!email?.trim() || !password) {
-        console.log("[AUTH CTRL] Validation échouée: email ou mot de passe manquant");
         return res.status(400).json({ message: "Email et mot de passe requis" });
     }
 
     try {
-        console.log(`[AUTH CTRL] Traitement de la connexion pour ${email}`);
+        logger.info('Tentative de connexion', { email: email.toLowerCase() });
 
-        // Utiliser le service d'authentification pour la connexion
-        const user = await AuthService.login(email, password);
+        // Utiliser le service d'authentification sécurisé pour la connexion
+        const result = await AuthService.login(email.toLowerCase().trim(), password);
 
-        // Générer un token JWT avec le service
-        const token = AuthService.generateToken(user);
-
-        console.log(`[AUTH CTRL] Connexion réussie pour ${email}`);
+        logger.info('Connexion réussie', { userId: result.user.id });
 
         // Renvoyer les informations utilisateur et le token
-        res.status(200).json({
+        res.json({
+            message: "Connexion réussie",
+            user: result.user,
+            token: result.token
+        });
+    } catch (error) {
+        logger.warn('Échec de connexion', {
+            email: email?.toLowerCase(),
+            error: error.message
+        });
+
+        // Gestion des erreurs spécifiques
+        if (error.message === "Identifiants invalides") {
+            return res.status(401).json({ message: "Email ou mot de passe incorrect" });
+        }
+
+        if (error.message === "Compte désactivé" || error.message === "Compte suspendu") {
+            return res.status(403).json({ message: error.message });
+        }
+
+        res.status(500).json({ message: "Erreur serveur lors de la connexion" });
+    }
+};
+
+// Déconnexion d'utilisateur (révocation du token)
+export const logout = async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(" ")[1];
+        const userId = req.user?.id;
+
+        if (!token || !userId) {
+            return res.status(400).json({ message: "Token ou utilisateur manquant" });
+        }
+
+        // Révoquer le token
+        const success = await AuthService.logout(token, userId);
+
+        if (success) {
+            logger.info('Déconnexion réussie', { userId });
+            res.json({ message: "Déconnexion réussie" });
+        } else {
+            logger.error('Échec de la déconnexion', { userId });
+            res.status(500).json({ message: "Erreur lors de la déconnexion" });
+        }
+    } catch (error) {
+        logger.error('Erreur de déconnexion', {
+            userId: req.user?.id,
+            error: error.message
+        });
+        res.status(500).json({ message: "Erreur serveur lors de la déconnexion" });
+    }
+};
+
+// Vérification du statut d'authentification
+export const checkAuth = async (req, res) => {
+    try {
+        const userId = req.user?.id;
+
+        if (!userId) {
+            return res.status(401).json({ message: "Non authentifié" });
+        }
+
+        // Vérifier que l'utilisateur existe toujours et récupérer ses informations
+        const user = await AuthService.getUserById(userId);
+
+        if (!user) {
+            return res.status(401).json({ message: "Utilisateur non trouvé" });
+        }
+
+        res.json({
+            authenticated: true,
             user: {
                 id: user.id,
                 username: user.username,
                 email: user.email,
-                isAdmin: user.is_admin
-            },
-            token
+                role: user.role,
+                isActive: user.isActive
+            }
         });
     } catch (error) {
-        console.error(`[AUTH CTRL] Erreur de connexion: ${error.message}`);
-
-        // Message d'erreur générique pour la sécurité
-        res.status(400).json({ message: "Email ou mot de passe incorrect" });
+        logger.error('Erreur de vérification d\'authentification', {
+            userId: req.user?.id,
+            error: error.message
+        });
+        res.status(500).json({ message: "Erreur serveur" });
     }
 };
 
-// Récupérer les informations de l'utilisateur actuel
-export const getCurrentUser = async (req, res) => {
+// Révocation de tous les tokens d'un utilisateur (utile pour la sécurité)
+export const revokeAllTokens = async (req, res) => {
     try {
-        console.log(`[AUTH CTRL] Récupération des données utilisateur`);
+        const userId = req.user?.id;
 
-        // L'utilisateur est déjà disponible dans req.user via le middleware d'authentification
-        const user = req.user;
-
-        if (!user) {
-            console.log(`[AUTH CTRL] Aucun utilisateur trouvé dans la requête`);
-            return res.status(404).json({ message: "Utilisateur non trouvé" });
+        if (!userId) {
+            return res.status(401).json({ message: "Non authentifié" });
         }
 
-        console.log(`[AUTH CTRL] Données utilisateur récupérées pour ID: ${user.id}`);
+        const success = await AuthService.revokeAllUserTokens(userId, 'user_request');
 
-        res.status(200).json({
-            id: user.id,
-            username: user.username,
-            email: user.email,
-            isAdmin: user.isAdmin
-        });
+        if (success) {
+            logger.info('Tous les tokens révoqués', { userId });
+            res.json({ message: "Tous les tokens ont été révoqués. Veuillez vous reconnecter." });
+        } else {
+            res.status(500).json({ message: "Erreur lors de la révocation des tokens" });
+        }
     } catch (error) {
-        console.error(`[AUTH CTRL] Erreur lors de la récupération des données utilisateur: ${error.message}`);
+        logger.error('Erreur de révocation des tokens', {
+            userId: req.user?.id,
+            error: error.message
+        });
         res.status(500).json({ message: "Erreur serveur" });
     }
 };

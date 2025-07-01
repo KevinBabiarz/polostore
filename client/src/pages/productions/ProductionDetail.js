@@ -518,7 +518,7 @@ const ProductionDetail = () => {
                                                 {new Date(production.releaseDate).toLocaleDateString()}
                                             </Typography>
                                         )}
-                                        <Rating value={production.rating || 4.5} precision={0.5} readOnly />
+                                        {/* Rating supprimé */}
                                     </Box>
 
                                     <Typography variant="h4" component="h1" fontWeight="bold" gutterBottom sx={{
@@ -677,9 +677,7 @@ const ProductionDetail = () => {
                                     )}
 
                                     <Box sx={{ mt: 'auto' }}>
-                                        <Typography variant="h5" fontWeight="bold" color="primary.main" sx={{ mb: 2 }}>
-                                            {production.price ? `${production.price} €` : 'Gratuit'}
-                                        </Typography>
+                                        {/* Typography affichant le prix supprimée */}
 
                                         <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
                                             <Button
@@ -687,6 +685,7 @@ const ProductionDetail = () => {
                                                 color="primary"
                                                 size="large"
                                                 startIcon={<ShoppingCart />}
+                                                onClick={() => navigate('/contact')}
                                                 sx={{
                                                     flexGrow: 1,
                                                     borderRadius: 10,

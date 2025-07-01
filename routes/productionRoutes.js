@@ -8,64 +8,46 @@ import {
     deleteProduction
 } from '../controllers/productionController.js';
 import { protect as isAuth, admin as isAdmin } from '../middleware/authMiddleware.js';
-import multer from 'multer';
-import path from 'path';
+import { secureUpload, cleanupOnError, validateUploadedFiles } from '../middleware/uploadSecurity.js';
 
 const router = express.Router();
 
-// Configuration de multer pour les uploads
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, './public/uploads/');
-    },
-    filename: function (req, file, cb) {
-        // Utiliser un timestamp pour éviter les conflits de noms de fichiers
-        cb(null, Date.now() + '_' + file.originalname.replace(/\s+/g, '_'));
-    }
-});
-
-// Filtre pour les types de fichiers autorisés
-const fileFilter = function (req, file, cb) {
-    if (file.fieldname === 'image' || file.fieldname === 'cover_image') {
-        if (!file.originalname.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
-            return cb(new Error('Seules les images sont autorisées'), false);
-        }
-    } else if (file.fieldname === 'audio' || file.fieldname === 'audio_files') {
-        if (!file.originalname.match(/\.(mp3|wav|ogg|flac|aac)$/i)) {
-            return cb(new Error('Seuls les fichiers audio sont autorisés'), false);
-        }
-    }
-    cb(null, true);
-};
-
-// Configuration de multer avec les options définies
-const upload = multer({
-    storage: storage,
-    limits: {
-        fileSize: 100 * 1024 * 1024 // Augmenter à 100 MB max
-    },
-    fileFilter: fileFilter
-}).fields([
+// Configuration des champs de fichiers pour multer
+const uploadFields = secureUpload.fields([
     { name: 'image', maxCount: 1 },
     { name: 'cover_image', maxCount: 1 },
     { name: 'audio', maxCount: 1 },
     { name: 'audio_files', maxCount: 5 }
 ]);
 
-// Middleware pour gérer les erreurs multer
-const handleMulterError = (req, res, next) => {
-    return function(err, req, res, next) {
-        if (err instanceof multer.MulterError) {
-            console.error('[MULTER ERROR]', err.message);
-            if (err.code === 'LIMIT_FILE_SIZE') {
-                return res.status(400).json({
-                    message: `Fichier trop volumineux. La taille maximum autorisée est de 100 MB.`
-                });
-            }
-            return res.status(400).json({ message: `Erreur lors du téléchargement du fichier: ${err.message}` });
+// Middleware de gestion des erreurs multer
+const handleUploadError = (error, req, res, next) => {
+    if (error) {
+        console.error('[UPLOAD ERROR]', error.message);
+
+        if (error.code === 'LIMIT_FILE_SIZE') {
+            return res.status(400).json({
+                message: 'Fichier trop volumineux. La taille maximum autorisée est de 50 MB.'
+            });
         }
-        next(err);
-    };
+
+        if (error.code === 'LIMIT_FILE_COUNT') {
+            return res.status(400).json({
+                message: 'Trop de fichiers. Maximum 10 fichiers autorisés.'
+            });
+        }
+
+        if (error.code === 'LIMIT_FIELD_COUNT') {
+            return res.status(400).json({
+                message: 'Trop de champs dans la requête.'
+            });
+        }
+
+        return res.status(400).json({
+            message: `Erreur lors du téléchargement: ${error.message}`
+        });
+    }
+    next();
 };
 
 // Routes publiques
@@ -76,50 +58,26 @@ router.get('/:id', getProductionById);
 router.post('/',
     isAuth,
     isAdmin,
+    cleanupOnError,
     (req, res, next) => {
-        upload(req, res, function(err) {
-            if (err) {
-                console.error('[UPLOAD ERROR]', err);
-                if (err instanceof multer.MulterError) {
-                    if (err.code === 'LIMIT_FILE_SIZE') {
-                        return res.status(400).json({
-                            message: `Fichier trop volumineux. La taille maximum autorisée est de 100 MB.`
-                        });
-                    }
-                    return res.status(400).json({
-                        message: `Erreur lors du téléchargement du fichier: ${err.message}`
-                    });
-                }
-                return res.status(500).json({ message: `Erreur lors du téléchargement: ${err.message}` });
-            }
-            next();
+        uploadFields(req, res, (error) => {
+            handleUploadError(error, req, res, next);
         });
     },
+    validateUploadedFiles,
     createProduction
 );
 
 router.put('/:id',
     isAuth,
     isAdmin,
+    cleanupOnError,
     (req, res, next) => {
-        upload(req, res, function(err) {
-            if (err) {
-                console.error('[UPLOAD ERROR]', err);
-                if (err instanceof multer.MulterError) {
-                    if (err.code === 'LIMIT_FILE_SIZE') {
-                        return res.status(400).json({
-                            message: `Fichier trop volumineux. La taille maximum autorisée est de 100 MB.`
-                        });
-                    }
-                    return res.status(400).json({
-                        message: `Erreur lors du téléchargement du fichier: ${err.message}`
-                    });
-                }
-                return res.status(500).json({ message: `Erreur lors du téléchargement: ${err.message}` });
-            }
-            next();
+        uploadFields(req, res, (error) => {
+            handleUploadError(error, req, res, next);
         });
     },
+    validateUploadedFiles,
     updateProduction
 );
 

@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 import path from "path";
 import { fileURLToPath } from "url";
 import fs from 'fs';
@@ -13,130 +14,140 @@ import contactRoutes from "./routes/contactRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import createTables from "./config/initDb.js";
+import logger from "./utils/logger.js";
+import { cleanExpiredTokens } from "./middleware/authMiddleware.js";
+import {
+    corsConfig,
+    helmetConfig,
+    rateLimitConfig,
+    securityHeaders,
+    securityMonitoring
+} from "./config/security.js";
 
 // Importer tous les modèles pour s'assurer qu'ils sont enregistrés
 import "./models/User.js";
 import "./models/Production.js";
 import "./models/ContactMessage.js";
 import "./models/Favorite.js";
+import "./models/RevokedToken.js";
 
 dotenv.config({'path': './utils/.env'});
 
-// Afficher les variables d'environnement de base de données pour débogage
-console.log("Variables d'environnement DB:", {
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: process.env.DB_DATABASE,
-  port: process.env.DB_PORT
+// Vérifier que la clé secrète JWT existe et est forte
+if (!process.env.JWT_SECRET) {
+    logger.error('JWT_SECRET manquant dans les variables d\'environnement');
+    process.exit(1);
+}
+
+if (process.env.JWT_SECRET.length < 32) {
+    logger.warn('JWT_SECRET trop courte, recommandation: minimum 32 caractères');
+}
+
+// Afficher les variables d'environnement de base de données pour débogage (sans données sensibles)
+logger.info("Configuration de base de données", {
+    host: process.env.DB_HOST,
+    database: process.env.DB_DATABASE,
+    port: process.env.DB_PORT,
+    // Ne pas logger DB_USER et DB_PASSWORD
 });
 
 // Initialiser l'application Express
 const app = express();
-const port = 5050;
+const port = process.env.PORT || 5050;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Configuration CORS étendue pour garantir l'accès depuis le frontend
-app.use(cors({
-  origin: '*',  // Permettre l'accès depuis n'importe quelle origine en développement
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,
-  maxAge: 86400 // Mettre en cache les préflight pour 24 heures
-}));
-
-// Configuration de sécurité avec Helmet
-app.use(helmet({
-  contentSecurityPolicy: false,
-  crossOriginEmbedderPolicy: false
-}));
-
-// Augmenter la taille limite des requêtes pour éviter les problèmes avec les uploads
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-
-// Middleware pour analyser le corps des requêtes multipart
-import multer from 'multer';
-const upload = multer();
+// Middleware de timing pour mesurer les performances
 app.use((req, res, next) => {
-  // Ne pas appliquer multer aux routes qui ont déjà leur propre middleware multer
-  if (req.path.startsWith('/api/productions') && (req.method === 'POST' || req.method === 'PUT')) {
-    // Ces routes ont leur propre configuration multer
-    return next();
-  }
-
-  // Appliquer multer.none() pour les autres routes, pour parser les champs form-data mais pas les fichiers
-  upload.none()(req, res, next);
+    req.startTime = Date.now();
+    next();
 });
 
-// Middleware pour déboguer les requêtes
+// Configuration CORS sécurisée
+app.use(cors(corsConfig));
+
+// Configuration de sécurité avec Helmet
+app.use(helmet(helmetConfig));
+
+// Limitation du taux de requêtes
+const limiter = rateLimit(rateLimitConfig);
+app.use('/api/', limiter);
+
+// Headers de sécurité personnalisés
+app.use(securityHeaders);
+
+// Monitoring de sécurité
+app.use('/api/', securityMonitoring);
+
+// Augmenter la taille limite des requêtes avec des limites raisonnables
+app.use(express.json({
+    limit: '10mb',
+    type: 'application/json'
+}));
+app.use(express.urlencoded({
+    extended: true,
+    limit: '10mb',
+    parameterLimit: 50 // Limiter le nombre de paramètres
+}));
+
+// Middleware pour déboguer les requêtes (seulement en développement)
 app.use((req, res, next) => {
-  if (!req.path.startsWith('/uploads/')) {
-    console.log(`${req.method} ${req.originalUrl}`);
-  }
-  next();
+    if (!req.path.startsWith('/uploads/') && process.env.NODE_ENV !== 'production') {
+        logger.debug(`${req.method} ${req.originalUrl}`, {
+            ip: req.ip,
+            userAgent: req.get('User-Agent')
+        });
+    }
+    next();
 });
 
 // Fonction d'aide pour déterminer le type MIME correct pour les fichiers audio
 const getAudioMimeType = (filename) => {
-  const ext = path.extname(filename).toLowerCase();
-  switch (ext) {
-    case '.mp3': return 'audio/mpeg';
-    case '.wav': return 'audio/wav';
-    case '.ogg': return 'audio/ogg';
-    case '.flac': return 'audio/flac';
-    case '.aac': return 'audio/aac';
-    default: return 'application/octet-stream';
-  }
+    const ext = path.extname(filename).toLowerCase();
+    switch (ext) {
+        case '.mp3': return 'audio/mpeg';
+        case '.wav': return 'audio/wav';
+        case '.ogg': return 'audio/ogg';
+        case '.flac': return 'audio/flac';
+        case '.aac': return 'audio/aac';
+        default: return 'application/octet-stream';
+    }
 };
 
-// Middleware personnalisé pour servir les fichiers statiques avec les en-têtes appropriés
+// Middleware sécurisé pour servir les fichiers statiques
 app.use('/uploads', (req, res, next) => {
-  const filePath = path.join(__dirname, 'public/uploads', req.path);
+    const filePath = path.join(__dirname, 'public/uploads', req.path);
 
-  // Vérifier si le fichier existe
-  fs.stat(filePath, (err, stats) => {
-    if (err || !stats.isFile()) {
-      console.log(`[STATIC] Fichier non trouvé: ${filePath}`);
-      return next();
+    // Vérifier que le chemin ne contient pas de traversée de répertoire
+    if (req.path.includes('..') || req.path.includes('~')) {
+        logger.warn('Tentative de traversée de répertoire détectée', {
+            path: req.path,
+            ip: req.ip
+        });
+        return res.status(403).json({ error: 'Accès interdit' });
     }
 
-    // Déterminer le type MIME pour les fichiers audio
-    if (req.path.match(/\.(mp3|wav|ogg|flac|aac)$/i)) {
-      const mimeType = getAudioMimeType(req.path);
-      console.log(`[STATIC] Servir fichier audio: ${req.path}, type MIME: ${mimeType}`);
-      res.setHeader('Content-Type', mimeType);
-      res.setHeader('Accept-Ranges', 'bytes');
-    }
+    // Vérifier si le fichier existe
+    fs.stat(filePath, (err, stats) => {
+        if (err || !stats.isFile()) {
+            logger.debug(`Fichier non trouvé: ${filePath}`);
+            return res.status(404).json({ error: 'Fichier non trouvé' });
+        }
 
-    // Servir le fichier
-    res.sendFile(filePath);
-  });
-});
+        // Headers de sécurité pour les fichiers
+        res.setHeader('X-Content-Type-Options', 'nosniff');
+        res.setHeader('Cache-Control', 'public, max-age=31536000'); // Cache 1 an
 
-// Configuration améliorée pour les uploads via /api/uploads
-app.use('/api/uploads', (req, res, next) => {
-  const filePath = path.join(__dirname, 'public/uploads', req.path.replace(/^\/+/, ''));
-  console.log(`[API] Tentative d'accès au fichier: ${filePath}`);
+        // Déterminer le type MIME pour les fichiers audio
+        if (req.path.match(/\.(mp3|wav|ogg|flac|aac)$/i)) {
+            const mimeType = getAudioMimeType(req.path);
+            res.setHeader('Content-Type', mimeType);
+            res.setHeader('Accept-Ranges', 'bytes');
+        }
 
-  // Vérifier si le fichier existe
-  fs.stat(filePath, (err, stats) => {
-    if (err || !stats.isFile()) {
-      console.log(`[API] Fichier non trouvé: ${filePath}`);
-      return res.status(404).send('Fichier non trouvé');
-    }
-
-    // Déterminer le type MIME pour les fichiers audio
-    if (req.path.match(/\.(mp3|wav|ogg|flac|aac)$/i)) {
-      const mimeType = getAudioMimeType(req.path);
-      console.log(`[API] Servir fichier audio via API: ${req.path}, type MIME: ${mimeType}`);
-      res.setHeader('Content-Type', mimeType);
-      res.setHeader('Accept-Ranges', 'bytes');
-    }
-
-    // Servir le fichier
-    res.sendFile(filePath);
-  });
+        // Servir le fichier
+        res.sendFile(filePath);
+    });
 });
 
 // Créer le dossier uploads s'il n'existe pas
@@ -145,24 +156,34 @@ if (!fs.existsSync(dir)){
     fs.mkdirSync(dir, { recursive: true });
 }
 
+// Nettoyage périodique des tokens expirés (toutes les heures)
+setInterval(async () => {
+    try {
+        await cleanExpiredTokens();
+        logger.info('Nettoyage des tokens expirés effectué');
+    } catch (error) {
+        logger.error('Erreur lors du nettoyage des tokens', { error: error.message });
+    }
+}, 3600000); // 1 heure
+
 // Initialiser la base de données
 const initializeDatabase = async () => {
-  try {
-    console.log('--- INITIALISATION DB ---');
-    await testConnection();
-    console.log("Connexion PostgreSQL établie avec succès");
+    try {
+        logger.info('Initialisation de la base de données');
+        await testConnection();
+        logger.info("Connexion PostgreSQL établie avec succès");
 
-    await sequelize.sync({ force: false });
-    console.log('Modèles Sequelize synchronisés avec la base de données');
+        await sequelize.sync({ force: false });
+        logger.info('Modèles Sequelize synchronisés avec la base de données');
 
-    await createTables();
-    console.log('Tables créées avec succès');
+        await createTables();
+        logger.info('Tables créées avec succès');
 
-    return true;
-  } catch (err) {
-    console.error("Erreur d'initialisation de la base de données:", err);
-    throw err;
-  }
+        return true;
+    } catch (err) {
+        logger.error("Erreur d'initialisation de la base de données", { error: err.message });
+        throw err;
+    }
 };
 
 // Routes API
@@ -175,50 +196,97 @@ app.use("/api/users", userRoutes);
 
 // Route de diagnostic pour vérifier la connexion à PostgreSQL
 app.get("/api/db-status", async (req, res) => {
-  try {
-    await sequelize.authenticate();
-    res.json({
-      status: "ok",
-      message: "Connecté à PostgreSQL",
-      dbHost: process.env.DB_HOST,
-      dbName: process.env.DB_DATABASE
-    });
-  } catch (error) {
-    res.status(500).json({
-      status: "error",
-      message: "Échec de connexion à PostgreSQL",
-      error: error.message
-    });
-  }
+    try {
+        await sequelize.authenticate();
+        res.json({
+            status: "ok",
+            message: "Connecté à PostgreSQL",
+            dbHost: process.env.DB_HOST,
+            dbName: process.env.DB_DATABASE,
+            environment: process.env.NODE_ENV || 'development'
+        });
+    } catch (error) {
+        logger.error("Erreur de connexion à la base de données", { error: error.message });
+        res.status(500).json({
+            status: "error",
+            message: "Échec de connexion à PostgreSQL"
+        });
+    }
 });
 
 // Route de test simple
 app.get('/test', (req, res) => {
-  res.json({ message: 'ok' });
+    res.json({
+        message: 'API opérationnelle',
+        timestamp: new Date().toISOString(),
+        environment: process.env.NODE_ENV || 'development'
+    });
+});
+
+// Middleware de gestion des erreurs globales
+app.use((err, req, res, next) => {
+    logger.error('Erreur non gérée', {
+        error: err.message,
+        stack: process.env.NODE_ENV !== 'production' ? err.stack : undefined,
+        path: req.path,
+        method: req.method
+    });
+
+    res.status(500).json({
+        error: process.env.NODE_ENV === 'production'
+            ? 'Erreur interne du serveur'
+            : err.message
+    });
+});
+
+// Middleware pour les routes non trouvées
+app.use('*', (req, res) => {
+    logger.warn('Route non trouvée', {
+        path: req.originalUrl,
+        method: req.method,
+        ip: req.ip
+    });
+
+    res.status(404).json({
+        error: 'Route non trouvée'
+    });
 });
 
 // En mode production, servir les fichiers statiques React
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, 'client/build')));
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
-  });
+    app.use(express.static(path.join(__dirname, 'client/build')));
+
+    app.get('*', (req, res) => {
+        res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
+    });
 }
 
-// Démarrage du serveur
+// Démarrer le serveur
 const startServer = async () => {
-  try {
-    // Initialisation de la base de données
-    await initializeDatabase();
+    try {
+        await initializeDatabase();
 
-    // Démarrage du serveur Express
-    app.listen(port, () => {
-      console.log(`✅ Serveur démarré avec succès sur le port ${port} en mode ${process.env.NODE_ENV || 'développement'}`);
-    });
-  } catch (err) {
-    console.error("Erreur fatale:", err);
-    process.exit(1);
-  }
+        app.listen(port, () => {
+            logger.info(`Serveur démarré sur le port ${port}`, {
+                environment: process.env.NODE_ENV || 'development',
+                port: port
+            });
+        });
+    } catch (error) {
+        logger.error('Erreur de démarrage du serveur', { error: error.message });
+        process.exit(1);
+    }
 };
+
+// Gestion gracieuse de l'arrêt
+process.on('SIGTERM', () => {
+    logger.info('Signal SIGTERM reçu, arrêt gracieux du serveur');
+    process.exit(0);
+});
+
+process.on('SIGINT', () => {
+    logger.info('Signal SIGINT reçu, arrêt gracieux du serveur');
+    process.exit(0);
+});
 
 startServer();

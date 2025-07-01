@@ -223,7 +223,7 @@ const Login = () => {
                                 <Box sx={{ mt: 4, textAlign: 'center' }}>
                                     <Divider sx={{ mb: 3 }}>
                                         <Typography variant="body2" component="span" sx={{ px: 2, color: 'text.secondary' }}>
-                                            Nouveau sur PoloStore ?
+                                            Nouveau sur le site ?
                                         </Typography>
                                     </Divider>
 

@@ -21,16 +21,31 @@ import MusicNoteIcon from '@mui/icons-material/MusicNote';
 import EmailIcon from '@mui/icons-material/Email';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import { useAuth } from '../../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const Footer = () => {
     const currentYear = new Date().getFullYear();
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
     const { isAuthenticated, isAdmin } = useAuth();
+    const navigate = useNavigate();
 
     // Fonction pour remonter en haut de la page
     const scrollToTop = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    // Fonction pour rediriger vers la page de contact
+    const goToContact = () => {
+        navigate('/contact');
+    };
+
+    // URLs des réseaux sociaux - à remplacer par vos vrais liens
+    const socialLinks = {
+        facebook: "https://www.facebook.com/PoloBeatsProd",
+        twitter: "https://x.com/beats_polo",
+        instagram: "https://www.instagram.com/polobeatsprod",
+        youtube: "https://www.youtube.com/@polobeatsprod2710"
     };
 
     return (
@@ -62,13 +77,13 @@ const Footer = () => {
                 <ArrowUpwardIcon />
             </IconButton>
             <Container maxWidth="lg">
-                <Grid container spacing={4} justifyContent="space-between" alignItems="flex-start">
+                <Grid container spacing={4} justifyContent="center" alignItems="flex-start">
                     {/* Logo & Slogan */}
                     <Grid item xs={12} md={4} sx={{ mb: { xs: 3, md: 0 }, textAlign: { xs: 'center', md: 'left' } }}>
                         <Box display="flex" alignItems="center" justifyContent={{ xs: 'center', md: 'flex-start' }} mb={1}>
                             <MusicNoteIcon color="primary" sx={{ fontSize: 32, mr: 1 }} />
                             <Typography variant="h6" fontWeight="bold" color="primary.main">
-                                PoloStore
+                                POLOBEATSPROD
                             </Typography>
                         </Box>
                         <Typography variant="body2" color="text.secondary">
@@ -76,8 +91,8 @@ const Footer = () => {
                         </Typography>
                     </Grid>
                     {/* Navigation */}
-                    <Grid item xs={12} md={4} sx={{ textAlign: 'center' }}>
-                        <Box mb={1}>
+                    <Grid item xs={12} md={4} sx={{ textAlign: 'center', display: { xs: 'flex', md: 'block' }, flexDirection: { xs: 'column', md: 'unset' }, alignItems: { xs: 'center', md: 'unset' }, justifyContent: { xs: 'center', md: 'unset' } }}>
+                        <Box mb={1} sx={{ width: '100%', display: { xs: 'flex', md: 'block' }, flexDirection: { xs: 'column', md: 'unset' }, alignItems: { xs: 'center', md: 'unset' }, justifyContent: { xs: 'center', md: 'unset' } }}>
                             <Button component={RouterLink} to="/" color="inherit" sx={{ mx: 1 }} size="small">Accueil</Button>
                             <Button component={RouterLink} to="/productions" color="inherit" sx={{ mx: 1 }} size="small">Productions</Button>
                             <Button component={RouterLink} to="/contact" color="inherit" sx={{ mx: 1 }} size="small">Contact</Button>
@@ -89,25 +104,77 @@ const Footer = () => {
                     </Grid>
                     {/* Contact & Réseaux */}
                     <Grid item xs={12} md={4} sx={{ textAlign: { xs: 'center', md: 'right' } }}>
-                        <Box mb={1}>
-                            <IconButton component="a" href="mailto:contact@polostore.com" color="primary" aria-label="Email">
+                        <Box mb={1} sx={{ display: 'flex', justifyContent: { xs: 'center', md: 'flex-end' } }}>
+                            <IconButton
+                                onClick={goToContact}
+                                color="primary"
+                                aria-label="Contact"
+                                sx={{
+                                    transition: 'transform 0.2s',
+                                    '&:hover': { transform: 'scale(1.1)' }
+                                }}
+                            >
                                 <EmailIcon />
                             </IconButton>
-                            <IconButton component="a" href="#" color="primary" aria-label="Facebook">
+                            <IconButton
+                                component="a"
+                                href={socialLinks.facebook}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                color="primary"
+                                aria-label="Facebook"
+                                sx={{
+                                    transition: 'transform 0.2s',
+                                    '&:hover': { transform: 'scale(1.1)' }
+                                }}
+                            >
                                 <FacebookIcon />
                             </IconButton>
-                            <IconButton component="a" href="#" color="primary" aria-label="Twitter">
+                            <IconButton
+                                component="a"
+                                href={socialLinks.twitter}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                color="primary"
+                                aria-label="Twitter"
+                                sx={{
+                                    transition: 'transform 0.2s',
+                                    '&:hover': { transform: 'scale(1.1)' }
+                                }}
+                            >
                                 <TwitterIcon />
                             </IconButton>
-                            <IconButton component="a" href="#" color="primary" aria-label="Instagram">
+                            <IconButton
+                                component="a"
+                                href={socialLinks.instagram}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                color="primary"
+                                aria-label="Instagram"
+                                sx={{
+                                    transition: 'transform 0.2s',
+                                    '&:hover': { transform: 'scale(1.1)' }
+                                }}
+                            >
                                 <InstagramIcon />
                             </IconButton>
-                            <IconButton component="a" href="#" color="primary" aria-label="YouTube">
+                            <IconButton
+                                component="a"
+                                href={socialLinks.youtube}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                color="primary"
+                                aria-label="YouTube"
+                                sx={{
+                                    transition: 'transform 0.2s',
+                                    '&:hover': { transform: 'scale(1.1)' }
+                                }}
+                            >
                                 <YouTubeIcon />
                             </IconButton>
                         </Box>
                         <Typography variant="body2" color="text.secondary">
-                            &copy; {currentYear} PoloStore. Tous droits réservés.
+                            &copy; {currentYear} POLOBEATSPROD. Tous droits réservés.
                         </Typography>
                     </Grid>
                 </Grid>

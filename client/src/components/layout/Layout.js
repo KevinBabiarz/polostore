@@ -36,7 +36,10 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 // Animation de dissimulation de la barre de navigation lors du défilement
 function HideOnScroll(props) {
   const { children } = props;
-  const trigger = useScrollTrigger();
+  const trigger = useScrollTrigger({
+    disableHysteresis: true,
+    threshold: 50,
+  });
 
   return (
     <Slide appear={false} direction="down" in={!trigger}>
@@ -48,7 +51,10 @@ function HideOnScroll(props) {
 const Layout = ({ themeToggle }) => {
     const { user, logout, isAuthenticated, isAdmin } = useAuth();
     const theme = useTheme();
+    const isExtraSmallScreen = useMediaQuery(theme.breakpoints.down('xs'));
+    const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+    const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
     const location = useLocation();
 
     // État pour suivre si l'utilisateur est admin (mis à jour à chaque rendu)
@@ -173,7 +179,8 @@ const Layout = ({ themeToggle }) => {
                 sx: {
                     mt: 1.5,
                     borderRadius: 2,
-                    minWidth: 200
+                    minWidth: { xs: '90vw', sm: 250 },
+                    maxWidth: '95vw',
                 }
             }}
         >
@@ -257,7 +264,11 @@ const Layout = ({ themeToggle }) => {
             onClose={handleAdminMenuClose}
             PaperProps={{
                 elevation: 3,
-                sx: { borderRadius: 2 }
+                sx: {
+                    borderRadius: 2,
+                    width: { xs: '90vw', sm: 'auto' },
+                    maxWidth: { xs: '95vw', sm: '400px' }
+                }
             }}
         >
             <MenuItem component={RouterLink} to="/admin/dashboard" onClick={handleAdminMenuClose}>
@@ -294,14 +305,22 @@ const Layout = ({ themeToggle }) => {
             onClose={handleProfileMenuClose}
             PaperProps={{
                 elevation: 3,
-                sx: { borderRadius: 2 }
+                sx: {
+                    borderRadius: 2,
+                    width: { xs: '90vw', sm: 'auto' },
+                    maxWidth: { xs: '95vw', sm: '300px' }
+                }
             }}
         >
-            <Box sx={{ px: 2, py: 1, textAlign: 'center' }}>
+            <Box sx={{
+                px: { xs: 1, sm: 2 },
+                py: { xs: 0.5, sm: 1 },
+                textAlign: 'center'
+            }}>
                 <Avatar
                     sx={{
-                        width: 60,
-                        height: 60,
+                        width: { xs: 45, sm: 60 },
+                        height: { xs: 45, sm: 60 },
                         mx: 'auto',
                         mb: 1,
                         bgcolor: isAdmin() ? 'secondary.main' : 'primary.main'
@@ -309,7 +328,7 @@ const Layout = ({ themeToggle }) => {
                 >
                     {username.charAt(0).toUpperCase()}
                 </Avatar>
-                <Typography variant="subtitle1" fontWeight="bold">
+                <Typography variant="subtitle1" fontWeight="bold" noWrap>
                     {username}
                 </Typography>
                 <Chip
@@ -358,24 +377,38 @@ const Layout = ({ themeToggle }) => {
                     }}
                 >
                     <Container maxWidth="lg">
-                        <Toolbar disableGutters>
+                        <Toolbar disableGutters sx={{
+                            minHeight: { xs: '56px', sm: '64px' },
+                            py: { xs: 0.5, sm: 0.75 }
+                        }}>
                             {/* Logo et titre */}
                             <Typography
-                                variant="h5"
+                                variant={isSmallScreen ? "h6" : "h5"}
                                 component={RouterLink}
                                 to="/"
                                 sx={{
-                                    mr: 2,
+                                    mr: { xs: 1, sm: 2 },
                                     fontWeight: 700,
-                                    letterSpacing: '.1rem',
+                                    letterSpacing: { xs: '.05rem', sm: '.1rem' },
                                     color: '#e02323', // Toujours rouge
                                     textDecoration: 'none',
                                     display: 'flex',
-                                    alignItems: 'center'
+                                    alignItems: 'center',
+                                    fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem' }
                                 }}
                             >
-                                <LibraryMusicIcon sx={{ mr: 1 }} />
-                                POLO<Box component="span" sx={{ color: 'text.primary' }}>STORE</Box>
+                                <Box
+                                    component="img"
+                                    src="/images/PB-removebg-preview.png"
+                                    alt="Logo POLOBEATSPROD"
+                                    sx={{
+                                        mr: { xs: 0.5, sm: 1 },
+                                        width: { xs: 24, sm: 28, md: 32 },
+                                        height: { xs: 24, sm: 28, md: 32 },
+                                        objectFit: 'contain'
+                                    }}
+                                />
+                                POLO<Box component="span" sx={{ color: 'text.primary', display: { xs: isExtraSmallScreen ? 'none' : 'inline', sm: 'inline' } }}>BEATSPROD</Box>
                             </Typography>
 
                             {/* Navigation sur desktop */}
@@ -389,6 +422,8 @@ const Layout = ({ themeToggle }) => {
                                             mx: 0.5,
                                             position: 'relative',
                                             color: textColor, // Couleur du texte adaptée
+                                            fontSize: { xs: '0.8rem', sm: '0.875rem' },
+                                            px: { xs: 1, sm: 2 },
                                             '&::after': {
                                                 content: '""',
                                                 position: 'absolute',
@@ -422,6 +457,8 @@ const Layout = ({ themeToggle }) => {
                                             mx: 0.5,
                                             position: 'relative',
                                             color: textColor, // Couleur du texte adaptée
+                                            fontSize: { xs: '0.8rem', sm: '0.875rem' },
+                                            px: { xs: 1, sm: 2 },
                                             '&::after': {
                                                 content: '""',
                                                 position: 'absolute',
@@ -456,6 +493,8 @@ const Layout = ({ themeToggle }) => {
                                                 mx: 0.5,
                                                 position: 'relative',
                                                 color: textColor, // Couleur du texte adaptée
+                                                fontSize: { xs: '0.8rem', sm: '0.875rem' },
+                                                px: { xs: 1, sm: 2 },
                                                 '&::after': {
                                                     content: '""',
                                                     position: 'absolute',
@@ -486,14 +525,14 @@ const Layout = ({ themeToggle }) => {
 
                             {/* Insérer le bouton de changement de thème ici */}
                             {themeToggle && (
-                                <Box sx={{ mx: 1 }}>
+                                <Box sx={{ mx: { xs: 0.5, sm: 1 } }}>
                                     {themeToggle}
                                 </Box>
                             )}
 
                             {/* Actions sur desktop */}
                             {!isMobile && (
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.25, sm: 0.5 } }}>
                                     {isAuthenticated() ? (
                                         <>
                                             {isAdmin() && (
@@ -501,11 +540,13 @@ const Layout = ({ themeToggle }) => {
                                                     <Button
                                                         color="inherit"
                                                         onClick={handleAdminMenuOpen}
-                                                        endIcon={<KeyboardArrowDownIcon />}
+                                                        endIcon={isTablet ? null : <KeyboardArrowDownIcon />}
                                                         sx={{
                                                             borderRadius: 2,
                                                             textTransform: 'none',
-                                                            bgcolor: isAdminMenuOpen ? 'action.selected' : 'transparent'
+                                                            bgcolor: isAdminMenuOpen ? 'action.selected' : 'transparent',
+                                                            fontSize: { xs: '0.8rem', sm: '0.875rem' },
+                                                            px: { xs: 1, sm: 1.5 },
                                                         }}
                                                     >
                                                         Admin
@@ -518,9 +559,9 @@ const Layout = ({ themeToggle }) => {
                                                 onClick={handleProfileMenuOpen}
                                                 color="inherit"
                                                 sx={{
-                                                    ml: 1,
+                                                    ml: { xs: 0.5, sm: 1 },
                                                     borderRadius: 6,
-                                                    px: 1,
+                                                    px: { xs: 0.5, sm: 1 },
                                                     py: 0.5,
                                                     border: '1px solid',
                                                     borderColor: 'divider',
@@ -532,19 +573,31 @@ const Layout = ({ themeToggle }) => {
                                             >
                                                 <Avatar
                                                     sx={{
-                                                        width: 32,
-                                                        height: 32,
-                                                        mr: 1,
+                                                        width: { xs: 24, sm: 32 },
+                                                        height: { xs: 24, sm: 32 },
+                                                        mr: { xs: 0.5, sm: 1 },
                                                         bgcolor: isAdmin() ? activeTabColor : hoverColor // Utilisation des nouvelles couleurs
                                                     }}
                                                 >
                                                     {username ? username.charAt(0).toUpperCase() : 'U'}
                                                 </Avatar>
-                                                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                                                    <Typography variant="body2" sx={{ fontWeight: 'bold', lineHeight: 1.1 }}>
+                                                <Box sx={{
+                                                    display: 'flex',
+                                                    flexDirection: 'column',
+                                                    alignItems: 'flex-start',
+                                                    display: { xs: isTablet ? 'none' : 'flex', sm: 'flex' }
+                                                }}>
+                                                    <Typography variant="body2" sx={{
+                                                        fontWeight: 'bold',
+                                                        lineHeight: 1.1,
+                                                        fontSize: { xs: '0.7rem', sm: '0.875rem' }
+                                                    }}>
                                                         {username || 'Utilisateur'}
                                                     </Typography>
-                                                    <Typography variant="caption" sx={{ lineHeight: 1 }}>
+                                                    <Typography variant="caption" sx={{
+                                                        lineHeight: 1,
+                                                        fontSize: { xs: '0.6rem', sm: '0.75rem' }
+                                                    }}>
                                                         {isAdmin() ? 'Admin' : 'Utilisateur'}
                                                     </Typography>
                                                 </Box>
@@ -558,8 +611,12 @@ const Layout = ({ themeToggle }) => {
                                                 to="/login"
                                                 color="inherit"
                                                 variant="text"
-                                                startIcon={<LockOpenIcon />}
-                                                sx={{ borderRadius: 2 }}
+                                                startIcon={isTablet ? null : <LockOpenIcon />}
+                                                sx={{
+                                                    borderRadius: 2,
+                                                    fontSize: { xs: '0.7rem', sm: '0.875rem' },
+                                                    px: { xs: 1, sm: 1.5 }
+                                                }}
                                             >
                                                 Connexion
                                             </Button>
@@ -569,14 +626,16 @@ const Layout = ({ themeToggle }) => {
                                                 to="/register"
                                                 variant="contained"
                                                 sx={{
-                                                    ml: 1,
+                                                    ml: { xs: 0.5, sm: 1 },
                                                     borderRadius: 2,
                                                     bgcolor: activeTabColor,
+                                                    fontSize: { xs: '0.7rem', sm: '0.875rem' },
+                                                    px: { xs: 1, sm: 1.5 },
                                                     '&:hover': {
                                                         bgcolor: hoverColor
                                                     }
                                                 }}
-                                                startIcon={<PersonAddIcon />}
+                                                startIcon={isTablet ? null : <PersonAddIcon />}
                                             >
                                                 Inscription
                                             </Button>

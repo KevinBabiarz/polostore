@@ -1,84 +1,70 @@
 // scripts/createAdmin.js
-import dotenv from 'dotenv';
-import path from 'path';
-import { fileURLToPath } from 'url';
 import bcrypt from 'bcrypt';
-import sequelize from '../config/sequelize.js';
 import User from '../models/User.js';
+import sequelize, { testConnection } from '../config/sequelize.js';
+import logger from '../utils/logger.js';
 
-// Configuration du chemin .env
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const envPath = path.resolve(__dirname, '../utils/.env');
-dotenv.config({ 'path': envPath });
+const createAdmin = async () => {
+    try {
+        logger.info('🔧 Création de l\'administrateur par défaut...');
 
-// Données de l'administrateur
-const adminData = {
-  username: 'poloadmin',
-  email: 'poloadmin@gmail.com',
-  password: 'admin123', // Vous pourrez changer ce mot de passe
-  role: 'admin'
+        // Tester la connexion
+        await testConnection();
+
+        // Vérifier si un admin existe déjà
+        const existingAdmin = await User.findOne({ where: { role: 'admin' } });
+
+        if (existingAdmin) {
+            logger.info('✅ Un administrateur existe déjà');
+            return;
+        }
+
+        // Créer un administrateur par défaut
+        const defaultAdmin = {
+            username: 'admin',
+            email: process.env.ADMIN_EMAIL || 'admin@polostore.com',
+            password: process.env.ADMIN_PASSWORD || 'AdminPoloStore2024!',
+            role: 'admin',
+            isActive: true,
+            isBanned: false
+        };
+
+        // Hasher le mot de passe
+        const saltRounds = 12;
+        const hashedPassword = await bcrypt.hash(defaultAdmin.password, saltRounds);
+
+        // Créer l'utilisateur admin
+        const admin = await User.create({
+            ...defaultAdmin,
+            password: hashedPassword
+        });
+
+        logger.info('✅ Administrateur créé avec succès', {
+            id: admin.id,
+            username: admin.username,
+            email: admin.email
+        });
+
+        console.log('🎉 Administrateur créé avec succès !');
+        console.log(`Email: ${admin.email}`);
+        console.log(`Mot de passe: ${defaultAdmin.password}`);
+        console.log('⚠️  Changez ce mot de passe après la première connexion !');
+
+    } catch (error) {
+        logger.error('❌ Erreur lors de la création de l\'administrateur', {
+            error: error.message
+        });
+        console.error('Erreur:', error.message);
+    }
 };
 
-// Fonction pour créer un administrateur
-async function createAdmin() {
-  try {
-    // Tester la connexion à la base de données
-    await sequelize.authenticate();
-    console.log('Connexion à la base de données établie avec succès');
-
-    // Synchroniser le modèle avec la base de données
-    await sequelize.sync({ alter: true });
-
-    // Vérifier si l'admin existe déjà
-    const existingAdmin = await User.findOne({
-      where: {
-        email: adminData.email
-      }
+// Si le script est exécuté directement
+if (import.meta.url === `file://${process.argv[1]}`) {
+    createAdmin().then(() => {
+        process.exit(0);
+    }).catch(() => {
+        process.exit(1);
     });
-
-    if (existingAdmin) {
-      console.log('Un utilisateur avec cet email existe déjà');
-      console.log('Mise à jour des informations et du rôle en admin...');
-
-      // Hacher le mot de passe
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(adminData.password, salt);
-
-      // Mettre à jour l'utilisateur existant
-      await existingAdmin.update({
-        username: adminData.username,
-        password: hashedPassword,
-        role: 'admin'
-      });
-
-      console.log('Utilisateur mis à jour avec le rôle admin!');
-    } else {
-      // Hacher le mot de passe
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(adminData.password, salt);
-
-      // Créer un nouvel administrateur
-      await User.create({
-        username: adminData.username,
-        email: adminData.email,
-        password: hashedPassword,
-        role: 'admin'
-      });
-
-      console.log('Administrateur créé avec succès!');
-    }
-
-    console.log('Email: poloadmin@gmail.com');
-    console.log('Mot de passe: admin123');
-
-  } catch (error) {
-    console.error('Erreur lors de la création de l\'administrateur:', error);
-  } finally {
-    // Fermer la connexion à la base de données
-    await sequelize.close();
-  }
 }
 
-// Exécuter la fonction
-createAdmin();
+export default createAdmin;
