@@ -17,13 +17,15 @@ let sequelize;
 if (process.env.DATABASE_URL) {
     // Configuration de production avec Railway (utilise DATABASE_URL)
     console.log('Configuration Railway DATABASE_URL détectée');
+    console.log('Utilisation de DATABASE_URL pour la connexion PostgreSQL');
+
     sequelize = new Sequelize(process.env.DATABASE_URL, {
         dialect: 'postgres',
         dialectOptions: {
-            ssl: process.env.NODE_ENV === 'production' ? {
+            ssl: {
                 require: true,
                 rejectUnauthorized: false // Nécessaire pour Railway
-            } : false
+            }
         },
         logging: process.env.NODE_ENV === 'production' ? false : console.log,
         pool: {
@@ -35,6 +37,7 @@ if (process.env.DATABASE_URL) {
     });
 } else {
     // Configuration de développement local
+    console.log('Configuration de développement local');
     console.log('Variables d\'environnement DB: {');
     console.log(`  user: '${process.env.DB_USER}',`);
     console.log(`  host: '${process.env.DB_HOST}',`);
@@ -81,7 +84,7 @@ export const testConnection = async () => {
         console.log('✅ Connexion à PostgreSQL établie avec succès');
         return true;
     } catch (error) {
-        console.error('❌ Impossible de se connecter à PostgreSQL:', error.message);
+        console.log('❌ Impossible de se connecter à PostgreSQL:', error.message);
         throw error;
     }
 };
