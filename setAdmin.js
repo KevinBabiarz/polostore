@@ -2,7 +2,12 @@
 import pool from './config/db.js';
 import dotenv from 'dotenv';
 
-dotenv.config({'path': './utils/.env'});
+
+// En production (Railway), les variables d'environnement sont automatiquement disponibles
+// En développement, charger depuis .env
+if (process.env.NODE_ENV !== 'production') {
+    dotenv.config();
+}
 
 // Email de l'utilisateur à promouvoir comme administrateur
 const userEmail = 'poloadmin@gmail.com'; // Remplacez par votre email

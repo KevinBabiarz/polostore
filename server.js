@@ -31,7 +31,11 @@ import "./models/ContactMessage.js";
 import "./models/Favorite.js";
 import "./models/RevokedToken.js";
 
-dotenv.config({'path': './utils/.env'});
+// En production (Railway), les variables d'environnement sont injectées automatiquement
+// En développement, on peut charger depuis un fichier .env
+if (process.env.NODE_ENV !== 'production') {
+    dotenv.config();
+}
 
 // Vérifier que la clé secrète JWT existe et est forte
 if (!process.env.JWT_SECRET) {
@@ -215,6 +219,29 @@ app.use("/api/favorites", favoriteRoutes);
 app.use("/api/contact", contactRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/users", userRoutes);
+
+// Route de santé pour Railway health check
+app.get("/health", async (req, res) => {
+    try {
+        // Tester la connexion à la base de données
+        await sequelize.authenticate();
+        res.status(200).json({
+            status: "ok",
+            message: "Service en ligne",
+            database: "connected",
+            timestamp: new Date().toISOString(),
+            environment: process.env.NODE_ENV || 'development'
+        });
+    } catch (error) {
+        res.status(503).json({
+            status: "error",
+            message: "Service indisponible",
+            database: "disconnected",
+            error: error.message,
+            timestamp: new Date().toISOString()
+        });
+    }
+});
 
 // Route de diagnostic pour vérifier la connexion à PostgreSQL
 app.get("/api/db-status", async (req, res) => {

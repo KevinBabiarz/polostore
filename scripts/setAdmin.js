@@ -3,8 +3,11 @@ import dotenv from 'dotenv';
 import sequelize from '../config/sequelize.js';
 import User from '../models/User.js';
 
-// Charger les variables d'environnement
-dotenv.config({ path: './utils/.env' });
+// En production (Railway), les variables d'environnement sont automatiquement disponibles
+// En développement, charger depuis .env
+if (process.env.NODE_ENV !== 'production') {
+    dotenv.config();
+}
 
 // Fonction pour définir un utilisateur comme admin par son email
 async function setUserAsAdmin(email) {
