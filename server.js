@@ -181,16 +181,6 @@ if (!fs.existsSync(dir)){
     fs.mkdirSync(dir, { recursive: true });
 }
 
-// Nettoyage périodique des tokens expirés (toutes les heures)
-setInterval(async () => {
-    try {
-        await cleanExpiredTokens();
-        logger.info('Nettoyage des tokens expirés effectué');
-    } catch (error) {
-        logger.error('Erreur lors du nettoyage des tokens', { error: error.message });
-    }
-}, 3600000); // 1 heure
-
 // Initialiser la base de données
 const initializeDatabase = async () => {
     try {
@@ -211,6 +201,8 @@ const initializeDatabase = async () => {
     }
 };
 
+logger.info('🔧 Configuration des routes...');
+
 // Routes API
 app.use("/api/auth", authRoutes);
 app.use("/api/productions", productionRoutes);
@@ -218,6 +210,8 @@ app.use("/api/favorites", favoriteRoutes);
 app.use("/api/contact", contactRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/users", userRoutes);
+
+logger.info('✅ Routes configurées');
 
 // Route de santé pour Railway health check
 app.get("/health", async (req, res) => {
@@ -341,6 +335,18 @@ const startServer = async () => {
         // Initialiser la base de données avant de démarrer le serveur
         await initializeDatabase();
 
+        // Démarrer le nettoyage périodique des tokens expirés après que tout soit initialisé
+        setInterval(async () => {
+            try {
+                await cleanExpiredTokens();
+                logger.info('Nettoyage des tokens expirés effectué');
+            } catch (error) {
+                logger.error('Erreur lors du nettoyage des tokens', { error: error.message });
+            }
+        }, 3600000); // 1 heure
+
+        logger.info('🎯 Tentative de démarrage du serveur HTTP...');
+
         // Démarrer le serveur HTTP
         server = app.listen(port, '0.0.0.0', () => {
             logger.info(`🚀 Serveur démarré sur le port ${port}`);
@@ -366,8 +372,8 @@ const startServer = async () => {
 };
 
 // Démarrer l'application
+logger.info('📞 Tentative d\'appel à startServer()...');
 startServer().catch((error) => {
     logger.error('Erreur fatale au démarrage', { error: error.message });
     process.exit(1);
 });
-
