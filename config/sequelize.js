@@ -11,18 +11,19 @@ const envPath = path.resolve(__dirname, '../utils/.env');
 // Utiliser le même chemin .env que dans server.js
 dotenv.config({ 'path': envPath });
 
-// Configuration pour Render et développement local
+// Configuration pour Railway et développement local
 let sequelize;
 
 if (process.env.DATABASE_URL) {
-    // Configuration de production avec Render (utilise DATABASE_URL)
+    // Configuration de production avec Railway (utilise DATABASE_URL)
+    console.log('Configuration Railway DATABASE_URL détectée');
     sequelize = new Sequelize(process.env.DATABASE_URL, {
         dialect: 'postgres',
         dialectOptions: {
-            ssl: {
+            ssl: process.env.NODE_ENV === 'production' ? {
                 require: true,
-                rejectUnauthorized: false // Nécessaire pour Render
-            }
+                rejectUnauthorized: false // Nécessaire pour Railway
+            } : false
         },
         logging: process.env.NODE_ENV === 'production' ? false : console.log,
         pool: {
@@ -34,6 +35,13 @@ if (process.env.DATABASE_URL) {
     });
 } else {
     // Configuration de développement local
+    console.log('Variables d\'environnement DB: {');
+    console.log(`  user: '${process.env.DB_USER}',`);
+    console.log(`  host: '${process.env.DB_HOST}',`);
+    console.log(`  database: '${process.env.DB_DATABASE}',`);
+    console.log(`  port: '${process.env.DB_PORT}'`);
+    console.log('}');
+
     const {
         DB_USER,
         DB_PASSWORD,
@@ -49,13 +57,12 @@ if (process.env.DATABASE_URL) {
         console.error(`DB_PASSWORD: ${DB_PASSWORD ? 'Défini' : 'Non défini'}`);
         console.error(`DB_HOST: ${DB_HOST ? 'Défini' : 'Non défini'}`);
         console.error(`DB_DATABASE: ${DB_DATABASE ? 'Défini' : 'Non défini'}`);
-        console.error(`DB_PORT: ${DB_PORT ? 'Défini' : 'Non défini (utilisera le port par défaut)'}`);
-        throw new Error('Configuration de base de données incomplète');
+        process.exit(1);
     }
 
     sequelize = new Sequelize(DB_DATABASE, DB_USER, DB_PASSWORD, {
         host: DB_HOST,
-        port: parseInt(DB_PORT),
+        port: DB_PORT,
         dialect: 'postgres',
         logging: process.env.NODE_ENV === 'production' ? false : console.log,
         pool: {

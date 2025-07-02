@@ -38,7 +38,7 @@ export const corsConfig = {
     optionsSuccessStatus: 200 // Support pour les anciens navigateurs
 };
 
-// Configuration Helmet pour la sécurité
+// Configuration Helmet pour la sécurité (version corrigée)
 export const helmetConfig = {
     contentSecurityPolicy: {
         directives: {
@@ -50,16 +50,15 @@ export const helmetConfig = {
             fontSrc: ["'self'"],
             connectSrc: ["'self'"],
             frameSrc: ["'none'"],
-            objectSrc: ["'none'"],
-            upgradeInsecureRequests: process.env.NODE_ENV === 'production'
+            objectSrc: ["'none'"]
         }
     },
-    crossOriginEmbedderPolicy: false, // Désactivé pour compatibilité avec les uploads
+    crossOriginEmbedderPolicy: false,
     crossOriginResourcePolicy: { policy: "cross-origin" },
     hsts: {
-        maxAge: 31536000, // 1 an
+        maxAge: 31536000,
         includeSubDomains: true,
-        preload: true
+        preload: false // Changé de true à false pour éviter les problèmes
     },
     noSniff: true,
     frameguard: { action: 'deny' },

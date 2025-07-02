@@ -44,12 +44,15 @@ if (process.env.JWT_SECRET.length < 32) {
 }
 
 // Afficher les variables d'environnement de base de données pour débogage (sans données sensibles)
-logger.info("Configuration de base de données", {
-    host: process.env.DB_HOST,
-    database: process.env.DB_DATABASE,
-    port: process.env.DB_PORT,
-    // Ne pas logger DB_USER et DB_PASSWORD
-});
+if (process.env.DATABASE_URL) {
+    logger.info("Configuration Railway DATABASE_URL détectée");
+} else {
+    logger.info("Configuration de base de données locale", {
+        host: process.env.DB_HOST,
+        database: process.env.DB_DATABASE,
+        port: process.env.DB_PORT,
+    });
+}
 
 // Initialiser l'application Express
 const app = express();
@@ -66,8 +69,27 @@ app.use((req, res, next) => {
 // Configuration CORS sécurisée
 app.use(cors(corsConfig));
 
-// Configuration de sécurité avec Helmet
-app.use(helmet(helmetConfig));
+// Configuration de sécurité avec Helmet (version simplifiée et corrigée)
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            scriptSrc: ["'self'"],
+            imgSrc: ["'self'", "data:", "https:"],
+            mediaSrc: ["'self'"],
+            fontSrc: ["'self'"],
+            connectSrc: ["'self'"]
+        }
+    },
+    crossOriginEmbedderPolicy: false,
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+    hsts: process.env.NODE_ENV === 'production' ? {
+        maxAge: 31536000,
+        includeSubDomains: true,
+        preload: false
+    } : false
+}));
 
 // Limitation du taux de requêtes
 const limiter = rateLimit(rateLimitConfig);
