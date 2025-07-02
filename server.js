@@ -18,7 +18,6 @@ import logger from "./utils/logger.js";
 import { cleanExpiredTokens } from "./middleware/authMiddleware.js";
 import {
     corsConfig,
-    helmetConfig,
     rateLimitConfig,
     securityHeaders,
     securityMonitoring
