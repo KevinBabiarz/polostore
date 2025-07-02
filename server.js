@@ -310,32 +310,65 @@ if (process.env.NODE_ENV === 'production') {
     });
 }
 
-// Démarrer le serveur
+// Gestion gracieuse de l'arrêt du serveur
+let server;
+
+const gracefulShutdown = async (signal) => {
+    logger.info(`Signal ${signal} reçu, arrêt gracieux du serveur...`);
+
+    if (server) {
+        server.close(() => {
+            logger.info('Serveur HTTP fermé');
+        });
+    }
+
+    try {
+        await sequelize.close();
+        logger.info('Connexion PostgreSQL fermée');
+    } catch (error) {
+        logger.error('Erreur lors de la fermeture de la connexion PostgreSQL', { error: error.message });
+    }
+
+    process.exit(0);
+};
+
+// Gestionnaires pour l'arrêt gracieux
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+
+// Démarrage du serveur
 const startServer = async () => {
     try {
+        // Initialiser la base de données avant de démarrer le serveur
         await initializeDatabase();
 
-        app.listen(port, () => {
-            logger.info(`Serveur démarré sur le port ${port}`, {
-                environment: process.env.NODE_ENV || 'development',
-                port: port
-            });
+        // Démarrer le serveur HTTP
+        server = app.listen(port, '0.0.0.0', () => {
+            logger.info(`🚀 Serveur démarré sur le port ${port}`);
+            logger.info(`🕐 Timestamp serveur: ${new Date().toISOString()}`);
+            logger.info(`🌍 Environnement: ${process.env.NODE_ENV || 'development'}`);
+            logger.info(`📍 URL de santé: http://localhost:${port}/health`);
         });
+
+        // Gestion des erreurs du serveur
+        server.on('error', (err) => {
+            if (err.code === 'EADDRINUSE') {
+                logger.error(`Le port ${port} est déjà utilisé`);
+            } else {
+                logger.error('Erreur du serveur HTTP', { error: err.message });
+            }
+            process.exit(1);
+        });
+
     } catch (error) {
-        logger.error('Erreur de démarrage du serveur', { error: error.message });
+        logger.error('Impossible de démarrer le serveur', { error: error.message });
         process.exit(1);
     }
 };
 
-// Gestion gracieuse de l'arrêt
-process.on('SIGTERM', () => {
-    logger.info('Signal SIGTERM reçu, arrêt gracieux du serveur');
-    process.exit(0);
+// Démarrer l'application
+startServer().catch((error) => {
+    logger.error('Erreur fatale au démarrage', { error: error.message });
+    process.exit(1);
 });
 
-process.on('SIGINT', () => {
-    logger.info('Signal SIGINT reçu, arrêt gracieux du serveur');
-    process.exit(0);
-});
-
-startServer();
