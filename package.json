@@ -19,19 +19,24 @@
     "seed": "node scripts/createAdmin.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["api", "backend", "music", "production"],
+  "keywords": [
+    "api",
+    "backend",
+    "music",
+    "production"
+  ],
   "author": "PoloStore",
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
-    "express": "^4.19.2",
-    "express-rate-limit": "^7.5.1",
+    "express": "^4.21.2",
+    "express-rate-limit": "^6.10.0",
     "express-validator": "^7.2.1",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
-    "multer": "^1.4.5-lts.2",
+    "multer": "^2.0.1",
     "pg": "^8.16.2",
     "pg-hstore": "^2.3.4",
     "sequelize": "^6.37.7"

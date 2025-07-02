@@ -13,13 +13,23 @@ export const corsConfig = {
         // En production, définir les domaines autorisés
         const allowedOrigins = [
             process.env.FRONTEND_URL || 'http://localhost:3000',
-            process.env.PRODUCTION_URL || 'https://votre-domaine.com'
+            process.env.PRODUCTION_URL || 'https://votre-domaine.com',
+            'https://polostore-frontend.vercel.app', // Ajout du domaine Vercel
+            /\.vercel\.app$/ // Autoriser tous les sous-domaines Vercel
         ];
 
         // Autoriser les requêtes sans origine (applications mobiles, Postman, etc.)
         if (!origin) return callback(null, true);
 
-        if (allowedOrigins.indexOf(origin) !== -1) {
+        // Vérifier si l'origine est autorisée (string ou regex)
+        const isAllowed = allowedOrigins.some(allowedOrigin => {
+            if (typeof allowedOrigin === 'string') {
+                return allowedOrigin === origin;
+            }
+            return allowedOrigin.test(origin);
+        });
+
+        if (isAllowed) {
             callback(null, true);
         } else {
             callback(new Error('Non autorisé par la politique CORS'));

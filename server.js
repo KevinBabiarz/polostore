@@ -262,7 +262,7 @@ app.use((err, req, res, next) => {
 });
 
 // Middleware pour les routes non trouvées
-app.use('*', (req, res) => {
+app.all('/*', (req, res) => {
     logger.warn('Route non trouvée', {
         path: req.originalUrl,
         method: req.method,
@@ -278,7 +278,7 @@ app.use('*', (req, res) => {
 if (process.env.NODE_ENV === 'production') {
     app.use(express.static(path.join(__dirname, 'client/build')));
 
-    app.get('*', (req, res) => {
+    app.get('/*', (req, res) => {
         res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
     });
 }
