@@ -74,18 +74,12 @@ export const AuthService = {
             throw new Error("Ce nom d'utilisateur est déjà pris");
         }
 
-        // Hasher le mot de passe
-        const saltRounds = 12;
-        const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-        // Créer l'utilisateur avec Sequelize
+        // Créer l'utilisateur avec Sequelize (le mot de passe sera hashé automatiquement par le hook beforeCreate)
         const newUser = await User.create({
             username,
             email,
-            password: hashedPassword,
-            role: 'user',
-            isActive: true,
-            isBanned: false
+            password, // Ne pas hasher ici, c'est fait automatiquement par le modèle
+            is_admin: false
         });
 
         // Générer le token sécurisé
@@ -101,8 +95,9 @@ export const AuthService = {
                 id: newUser.id,
                 username: newUser.username,
                 email: newUser.email,
-                role: newUser.role,
-                isActive: newUser.isActive
+                role: newUser.is_admin ? 'admin' : 'user',
+                isActive: true,
+                isAdmin: newUser.is_admin || false
             },
             token,
             jti
