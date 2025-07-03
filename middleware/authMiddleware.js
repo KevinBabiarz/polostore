@@ -97,9 +97,9 @@ export const protect = async (req, res, next) => {
                     }
                 }
 
-                // Vérifier si l'utilisateur existe toujours et n'est pas banni
+                // Vérifier si l'utilisateur existe toujours
                 const user = await User.findByPk(decoded.id, {
-                    attributes: ['id', 'email', 'is_admin', 'isActive', 'isBanned']
+                    attributes: ['id', 'email', 'is_admin', 'created_at']
                 });
 
                 if (!user) {
@@ -108,21 +108,6 @@ export const protect = async (req, res, next) => {
                     });
                 }
 
-                if (user.isBanned) {
-                    // Révoquer automatiquement le token si l'utilisateur est banni
-                    if (decoded.jti) {
-                        await revokeToken(token, decoded.id, 'user_banned');
-                    }
-                    return res.status(403).json({
-                        message: "Compte suspendu"
-                    });
-                }
-
-                if (!user.isActive) {
-                    return res.status(401).json({
-                        message: "Compte désactivé"
-                    });
-                }
 
                 // Ajouter les informations de l'utilisateur à la requête
                 req.user = {

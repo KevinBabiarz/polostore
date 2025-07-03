@@ -35,7 +35,7 @@ export const getUsers = async (page = 1, limit = 10, searchTerm = '', sortBy = '
     };
 
     console.log('[CLIENT] Envoi requête API:', params);
-    const response = await api.get('/users', { params });
+    const response = await api.get('/admin/users', { params });
     console.log('[CLIENT] Réponse API utilisateurs:', response.data ? response.data.length : 'aucune');
 
     // Mise en cache des données
