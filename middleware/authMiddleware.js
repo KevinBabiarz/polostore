@@ -99,7 +99,7 @@ export const protect = async (req, res, next) => {
 
                 // Vérifier si l'utilisateur existe toujours et n'est pas banni
                 const user = await User.findByPk(decoded.id, {
-                    attributes: ['id', 'email', 'role', 'isActive', 'isBanned']
+                    attributes: ['id', 'email', 'is_admin', 'isActive', 'isBanned']
                 });
 
                 if (!user) {
@@ -128,7 +128,9 @@ export const protect = async (req, res, next) => {
                 req.user = {
                     id: decoded.id,
                     email: user.email,
-                    role: user.role,
+                    is_admin: user.is_admin,
+                    isAdmin: user.is_admin || false,
+                    role: user.is_admin ? 'admin' : 'user',
                     jti: decoded.jti
                 };
 

@@ -1,5 +1,6 @@
 // services/contactService.js
 import ContactMessage from '../models/ContactMessage.js';
+import Production from '../models/Production.js';
 
 /**
  * Service de gestion des messages de contact
@@ -14,6 +15,14 @@ export const ContactService = {
         const { limit = 10, offset = 0, sortBy = 'created_at', sortOrder = 'DESC' } = options;
 
         return await ContactMessage.findAll({
+            include: [
+                {
+                    model: Production,
+                    as: 'production',
+                    attributes: ['id', 'title'],
+                    required: false
+                }
+            ],
             order: [[sortBy, sortOrder]],
             limit,
             offset
@@ -26,7 +35,16 @@ export const ContactService = {
      * @returns {Promise<Object>} Le message trouvé
      */
     getMessageById: async (id) => {
-        const message = await ContactMessage.findByPk(id);
+        const message = await ContactMessage.findByPk(id, {
+            include: [
+                {
+                    model: Production,
+                    as: 'production',
+                    attributes: ['id', 'title'],
+                    required: false
+                }
+            ]
+        });
 
         if (!message) {
             throw new Error("Message non trouvé");
