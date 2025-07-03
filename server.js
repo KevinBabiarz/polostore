@@ -82,7 +82,7 @@ app.use(helmet({
             imgSrc: ["'self'", "data:", "https:"],
             mediaSrc: ["'self'"],
             fontSrc: ["'self'"],
-            connectSrc: ["'self'"]
+            connectSrc: ["'self'", 'https://polostore-five.vercel.app', 'https://polostore-production.up.railway.app'],
         }
     },
     crossOriginEmbedderPolicy: false,
