@@ -21,9 +21,10 @@ export const AuthService = {
 
         const payload = {
             id: user.id,
-            role: user.role || 'user',
+            role: user.is_admin ? 'admin' : 'user',
             email: user.email,
-            isActive: user.isActive
+            isActive: user.isActive,
+            isAdmin: user.is_admin || false
         };
 
         return createTokenWithJTI(payload);
@@ -167,8 +168,10 @@ export const AuthService = {
                 id: user.id,
                 username: user.username,
                 email: user.email,
-                role: user.role,
-                isActive: user.isActive
+                role: user.is_admin ? 'admin' : 'user',
+                isActive: user.isActive,
+                isAdmin: user.is_admin || false,
+                is_admin: user.is_admin || false
             },
             token,
             jti

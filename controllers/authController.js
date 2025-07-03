@@ -1,6 +1,7 @@
 // controllers/authController.js
 import AuthService from "../services/authService.js";
 import logger from "../utils/logger.js";
+import User from "../models/User.js";
 
 // Inscription d'utilisateur
 export const register = async (req, res) => {

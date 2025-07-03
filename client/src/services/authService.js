@@ -87,14 +87,15 @@ export const login = async (credentials) => {
             const userObject = {
                 ...userData,
                 isAdmin: isAdmin,
-                role: isAdmin ? 'admin' : 'user',
+                role: isAdmin ? 'admin' : userData.role || 'user',
                 email: userData.email || credentials.email
             };
 
             return {
                 success: true,
                 user: userObject,
-                token: token
+                token: token,
+                isAdmin: isAdmin
             };
         } catch (decodeError) {
             // En cas d'erreur de décodage, retourner quand même un succès mais avec un utilisateur minimal
@@ -138,4 +139,3 @@ export const isAuthenticated = () => {
         return false;
     }
 };
-
