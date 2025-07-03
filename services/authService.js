@@ -128,15 +128,6 @@ export const AuthService = {
             throw new Error("Identifiants invalides");
         }
 
-        // Vérifier si l'utilisateur est actif
-        if (!user.isActive) {
-            logger.warn('Tentative de connexion sur compte désactivé', {
-                userId: user.id,
-                email
-            });
-            throw new Error("Compte désactivé");
-        }
-
         // Vérifier si l'utilisateur est banni
         if (user.isBanned) {
             logger.warn('Tentative de connexion sur compte banni', {
