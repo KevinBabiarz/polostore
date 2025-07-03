@@ -62,7 +62,7 @@ export const ContactService = {
         return await ContactMessage.create({
             ...messageData,
             created_at: new Date(),
-            is_read: false
+            read: false
         });
     },
 
@@ -78,7 +78,7 @@ export const ContactService = {
             throw new Error("Message non trouvé");
         }
 
-        await message.update({ is_read: true });
+        await message.update({ read: true });
         return message;
     },
 
@@ -105,7 +105,7 @@ export const ContactService = {
     countUnreadMessages: async () => {
         return await ContactMessage.count({
             where: {
-                is_read: false
+                read: false
             }
         });
     }

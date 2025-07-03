@@ -39,11 +39,11 @@ const ContactMessage = sequelize.define('ContactMessage', {
       key: 'id'
     }
   },
-  is_read: {
+  read: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
     allowNull: false,
-    field: 'is_read'
+    field: 'read'
   },
   created_at: {
     type: DataTypes.DATE,
@@ -62,7 +62,7 @@ ContactMessage.belongsTo(Production, { foreignKey: 'production_id', as: 'product
 // Méthodes statiques
 ContactMessage.findUnread = async function() {
   return await ContactMessage.findAll({
-    where: { is_read: false },
+    where: { read: false },
     order: [['created_at', 'DESC']]
   });
 };
@@ -70,7 +70,7 @@ ContactMessage.findUnread = async function() {
 ContactMessage.markAsRead = async function(id) {
   const message = await ContactMessage.findByPk(id);
   if (message) {
-    message.is_read = true;
+    message.read = true;
     await message.save();
     return true;
   }
