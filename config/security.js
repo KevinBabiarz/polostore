@@ -14,7 +14,8 @@ export const corsConfig = {
         const allowedOrigins = [
             process.env.FRONTEND_URL || 'http://localhost:3000',
             process.env.PRODUCTION_URL || 'https://votre-domaine.com',
-            'https://polostore-frontend.vercel.app', // Ajout du domaine Vercel
+            'https://polostore-frontend.vercel.app', // Ancien domaine Vercel
+            'https://polostore-five.vercel.app', // Domaine Vercel actuel
             /\.vercel\.app$/ // Autoriser tous les sous-domaines Vercel
         ];
 

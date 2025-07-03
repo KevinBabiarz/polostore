@@ -341,11 +341,9 @@ const startServer = async () => {
                 await cleanExpiredTokens();
                 logger.info('Nettoyage des tokens expirés effectué');
             } catch (error) {
-                logger.error('Erreur lors du nettoyage des tokens', { error: error.message });
+                logger.error('Erreur lors du nettoyage des tokens expirés', { error: error.message });
             }
-        }, 3600000); // 1 heure
-
-        logger.info('🎯 Tentative de démarrage du serveur HTTP...');
+        }, 60 * 60 * 1000); // Nettoyage toutes les heures
 
         // Démarrer le serveur HTTP
         server = app.listen(port, '0.0.0.0', () => {
@@ -356,24 +354,32 @@ const startServer = async () => {
         });
 
         // Gestion des erreurs du serveur
-        server.on('error', (err) => {
-            if (err.code === 'EADDRINUSE') {
-                logger.error(`Le port ${port} est déjà utilisé`);
-            } else {
-                logger.error('Erreur du serveur HTTP', { error: err.message });
+        server.on('error', (error) => {
+            if (error.syscall !== 'listen') {
+                throw error;
             }
-            process.exit(1);
+
+            const bind = typeof port === 'string' ? 'Pipe ' + port : 'Port ' + port;
+
+            switch (error.code) {
+                case 'EACCES':
+                    logger.error(`${bind} nécessite des privilèges élevés`);
+                    process.exit(1);
+                    break;
+                case 'EADDRINUSE':
+                    logger.error(`${bind} est déjà utilisé`);
+                    process.exit(1);
+                    break;
+                default:
+                    throw error;
+            }
         });
 
     } catch (error) {
-        logger.error('Impossible de démarrer le serveur', { error: error.message });
+        logger.error('Erreur lors du démarrage du serveur', { error: error.message });
         process.exit(1);
     }
 };
 
-// Démarrer l'application
-logger.info('📞 Tentative d\'appel à startServer()...');
-startServer().catch((error) => {
-    logger.error('Erreur fatale au démarrage', { error: error.message });
-    process.exit(1);
-});
+// Lancer le serveur
+startServer();
