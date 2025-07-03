@@ -4,8 +4,8 @@ import User from "../models/User.js";
 export const getAllUsers = async (req, res) => {
     try {
         const users = await User.findAll({
-            attributes: ['id', 'username', 'email', 'role', 'createdAt'],
-            order: [['createdAt', 'DESC']]
+            attributes: ['id', 'username', 'email', 'is_admin', 'created_at'],
+            order: [['created_at', 'DESC']]
         });
 
         // Transformer la réponse pour correspondre à la structure attendue
@@ -13,8 +13,8 @@ export const getAllUsers = async (req, res) => {
             id: user.id,
             username: user.username,
             email: user.email,
-            is_admin: user.role === 'admin',
-            created_at: user.createdAt
+            is_admin: user.is_admin,
+            created_at: user.created_at
         }));
 
         res.status(200).json(formattedUsers);
