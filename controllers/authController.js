@@ -185,3 +185,44 @@ export const revokeAllTokens = async (req, res) => {
         res.status(500).json({ message: "Erreur serveur" });
     }
 };
+
+// Vérification du statut d'authentification (route /auth/me)
+export const getMe = async (req, res) => {
+    try {
+        // L'utilisateur est déjà disponible via le middleware protect
+        const user = req.user;
+
+        if (!user) {
+            return res.status(401).json({ message: "Utilisateur non authentifié" });
+        }
+
+        // Récupérer les informations complètes de l'utilisateur depuis la base de données
+        const fullUser = await User.findByPk(user.id, {
+            attributes: ['id', 'username', 'email', 'is_admin', 'created_at']
+        });
+
+        if (!fullUser) {
+            return res.status(404).json({ message: "Utilisateur non trouvé" });
+        }
+
+        logger.info('Informations utilisateur récupérées', { userId: user.id });
+
+        res.json({
+            user: {
+                id: fullUser.id,
+                username: fullUser.username,
+                email: fullUser.email,
+                role: fullUser.is_admin ? 'admin' : 'user',
+                isAdmin: fullUser.is_admin || false,
+                is_admin: fullUser.is_admin || false,
+                created_at: fullUser.created_at
+            }
+        });
+    } catch (error) {
+        logger.error('Erreur lors de la récupération des informations utilisateur', {
+            userId: req.user?.id,
+            error: error.message
+        });
+        res.status(500).json({ message: "Erreur serveur" });
+    }
+};
