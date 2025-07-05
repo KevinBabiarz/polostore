@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Box, IconButton, Typography } from '@mui/material';
 import { PlayArrow, Pause } from '@mui/icons-material';
+import { getAudioUrl } from '../../utils/fileUtils';
 
 /**
  * Composant de lecteur audio minimal et simplifié
@@ -32,25 +33,14 @@ const SimpleAudioPlayer = ({ src }) => {
     setIsPlaying(false);
     setError(null);
 
-    // Construire l'URL absolue pour Railway/production
-    let correctedSrc = src;
-    if (src && !src.startsWith('http')) {
-      const baseUrl = process.env.NODE_ENV === 'production'
-        ? 'https://polostore-production.up.railway.app'
-        : 'http://localhost:5050';
-
-      if (src.startsWith('/uploads/')) {
-        correctedSrc = `${baseUrl}${src}`;
-      } else if (src.startsWith('/api/uploads/')) {
-        const correctedPath = src.replace('/api/uploads/', '/uploads/');
-        correctedSrc = `${baseUrl}${correctedPath}`;
-      } else {
-        const fileName = src.split('/').pop();
-        correctedSrc = `${baseUrl}/uploads/${fileName}`;
-      }
-    }
-
+    // Utiliser la fonction utilitaire pour obtenir l'URL correcte
+    const correctedSrc = getAudioUrl(src);
     console.log("SimpleAudioPlayer: URL corrigée:", correctedSrc);
+
+    if (!correctedSrc) {
+      setError("Fichier audio non supporté ou manquant");
+      return;
+    }
 
     // Configurer la source
     audio.src = correctedSrc;

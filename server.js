@@ -63,6 +63,11 @@ const port = process.env.PORT || 5050;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Configuration trust proxy pour Railway et production
+if (process.env.NODE_ENV === 'production') {
+    app.set('trust proxy', 1); // Corriger l'erreur express-rate-limit sur Railway
+}
+
 // Middleware de timing pour mesurer les performances
 app.use((req, res, next) => {
     req.startTime = Date.now();
@@ -79,8 +84,8 @@ app.use(helmet({
             defaultSrc: ["'self'"],
             styleSrc: ["'self'", "'unsafe-inline'"],
             scriptSrc: ["'self'"],
-            imgSrc: ["'self'", "data:", "https:"],
-            mediaSrc: ["'self'"],
+            imgSrc: ["'self'", "data:", "https:", "blob:"],
+            mediaSrc: ["'self'", "data:", "blob:"], // Permettre les fichiers audio
             fontSrc: ["'self'"],
             connectSrc: ["'self'", 'https://polostore-five.vercel.app', 'https://polostore-production.up.railway.app'],
         }
@@ -132,10 +137,29 @@ const getAudioMimeType = (filename) => {
     switch (ext) {
         case '.mp3': return 'audio/mpeg';
         case '.wav': return 'audio/wav';
+        case '.wave': return 'audio/wav';
         case '.ogg': return 'audio/ogg';
         case '.flac': return 'audio/flac';
         case '.aac': return 'audio/aac';
-        default: return 'application/octet-stream';
+        case '.m4a': return 'audio/mp4';
+        case '.wma': return 'audio/x-ms-wma';
+        default: return 'audio/mpeg'; // Par défaut audio
+    }
+};
+
+// Fonction d'aide pour déterminer le type MIME correct pour les fichiers image
+const getImageMimeType = (filename) => {
+    const ext = path.extname(filename).toLowerCase();
+    switch (ext) {
+        case '.jpg':
+        case '.jpeg': return 'image/jpeg';
+        case '.png': return 'image/png';
+        case '.gif': return 'image/gif';
+        case '.webp': return 'image/webp';
+        case '.svg': return 'image/svg+xml';
+        case '.bmp': return 'image/bmp';
+        case '.ico': return 'image/x-icon';
+        default: return 'image/jpeg'; // Par défaut image
     }
 };
 
@@ -164,10 +188,16 @@ app.use('/uploads', (req, res, next) => {
         res.setHeader('Cache-Control', 'public, max-age=31536000'); // Cache 1 an
 
         // Déterminer le type MIME pour les fichiers audio
-        if (req.path.match(/\.(mp3|wav|ogg|flac|aac)$/i)) {
+        if (req.path.match(/\.(mp3|wav|ogg|flac|aac|m4a|wma)$/i)) {
             const mimeType = getAudioMimeType(req.path);
             res.setHeader('Content-Type', mimeType);
             res.setHeader('Accept-Ranges', 'bytes');
+        }
+
+        // Déterminer le type MIME pour les fichiers image
+        if (req.path.match(/\.(jpg|jpeg|png|gif|webp|svg|bmp|ico)$/i)) {
+            const mimeType = getImageMimeType(req.path);
+            res.setHeader('Content-Type', mimeType);
         }
 
         // Servir le fichier

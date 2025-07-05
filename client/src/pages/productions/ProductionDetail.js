@@ -19,6 +19,7 @@ import {
     NavigateNext
 } from '@mui/icons-material';
 import config from '../../config/config';
+import { getImageUrl, getAudioUrl } from '../../utils/fileUtils';
 
 // Composant pour afficher la barre de progression
 const ProgressBar = ({ audioRef, isPlaying }) => {
@@ -191,19 +192,10 @@ const ProductionDetail = () => {
                 // Log complet des données pour débugger
                 console.log('Production complète:', data);
 
-                // Correction : ne pas mettre d'audio par défaut
+                // Correction : utiliser getAudioUrl pour gérer l'URL audio
                 if (data && data.audio_url) {
-                    let audioSrc;
-                    if (data.audio_url.startsWith('http')) {
-                        audioSrc = data.audio_url;
-                    } else if (data.audio_url.startsWith('/api/')) {
-                        audioSrc = data.audio_url;
-                    } else if (data.audio_url.startsWith('/')) {
-                        audioSrc = data.audio_url;
-                    } else {
-                        audioSrc = `/api/uploads/${data.audio_url}`;
-                    }
-                    setAudioUrl(audioSrc);
+                    const audioSrc = getAudioUrl(data.audio_url);
+                    setAudioUrl(audioSrc || '');
                 } else {
                     setAudioUrl(''); // Pas d'audio
                 }
@@ -463,16 +455,10 @@ const ProductionDetail = () => {
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
-                                        background: production.image_url
-                                            ? production.image_url.startsWith('http')
-                                              ? `url(${production.image_url}) center/cover`
-                                              : production.image_url.startsWith('/api/')
-                                                ? `url(${production.image_url}) center/cover`
-                                                : production.image_url.startsWith('/uploads/')
-                                                  ? `url(/api${production.image_url}) center/cover`
-                                                  : `url(/api/uploads/${production.image_url}) center/cover`
+                                        background: getImageUrl(production.image_url)
+                                            ? `url(${getImageUrl(production.image_url)}) center/cover`
                                             : 'linear-gradient(135deg, #6a1b9a 0%, #4a148c 100%)',
-                                        '&::before': production.image_url && {
+                                        '&::before': getImageUrl(production.image_url) && {
                                             content: '""',
                                             position: 'absolute',
                                             top: 0, left: 0, right: 0, bottom: 0,

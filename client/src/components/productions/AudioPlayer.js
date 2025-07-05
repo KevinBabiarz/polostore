@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Box, IconButton, Typography, Slider } from '@mui/material';
 import { PlayArrow, Pause, VolumeUp, VolumeOff } from '@mui/icons-material';
+import { getAudioUrl } from '../../utils/fileUtils';
 
 /**
  * Composant de lecteur audio amélioré
@@ -18,36 +19,6 @@ const AudioPlayer = ({ audioUrl, onPlayStateChange = () => {} }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   const audioRef = useRef(null);
-
-  // Formatage de l'URL audio pour garantir qu'elle fonctionne
-  const getFormattedAudioUrl = () => {
-    if (!audioUrl) return '';
-
-    // Si URL complète avec http, utiliser telle quelle
-    if (audioUrl.startsWith('http')) {
-      return audioUrl;
-    }
-
-    // Construire l'URL absolue pour Railway/production
-    const baseUrl = process.env.NODE_ENV === 'production'
-      ? 'https://polostore-production.up.railway.app'
-      : 'http://localhost:5050';
-
-    // Si le chemin commence par /uploads/, construire l'URL complète
-    if (audioUrl.startsWith('/uploads/')) {
-      return `${baseUrl}${audioUrl}`;
-    }
-
-    // Corriger les anciennes URLs /api/uploads/ vers /uploads/
-    if (audioUrl.startsWith('/api/uploads/')) {
-      const correctedPath = audioUrl.replace('/api/uploads/', '/uploads/');
-      return `${baseUrl}${correctedPath}`;
-    }
-
-    // Pour tout autre cas, construire l'URL avec /uploads/
-    const fileName = audioUrl.split('/').pop();
-    return `${baseUrl}/uploads/${fileName}`;
-  };
 
   // Format time in minutes and seconds
   const formatTime = (seconds) => {
@@ -80,8 +51,15 @@ const AudioPlayer = ({ audioUrl, onPlayStateChange = () => {} }) => {
       audioElement.pause();
     }
 
-    const formattedUrl = getFormattedAudioUrl();
+    // Utiliser la fonction utilitaire pour obtenir l'URL correcte
+    const formattedUrl = getAudioUrl(audioUrl);
     console.log("AudioPlayer: URL formatée:", formattedUrl);
+
+    if (!formattedUrl) {
+      setError("Fichier audio non supporté");
+      setIsLoading(false);
+      return;
+    }
 
     // Préparer les gestionnaires d'événements
     const handleLoadedMetadata = () => {

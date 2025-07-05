@@ -23,6 +23,7 @@ import config from '../../config/config';
 import { useAuth } from '../../contexts/AuthContext';
 import AudioPlayer from '../../components/productions/AudioPlayer';
 import SimpleAudioPlayer from '../../components/productions/SimpleAudioPlayer';
+import { getImageUrl, getAudioUrl } from '../../utils/fileUtils';
 
 const ProductionsList = () => {
     // États
@@ -555,11 +556,7 @@ const ProductionsList = () => {
                                                     {/* Image absolument positionnée pour maintenir le ratio */}
                                                     <CardMedia
                                                         component="img"
-                                                        image={production.image_url ?
-                                                            (production.image_url.startsWith('http') ?
-                                                            production.image_url :
-                                                            `/uploads/${production.image_url.split('/').pop()}`) :
-                                                            '/images/vinyl-record.svg'}
+                                                        image={getImageUrl(production.image_url) || '/images/vinyl-record.svg'}
                                                         alt={production.title}
                                                         sx={{
                                                             position: 'absolute',
@@ -678,11 +675,7 @@ const ProductionsList = () => {
                                                                     Écouter un extrait
                                                                 </Typography>
                                                                 <SimpleAudioPlayer
-                                                                    src={production.audio_url.startsWith('http')
-                                                                        ? production.audio_url
-                                                                        : production.audio_url.startsWith('/api/')
-                                                                            ? production.audio_url
-                                                                            : `/api/uploads/${production.audio_url.split('/').pop()}`}
+                                                                    src={production.audio_url}
                                                                 />
                                                             </>
                                                         ) : (
