@@ -13,7 +13,8 @@ export const corsConfig = {
         // En production, définir les domaines autorisés
         const allowedOrigins = [
             process.env.FRONTEND_URL || 'http://localhost:3000',
-            process.env.PRODUCTION_URL || 'https://votre-domaine.com',
+            'https://www.polobeatsprod.com', // Domaine principal avec www
+            'https://polobeatsprod.com', // Domaine sans www
             'https://polostore-frontend.vercel.app', // Ancien domaine Vercel
             'https://polostore-five.vercel.app', // Domaine Vercel actuel
             /\.vercel\.app$/ // Autoriser tous les sous-domaines Vercel

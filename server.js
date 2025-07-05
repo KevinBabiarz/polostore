@@ -101,7 +101,7 @@ app.use(helmet({
             imgSrc: ["'self'", "data:", "https:", "blob:"],
             mediaSrc: ["'self'", "data:", "blob:"], // Permettre les fichiers audio
             fontSrc: ["'self'"],
-            connectSrc: ["'self'", 'https://polostore-five.vercel.app', 'https://polostore-production.up.railway.app'],
+            connectSrc: ["'self'", 'https://www.polobeatsprod.com', 'https://polobeatsprod.com', 'https://polostore-five.vercel.app', 'https://polostore-production.up.railway.app'],
         }
     },
     crossOriginEmbedderPolicy: false,
