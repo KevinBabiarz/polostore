@@ -10,3 +10,9 @@ restartPolicyMaxRetries = 10
 
 [variables]
 NODE_ENV = "production"
+RAILWAY_RUN_UID = "0"
+
+# Configuration du volume persistant pour les uploads
+[[volume]]
+name = "uploads-volume"
+mountPath = "/app/public/uploads"

@@ -4,6 +4,19 @@ import path from 'path';
 import crypto from 'crypto';
 import fs from 'fs';
 
+// Configuration du chemin des uploads pour Railway avec volume persistant
+const getUploadsPath = () => {
+    // Si on est sur Railway avec un volume monté
+    if (process.env.RAILWAY_VOLUME_MOUNT_PATH) {
+        return process.env.RAILWAY_VOLUME_MOUNT_PATH;
+    }
+
+    // Sinon, utiliser le chemin local
+    return './public/uploads/';
+};
+
+const UPLOADS_PATH = getUploadsPath();
+
 // Liste des types MIME autorisés
 const ALLOWED_IMAGE_TYPES = [
     'image/jpeg',
@@ -61,14 +74,12 @@ const generateSecureFilename = (originalname) => {
 // Configuration de stockage sécurisée
 const secureStorage = multer.diskStorage({
     destination: function (req, file, cb) {
-        const uploadDir = './public/uploads/';
-
         // Créer le dossier s'il n'existe pas
-        if (!fs.existsSync(uploadDir)) {
-            fs.mkdirSync(uploadDir, { recursive: true });
+        if (!fs.existsSync(UPLOADS_PATH)) {
+            fs.mkdirSync(UPLOADS_PATH, { recursive: true });
         }
 
-        cb(null, uploadDir);
+        cb(null, UPLOADS_PATH);
     },
     filename: function (req, file, cb) {
         const secureFilename = generateSecureFilename(file.originalname);

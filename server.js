@@ -36,6 +36,20 @@ if (process.env.NODE_ENV !== 'production') {
     dotenv.config();
 }
 
+// Configuration du chemin des uploads pour Railway avec volume persistant
+const getUploadsPath = () => {
+    // Si on est sur Railway avec un volume monté
+    if (process.env.RAILWAY_VOLUME_MOUNT_PATH) {
+        logger.info(`Volume Railway détecté: ${process.env.RAILWAY_VOLUME_MOUNT_PATH}`);
+        return process.env.RAILWAY_VOLUME_MOUNT_PATH;
+    }
+
+    // Sinon, utiliser le chemin local
+    return path.join(__dirname, 'public/uploads');
+};
+
+const UPLOADS_PATH = getUploadsPath();
+
 // Vérifier que la clé secrète JWT existe et est forte
 if (!process.env.JWT_SECRET) {
     logger.error('JWT_SECRET manquant dans les variables d\'environnement');
@@ -165,7 +179,7 @@ const getImageMimeType = (filename) => {
 
 // Middleware sécurisé pour servir les fichiers statiques
 app.use('/uploads', (req, res, next) => {
-    const filePath = path.join(__dirname, 'public/uploads', req.path);
+    const filePath = path.join(UPLOADS_PATH, req.path);
 
     // Vérifier que le chemin ne contient pas de traversée de répertoire
     if (req.path.includes('..') || req.path.includes('~')) {
@@ -206,9 +220,9 @@ app.use('/uploads', (req, res, next) => {
 });
 
 // Créer le dossier uploads s'il n'existe pas
-const dir = './public/uploads';
-if (!fs.existsSync(dir)){
-    fs.mkdirSync(dir, { recursive: true });
+if (!fs.existsSync(UPLOADS_PATH)){
+    fs.mkdirSync(UPLOADS_PATH, { recursive: true });
+    logger.info(`Dossier uploads créé: ${UPLOADS_PATH}`);
 }
 
 // Initialiser la base de données
