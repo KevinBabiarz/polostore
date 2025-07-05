@@ -104,11 +104,19 @@ const Home = () => {
                     height: { xs: 300, sm: 350, md: 400 },
                     width: '100%',
                     maxWidth: { xs: '100%', sm: 500, md: 600 },
-                    margin: '0 auto'
-                }}>
+                    margin: '0 auto',
+                    cursor: 'pointer',
+                    transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
+                    '&:hover': {
+                        transform: 'scale(1.02)',
+                        boxShadow: 6
+                    }
+                }}
+                onClick={() => window.open('https://distrokid.com/hyperfollow/polobeatsprod/121-bpm', '_blank')}
+                >
                     <img
                         src="/images/COVER121BPM3000x3000.jpg"
-                        alt="Promotion en cours"
+                        alt="121 BPM - Cliquez pour écouter sur DistroKid"
                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                     />
                 </Box>
