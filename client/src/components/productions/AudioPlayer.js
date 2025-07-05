@@ -37,9 +37,9 @@ const AudioPlayer = ({ audioUrl, onPlayStateChange = () => {} }) => {
       return audioUrl;
     }
 
-    // Si le chemin commence par /api/uploads/, l'utiliser tel quel
+    // Corriger: ne plus supporter /api/uploads/ car le serveur sert sur /uploads/
     if (audioUrl.startsWith('/api/uploads/')) {
-      return audioUrl;
+      return audioUrl.replace('/api/uploads/', '/uploads/');
     }
 
     // Sinon, construire le chemin complet

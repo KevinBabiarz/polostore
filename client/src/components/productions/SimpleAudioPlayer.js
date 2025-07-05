@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Box, IconButton, Typography, Slider } from '@mui/material';
+import { Box, IconButton, Typography } from '@mui/material';
 import { PlayArrow, Pause } from '@mui/icons-material';
 
 /**
@@ -32,12 +32,17 @@ const SimpleAudioPlayer = ({ src }) => {
     setIsPlaying(false);
     setError(null);
 
+    // Corriger l'URL si nécessaire
+    const correctedSrc = src?.startsWith('/api/uploads/')
+      ? src.replace('/api/uploads/', '/uploads/')
+      : src;
+
     // Configurer la source
-    audio.src = src;
+    audio.src = correctedSrc;
 
     // Gestionnaire d'erreur simple
     const handleError = () => {
-      console.error("SimpleAudioPlayer: Erreur de chargement audio:", src);
+      console.error("SimpleAudioPlayer: Erreur de chargement audio:", correctedSrc);
       setError("Impossible de charger l'audio");
       setIsPlaying(false);
     };

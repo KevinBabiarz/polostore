@@ -222,6 +222,7 @@ export const ProductionService = {
      */
     updateProduction: async (id, updateData) => {
         console.log(`[PROD SERVICE] Mise à jour de la production ID ${id}`);
+        console.log(`[PROD SERVICE] Données de mise à jour reçues:`, updateData);
 
         try {
             const production = await Production.findByPk(id);
@@ -236,7 +237,11 @@ export const ProductionService = {
                 updateData.audio_url !== production.audio_url) {
                 // Suppression de l'ancien fichier
                 try {
-                    const oldFilePath = path.join(__dirname, '..', 'public', production.audio_url);
+                    // Corriger le chemin pour la suppression de fichier
+                    const oldAudioPath = production.audio_url.startsWith('/uploads/')
+                        ? production.audio_url.replace('/uploads/', '')
+                        : production.audio_url.replace('/api/uploads/', '');
+                    const oldFilePath = path.join(__dirname, '..', 'public', 'uploads', oldAudioPath);
                     if (fs.existsSync(oldFilePath)) {
                         fs.unlinkSync(oldFilePath);
                         console.log(`[PROD SERVICE] Ancien fichier audio supprimé: ${oldFilePath}`);
@@ -247,11 +252,52 @@ export const ProductionService = {
                 }
             }
 
-            // Mettre à jour la production
-            await production.update(updateData);
+            // Gestion du fichier image si un nouveau fichier est envoyé
+            if (updateData.image_url && production.image_url &&
+                updateData.image_url !== production.image_url) {
+                try {
+                    // Corriger le chemin pour la suppression de fichier
+                    const oldImagePath = production.image_url.startsWith('/uploads/')
+                        ? production.image_url.replace('/uploads/', '')
+                        : production.image_url.replace('/api/uploads/', '');
+                    const oldFilePath = path.join(__dirname, '..', 'public', 'uploads', oldImagePath);
+                    if (fs.existsSync(oldFilePath)) {
+                        fs.unlinkSync(oldFilePath);
+                        console.log(`[PROD SERVICE] Ancien fichier image supprimé: ${oldFilePath}`);
+                    }
+                } catch (fileError) {
+                    console.error(`[PROD SERVICE] Erreur lors de la suppression de l'image:`, fileError);
+                    // On continue malgré l'erreur de suppression du fichier
+                }
+            }
+
+            // Nettoyer les données avant la mise à jour pour éviter les doublons
+            const cleanUpdateData = { ...updateData };
+
+            // Supprimer les champs undefined ou null
+            Object.keys(cleanUpdateData).forEach(key => {
+                if (cleanUpdateData[key] === undefined || cleanUpdateData[key] === null || cleanUpdateData[key] === '') {
+                    delete cleanUpdateData[key];
+                }
+            });
+
+            console.log(`[PROD SERVICE] Données nettoyées pour mise à jour:`, cleanUpdateData);
+
+            // Mettre à jour la production avec les données nettoyées
+            const [updatedCount] = await Production.update(cleanUpdateData, {
+                where: { id: id },
+                returning: true
+            });
+
+            if (updatedCount === 0) {
+                throw new Error("Aucune mise à jour effectuée");
+            }
+
+            // Récupérer la production mise à jour
+            const updatedProduction = await Production.findByPk(id);
             console.log(`[PROD SERVICE] Production mise à jour avec succès, ID: ${id}`);
 
-            return production;
+            return updatedProduction;
         } catch (error) {
             console.error(`[PROD SERVICE] Erreur lors de la mise à jour de la production ${id}:`, error.message);
             throw error;
