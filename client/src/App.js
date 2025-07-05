@@ -23,6 +23,7 @@ import Favorites from './pages/favorites/Favorites';
 import UserProfile from './pages/profile/UserProfile';
 import ThemeToggle from './components/ui/ThemeToggle';
 import ProtectedRoute from './components/auth/ProtectedRoute';
+import DiagnosticPage from './pages/DiagnosticPage';
 
 // Personnalisation globale des champs de formulaire MUI
 // const theme = createTheme({
@@ -181,6 +182,7 @@ function App() {
                     <UserManagement />
                   </ProtectedRoute>
                 } />
+                <Route path="/diagnostic" element={<DiagnosticPage />} />
 
                 {/* Page d'accès refusé */}
                 <Route path="/access-denied" element={<AccessDenied />} />

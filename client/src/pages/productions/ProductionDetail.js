@@ -468,7 +468,7 @@ const ProductionDetail = () => {
                                     }}
                                 >
                                     {/* Affiche l'icône MusicNote SEULEMENT si pas d'image ET il y a un audio */}
-                                    {!production.image_url && audioUrl && (
+                                    {!getImageUrl(production.image_url) && audioUrl && (
                                         <MusicNote
                                             sx={{
                                                 fontSize: { xs: 80, md: 120 },
