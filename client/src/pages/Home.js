@@ -1,27 +1,28 @@
 // src/pages/Home.js
-import React, { useState } from 'react';
-import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     Container, Typography, Box, Grid, Card,
-    CardContent, Button, CircularProgress, Alert,
-    Paper, Chip, IconButton, useTheme, useMediaQuery,
-    Stack, Fade
+    CardContent, Button, useTheme, useMediaQuery,
+    Stack
 } from '@mui/material';
 import {
     ArrowForward, MusicNote, Email, CheckCircle,
     PlayArrow, ArrowForwardIos
 } from '@mui/icons-material';
-import { isAuthenticated } from '../services/authService';
-import config from '../config/config';
 import { useAuth } from '../contexts/AuthContext';
 
 const Home = () => {
     const navigate = useNavigate();
     const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
     const isSmallMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const { user } = useAuth();
     const isUserLoggedIn = !!user;
+
+    const handleImageClick = () => {
+        console.log('Image cliquée!'); // Pour debug
+        window.open('https://distrokid.com/hyperfollow/polobeatsprod/121-bpm', '_blank');
+    };
 
     return (
         <Container maxWidth="lg" sx={{ py: { xs: 3, sm: 4, md: 8 } }}>
@@ -93,31 +94,44 @@ const Home = () => {
                         )}
                     </Stack>
                 </Box>
-                <Box sx={{
-                    flex: 1,
-                    display: 'flex',
-                    justifyContent: 'center',
-                    border: '1px solid #eaeaea',
-                    borderRadius: 2,
-                    overflow: 'hidden',
-                    boxShadow: 3,
-                    height: { xs: 300, sm: 350, md: 400 },
-                    width: '100%',
-                    maxWidth: { xs: '100%', sm: 500, md: 600 },
-                    margin: '0 auto',
-                    cursor: 'pointer',
-                    transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
-                    '&:hover': {
-                        transform: 'scale(1.02)',
-                        boxShadow: 6
-                    }
-                }}
-                onClick={() => window.open('https://distrokid.com/hyperfollow/polobeatsprod/121-bpm', '_blank')}
+                <Box
+                    sx={{
+                        flex: 1,
+                        display: 'flex',
+                        justifyContent: 'center',
+                        border: '1px solid #eaeaea',
+                        borderRadius: 2,
+                        overflow: 'hidden',
+                        boxShadow: 3,
+                        height: { xs: 300, sm: 350, md: 400 },
+                        width: '100%',
+                        maxWidth: { xs: '100%', sm: 500, md: 600 },
+                        margin: '0 auto',
+                        cursor: 'pointer',
+                        transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
+                        '&:hover': {
+                            transform: 'scale(1.02)',
+                            boxShadow: 6
+                        }
+                    }}
+                    onClick={handleImageClick}
+                    role="button"
+                    tabIndex={0}
+                    onKeyPress={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            handleImageClick();
+                        }
+                    }}
                 >
                     <img
                         src="/images/COVER121BPM3000x3000.jpg"
                         alt="121 BPM - Cliquez pour écouter sur DistroKid"
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover',
+                            pointerEvents: 'none' // Empêche l'img d'intercepter les clics
+                        }}
                     />
                 </Box>
             </Box>
