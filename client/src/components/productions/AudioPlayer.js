@@ -28,22 +28,25 @@ const AudioPlayer = ({ audioUrl, onPlayStateChange = () => {} }) => {
       return audioUrl;
     }
 
-    // Pour les chemins locaux, utiliser /uploads/ avec le nom de fichier complet
-    // Ne jamais supprimer le timestamp du nom du fichier
-    const fileName = audioUrl.split('/').pop();
+    // Construire l'URL absolue pour Railway/production
+    const baseUrl = process.env.NODE_ENV === 'production'
+      ? 'https://polostore-production.up.railway.app'
+      : 'http://localhost:5050';
 
-    // Si le chemin commence déjà par /uploads/, l'utiliser tel quel
+    // Si le chemin commence par /uploads/, construire l'URL complète
     if (audioUrl.startsWith('/uploads/')) {
-      return audioUrl;
+      return `${baseUrl}${audioUrl}`;
     }
 
-    // Corriger: ne plus supporter /api/uploads/ car le serveur sert sur /uploads/
+    // Corriger les anciennes URLs /api/uploads/ vers /uploads/
     if (audioUrl.startsWith('/api/uploads/')) {
-      return audioUrl.replace('/api/uploads/', '/uploads/');
+      const correctedPath = audioUrl.replace('/api/uploads/', '/uploads/');
+      return `${baseUrl}${correctedPath}`;
     }
 
-    // Sinon, construire le chemin complet
-    return `/uploads/${fileName}`;
+    // Pour tout autre cas, construire l'URL avec /uploads/
+    const fileName = audioUrl.split('/').pop();
+    return `${baseUrl}/uploads/${fileName}`;
   };
 
   // Format time in minutes and seconds

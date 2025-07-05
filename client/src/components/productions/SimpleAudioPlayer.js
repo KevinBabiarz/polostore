@@ -32,10 +32,25 @@ const SimpleAudioPlayer = ({ src }) => {
     setIsPlaying(false);
     setError(null);
 
-    // Corriger l'URL si nécessaire
-    const correctedSrc = src?.startsWith('/api/uploads/')
-      ? src.replace('/api/uploads/', '/uploads/')
-      : src;
+    // Construire l'URL absolue pour Railway/production
+    let correctedSrc = src;
+    if (src && !src.startsWith('http')) {
+      const baseUrl = process.env.NODE_ENV === 'production'
+        ? 'https://polostore-production.up.railway.app'
+        : 'http://localhost:5050';
+
+      if (src.startsWith('/uploads/')) {
+        correctedSrc = `${baseUrl}${src}`;
+      } else if (src.startsWith('/api/uploads/')) {
+        const correctedPath = src.replace('/api/uploads/', '/uploads/');
+        correctedSrc = `${baseUrl}${correctedPath}`;
+      } else {
+        const fileName = src.split('/').pop();
+        correctedSrc = `${baseUrl}/uploads/${fileName}`;
+      }
+    }
+
+    console.log("SimpleAudioPlayer: URL corrigée:", correctedSrc);
 
     // Configurer la source
     audio.src = correctedSrc;

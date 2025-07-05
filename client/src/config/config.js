@@ -10,8 +10,8 @@ const config = {
         ? 'https://polostore-production.up.railway.app'
         : 'http://localhost:5050',
 
-    // Chemin d'accès pour les nouveaux uploads
-    UPLOAD_PATH: '/api/uploads/'
+    // Chemin d'accès pour les nouveaux uploads - CORRIGER ici
+    UPLOAD_PATH: '/uploads/'
 };
 
 console.log('Configuration API:', config);
