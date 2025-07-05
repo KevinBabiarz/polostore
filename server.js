@@ -325,8 +325,24 @@ app.use((err, req, res, next) => {
     });
 });
 
-// Middleware pour les routes non trouvées
-app.all('/*', (req, res) => {
+// En mode production, servir les fichiers statiques React
+if (process.env.NODE_ENV === 'production') {
+    app.use(express.static(path.join(__dirname, 'client/build')));
+
+    // Catch-all handler pour React Router - doit être APRÈS les routes API et AVANT le middleware 404
+    app.get('/*', (req, res, next) => {
+        // Ne pas intercepter les routes API
+        if (req.path.startsWith('/api/') || req.path.startsWith('/uploads/') || req.path.startsWith('/health') || req.path.startsWith('/test')) {
+            return next();
+        }
+
+        // Servir index.html pour toutes les autres routes (React Router)
+        res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
+    });
+}
+
+// Middleware pour les routes non trouvées - DOIT ÊTRE LE DERNIER
+app.all('*', (req, res) => {
     logger.warn('Route non trouvée', {
         path: req.originalUrl,
         method: req.method,
@@ -337,15 +353,6 @@ app.all('/*', (req, res) => {
         error: 'Route non trouvée'
     });
 });
-
-// En mode production, servir les fichiers statiques React
-if (process.env.NODE_ENV === 'production') {
-    app.use(express.static(path.join(__dirname, 'client/build')));
-
-    app.get('/*', (req, res) => {
-        res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
-    });
-}
 
 // Gestion gracieuse de l'arrêt du serveur
 let server;
