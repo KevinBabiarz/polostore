@@ -3,39 +3,42 @@ import React, { useState } from 'react';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import { sendContactMessage } from '../../services/contactService';
+import { useTranslation } from 'react-i18next';
 import {
     Container, Typography, Paper, TextField, Button,
     Snackbar, Alert, Box
 } from '@mui/material';
 
-const validationSchema = Yup.object({
-    name: Yup.string()
-        .required('Nom requis'),
-    email: Yup.string()
-        .email('Email invalide')
-        .required('Email requis'),
-    subject: Yup.string()
-        .required('Sujet requis'),
-    message: Yup.string()
-        .required('Message requis')
-        .min(10, 'Le message doit contenir au moins 10 caractères')
-});
-
 const Contact = () => {
     const [openAlert, setOpenAlert] = useState(false);
     const [alertMessage, setAlertMessage] = useState('');
     const [alertSeverity, setAlertSeverity] = useState('success');
+    const { t } = useTranslation('contact'); // Spécifier le namespace contact
+
+    // Schéma de validation avec traductions
+    const validationSchema = Yup.object({
+        name: Yup.string()
+            .required(t('nameRequired')),
+        email: Yup.string()
+            .email(t('emailInvalid'))
+            .required(t('emailRequired')),
+        subject: Yup.string()
+            .required(t('subjectRequired')),
+        message: Yup.string()
+            .required(t('messageRequired'))
+            .min(10, t('messageMinLength'))
+    });
 
     const handleSubmit = async (values, { setSubmitting, resetForm }) => {
         try {
             await sendContactMessage(values);
-            setAlertMessage('Votre message a été envoyé avec succès. Nous vous répondrons prochainement.');
+            setAlertMessage(t('messageSuccess'));
             setAlertSeverity('success');
             setOpenAlert(true);
             resetForm();
         } catch (error) {
             console.error("Erreur lors de l'envoi du message:", error);
-            setAlertMessage('Une erreur est survenue lors de l\'envoi du message. Veuillez réessayer.');
+            setAlertMessage(t('messageError'));
             setAlertSeverity('error');
             setOpenAlert(true);
         } finally {
@@ -47,11 +50,11 @@ const Contact = () => {
         <Container maxWidth="md" sx={{ py: 4 }}>
             <Paper sx={{ p: 4 }}>
                 <Typography variant="h4" component="h1" gutterBottom align="center">
-                    Contactez-nous
+                    {t('title')}
                 </Typography>
 
                 <Typography variant="body1" paragraph align="center" sx={{ mb: 4 }}>
-                    Une question, une suggestion ou un problème ? N'hésitez pas à nous écrire !
+                    {t('subtitle')}
                 </Typography>
 
                 <Formik
@@ -66,7 +69,7 @@ const Contact = () => {
                                     as={TextField}
                                     fullWidth
                                     name="name"
-                                    label="Nom"
+                                    label={t('name')}
                                     error={touched.name && Boolean(errors.name)}
                                     helperText={touched.name && errors.name}
                                 />
@@ -75,7 +78,7 @@ const Contact = () => {
                                     as={TextField}
                                     fullWidth
                                     name="email"
-                                    label="Email"
+                                    label={t('email')}
                                     type="email"
                                     error={touched.email && Boolean(errors.email)}
                                     helperText={touched.email && errors.email}
@@ -87,7 +90,7 @@ const Contact = () => {
                                 fullWidth
                                 margin="normal"
                                 name="subject"
-                                label="Sujet"
+                                label={t('subject')}
                                 error={touched.subject && Boolean(errors.subject)}
                                 helperText={touched.subject && errors.subject}
                             />
@@ -97,7 +100,7 @@ const Contact = () => {
                                 fullWidth
                                 margin="normal"
                                 name="message"
-                                label="Message"
+                                label={t('message')}
                                 multiline
                                 rows={6}
                                 error={touched.message && Boolean(errors.message)}
@@ -112,7 +115,7 @@ const Contact = () => {
                                     size="large"
                                     disabled={isSubmitting}
                                 >
-                                    {isSubmitting ? 'Envoi en cours...' : 'Envoyer le message'}
+                                    {isSubmitting ? t('sending') : t('sendMessage')}
                                 </Button>
                             </Box>
                         </Form>

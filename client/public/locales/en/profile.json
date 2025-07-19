@@ -1,0 +1,13 @@
+{
+  "title": "My Profile",
+  "editProfile": "Edit Profile",
+  "changePassword": "Change Password",
+  "currentPassword": "Current Password",
+  "newPassword": "New Password",
+  "confirmNewPassword": "Confirm New Password",
+  "profileUpdated": "Profile updated",
+  "passwordChanged": "Password changed",
+  "invalidCurrentPassword": "Invalid current password",
+  "personalInfo": "Personal Information",
+  "updateProfile": "Update Profile"
+}

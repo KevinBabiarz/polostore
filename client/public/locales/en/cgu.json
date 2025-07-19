@@ -1,0 +1,57 @@
+{
+  "title": "Terms and Conditions of Use",
+  "lastUpdate": "Last updated: {{date}}",
+  "section1": {
+    "title": "1. Purpose",
+    "content1": "These terms and conditions of use (Terms) are intended to define the terms and conditions of use of the POLOBEATSPROD website as well as the rights and obligations of its users.",
+    "content2": "The POLOBEATSPROD site is a platform dedicated to music production, offering beats, instrumentals and high quality music production services."
+  },
+  "section2": {
+    "title": "2. Acceptance of Terms",
+    "content1": "Use of the POLOBEATSPROD site implies full acceptance of these Terms. If you do not accept these conditions, you must refrain from using the site.",
+    "content2": "These Terms may be modified at any time. Users will be informed of any changes via the site."
+  },
+  "section3": {
+    "title": "3. Site Access",
+    "content1": "The site is freely accessible anywhere to any user with Internet access. All costs incurred by the user to access the service (computer hardware, software, Internet connection, etc.) are at their expense.",
+    "content2": "Some features may require creating a user account. The user undertakes to provide accurate information and to keep their information up to date."
+  },
+  "section4": {
+    "title": "4. Intellectual Property",
+    "content1": "All content present on the POLOBEATSPROD site (texts, images, sounds, videos, logos, etc.) is protected by intellectual property rights and belongs to POLOBEATSPROD or its partners.",
+    "content2": "Any reproduction, distribution, modification, adaptation, retransmission or publication of these different elements is strictly prohibited without the express written agreement of POLOBEATSPROD.",
+    "content3": "The musical productions offered on the site are subject to specific licenses detailed at the time of purchase or download."
+  },
+  "section5": {
+    "title": "5. Site Usage",
+    "content1": "The user undertakes to use the site in accordance with these Terms and applicable legislation. It is notably forbidden to:",
+    "restriction1": "Use the site for illegal or unauthorized purposes",
+    "restriction2": "Download, broadcast or distribute content without authorization",
+    "restriction3": "Infringe intellectual property rights",
+    "restriction4": "Disrupt the operation of the site or servers"
+  },
+  "section6": {
+    "title": "6. Personal Data Protection",
+    "content1": "Personal data collected on the site is processed in accordance with the General Data Protection Regulation (GDPR) and applicable French legislation.",
+    "content2": "Users have the right to access, rectify, delete and port their personal data. To exercise these rights, contact us via the contact page."
+  },
+  "section7": {
+    "title": "7. Limitation of Liability",
+    "content1": "POLOBEATSPROD strives to provide information as accurate as possible. However, it cannot be held responsible for omissions, inaccuracies and deficiencies in updates.",
+    "content2": "The user assumes full responsibility for the use they make of the information and content present on the site."
+  },
+  "section8": {
+    "title": "8. Applicable Law and Competent Jurisdiction",
+    "content1": "These Terms are governed by French law. In case of dispute, French courts will have sole jurisdiction."
+  },
+  "section9": {
+    "title": "9. Contact",
+    "content1": "For any questions regarding these Terms, you can contact us via our",
+    "contactLink": "contact page",
+    "content2": "or by email."
+  },
+  "footer": {
+    "copyright": "© {{year}} POLOBEATSPROD - All rights reserved"
+  }
+}
+

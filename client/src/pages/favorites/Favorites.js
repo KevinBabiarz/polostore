@@ -8,8 +8,10 @@ import {
 } from '@mui/material';
 import { Delete } from '@mui/icons-material';
 import config from '../../config/config';
+import { useTranslation } from 'react-i18next';
 
 const Favorites = () => {
+    const { t } = useTranslation();
     const [favorites, setFavorites] = useState([]);
     const [loading, setLoading] = useState(true);
     const [openAlert, setOpenAlert] = useState(false);
@@ -20,9 +22,11 @@ const Favorites = () => {
             setLoading(true);
             const data = await getFavorites();
             setFavorites(data);
+            setAlertMessage(t('favorites.successFetch'));
+            setOpenAlert(true);
         } catch (error) {
             console.error("Erreur lors du chargement des favoris:", error);
-            setAlertMessage('Erreur lors du chargement des favoris');
+            setAlertMessage(t('favorites.errorFetch'));
             setOpenAlert(true);
         } finally {
             setLoading(false);
@@ -37,11 +41,11 @@ const Favorites = () => {
         try {
             await removeFavorite(productionId);
             setFavorites(favorites.filter(fav => fav.id !== productionId));
-            setAlertMessage('Production retirée des favoris');
+            setAlertMessage(t('favorites.successDelete'));
             setOpenAlert(true);
         } catch (error) {
             console.error("Erreur lors de la suppression du favori:", error);
-            setAlertMessage('Erreur lors de la suppression du favori');
+            setAlertMessage(t('favorites.errorDelete'));
             setOpenAlert(true);
         }
     };
@@ -49,19 +53,19 @@ const Favorites = () => {
     return (
         <Container maxWidth="lg" sx={{ py: 4 }}>
             <Typography variant="h4" component="h1" gutterBottom>
-                Mes Favoris
+                {t('favorites.title')}
             </Typography>
 
             {loading ? (
                 <Box sx={{ textAlign: 'center', py: 4 }}>
-                    <Typography>Chargement...</Typography>
+                    <Typography>{t('favorites.loading')}</Typography>
                 </Box>
             ) : (
                 <>
                     {favorites.length === 0 ? (
                         <Box sx={{ textAlign: 'center', py: 4 }}>
                             <Typography variant="body1" gutterBottom>
-                                Vous n'avez pas encore de favoris.
+                                {t('favorites.empty')}
                             </Typography>
                             <Button
                                 component={Link}
@@ -70,7 +74,7 @@ const Favorites = () => {
                                 color="primary"
                                 sx={{ mt: 2 }}
                             >
-                                Parcourir les productions
+                                {t('favorites.browseProductions')}
                             </Button>
                         </Box>
                     ) : (
@@ -104,13 +108,13 @@ const Favorites = () => {
                                                 size="small"
                                                 color="primary"
                                             >
-                                                Voir détails
+                                                {t('favorites.viewDetails')}
                                             </Button>
                                             <IconButton
                                                 color="error"
                                                 size="small"
                                                 onClick={() => handleRemoveFavorite(production.id)}
-                                                aria-label="Retirer des favoris"
+                                                aria-label={t('favorites.removeFromFavorites')}
                                             >
                                                 <Delete />
                                             </IconButton>

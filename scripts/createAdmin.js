@@ -3,10 +3,11 @@ import bcrypt from 'bcrypt';
 import User from '../models/User.js';
 import sequelize, { testConnection } from '../config/sequelize.js';
 import logger from '../utils/logger.js';
+import { i18n } from '../utils/i18n.js';
 
 const createAdmin = async () => {
     try {
-        logger.info('🔧 Création de l\'administrateur par défaut...');
+        logger.info(i18n.t('admin.createAdmin.creating'));
 
         // Tester la connexion
         await testConnection();
@@ -15,7 +16,7 @@ const createAdmin = async () => {
         const existingAdmin = await User.findOne({ where: { role: 'admin' } });
 
         if (existingAdmin) {
-            logger.info('✅ Un administrateur existe déjà');
+            logger.info(i18n.t('admin.createAdmin.adminExists'));
             return;
         }
 
@@ -39,22 +40,22 @@ const createAdmin = async () => {
             password: hashedPassword
         });
 
-        logger.info('✅ Administrateur créé avec succès', {
+        logger.info(i18n.t('admin.createAdmin.createSuccess'), {
             id: admin.id,
             username: admin.username,
             email: admin.email
         });
 
-        console.log('🎉 Administrateur créé avec succès !');
-        console.log(`Email: ${admin.email}`);
-        console.log(`Mot de passe: ${defaultAdmin.password}`);
-        console.log('⚠️  Changez ce mot de passe après la première connexion !');
+        console.log(i18n.t('admin.createAdmin.createSuccessConsole'));
+        console.log(i18n.t('admin.createAdmin.emailLabel', { email: admin.email }));
+        console.log(i18n.t('admin.createAdmin.passwordLabel', { password: defaultAdmin.password }));
+        console.log(i18n.t('admin.createAdmin.changePasswordWarning'));
 
     } catch (error) {
-        logger.error('❌ Erreur lors de la création de l\'administrateur', {
-            error: error.message
-        });
-        console.error('Erreur:', error.message);
+        logger.error(i18n.t('admin.createAdmin.createError'), { error: error.message });
+        console.error(i18n.t('admin.createAdmin.createError'), error);
+    } finally {
+        await sequelize.close();
     }
 };
 

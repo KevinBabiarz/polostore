@@ -1,0 +1,12 @@
+{
+  "title": "Mój profil",
+  "personalInfo": "Informacje osobiste",
+  "changePassword": "Zmień hasło",
+  "currentPassword": "Aktualne hasło",
+  "newPassword": "Nowe hasło",
+  "confirmNewPassword": "Potwierdź nowe hasło",
+  "updateProfile": "Zaktualizuj profil",
+  "profileUpdated": "Profil zaktualizowany pomyślnie",
+  "passwordChanged": "Hasło zmienione pomyślnie"
+}
+

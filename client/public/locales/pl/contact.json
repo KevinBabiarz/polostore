@@ -1,0 +1,18 @@
+{
+  "title": "Kontakt",
+  "subtitle": "Nie wahaj się skontaktować z nami w przypadku jakichkolwiek pytań lub sugestii.",
+  "name": "Nazwa",
+  "email": "Email",
+  "subject": "Temat",
+  "message": "Wiadomość",
+  "sendMessage": "Wyślij wiadomość",
+  "sending": "Wysyłanie...",
+  "messageSuccess": "Twoja wiadomość została wysłana pomyślnie!",
+  "messageError": "Błąd podczas wysyłania wiadomości",
+  "nameRequired": "Nazwa jest wymagana",
+  "emailRequired": "Email jest wymagany",
+  "emailInvalid": "Adres email nie jest prawidłowy",
+  "subjectRequired": "Temat jest wymagany",
+  "messageRequired": "Wiadomość jest wymagana",
+  "messageMinLength": "Wiadomość musi zawierać co najmniej 10 znaków"
+}

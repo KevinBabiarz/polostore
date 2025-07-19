@@ -1,0 +1,12 @@
+{
+  "title": "Contact",
+  "subtitle": "Feel free to contact us",
+  "name": "Name",
+  "message": "Message",
+  "send": "Send message",
+  "success": "Message sent successfully",
+  "error": "Error sending message",
+  "nameRequired": "Name is required",
+  "emailRequired": "Email is required",
+  "messageRequired": "Message is required"
+}

@@ -3,9 +3,11 @@ import React from 'react';
 import { Box, Container, Typography, Button, Paper } from '@mui/material';
 import { ArrowBack } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const NotFound = () => {
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     return (
         <Container maxWidth="md" sx={{ py: 8 }}>
@@ -15,11 +17,11 @@ const NotFound = () => {
                 </Typography>
 
                 <Typography variant="h4" component="h2" gutterBottom>
-                    Page non trouvée
+                    {t('errors.pageNotFound')}
                 </Typography>
 
                 <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-                    La page que vous recherchez n'existe pas ou a été déplacée.
+                    {t('errors.pageNotFoundDescription')}
                 </Typography>
 
                 <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2 }}>
@@ -28,14 +30,14 @@ const NotFound = () => {
                         startIcon={<ArrowBack />}
                         onClick={() => navigate('/')}
                     >
-                        Retour à l'accueil
+                        {t('errors.backToHome')}
                     </Button>
 
                     <Button
                         variant="outlined"
                         onClick={() => navigate(-1)}
                     >
-                        Page précédente
+                        {t('common.previous')}
                     </Button>
                 </Box>
             </Paper>

@@ -1,0 +1,8 @@
+{
+  "title": "Mes Favoris",
+  "noFavorites": "Aucun favori pour le moment",
+  "addedToFavorites": "Ajouté aux favoris",
+  "removedFromFavorites": "Retiré des favoris",
+  "errorAdding": "Erreur lors de l'ajout aux favoris",
+  "errorRemoving": "Erreur lors de la suppression des favoris"
+}

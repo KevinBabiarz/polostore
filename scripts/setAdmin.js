@@ -2,6 +2,7 @@
 import dotenv from 'dotenv';
 import sequelize from '../config/sequelize.js';
 import User from '../models/User.js';
+import { i18n } from '../utils/i18n.js';
 
 // En production (Railway), les variables d'environnement sont automatiquement disponibles
 // En développement, charger depuis .env
@@ -12,27 +13,27 @@ if (process.env.NODE_ENV !== 'production') {
 // Fonction pour définir un utilisateur comme admin par son email
 async function setUserAsAdmin(email) {
     try {
-        console.log(`Tentative de définition de l'utilisateur ${email} comme administrateur...`);
+        console.log(i18n.t('admin.setAdmin.attempting', { email }));
 
         // Trouver l'utilisateur par email
         const user = await User.findOne({ where: { email } });
 
         if (!user) {
-            console.error(`Utilisateur avec l'email ${email} non trouvé.`);
+            console.error(i18n.t('admin.setAdmin.userNotFound'));
             process.exit(1);
         }
 
         // Mettre à jour le rôle de l'utilisateur
         await user.update({ role: 'admin' });
 
-        console.log(`L'utilisateur ${email} a été défini comme administrateur avec succès.`);
+        console.log(i18n.t('admin.setAdmin.success', { email }));
         console.log(`Détails de l'utilisateur:`);
         console.log(`- ID: ${user.id}`);
         console.log(`- Nom d'utilisateur: ${user.username}`);
         console.log(`- Email: ${user.email}`);
         console.log(`- Rôle: ${user.role}`);
     } catch (error) {
-        console.error('Erreur:', error);
+        console.error(i18n.t('admin.setAdmin.error'), error);
     } finally {
         // Fermer la connexion à la base de données
         await sequelize.close();

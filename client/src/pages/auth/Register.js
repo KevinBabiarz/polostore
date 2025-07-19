@@ -8,6 +8,7 @@ import {
 } from '@mui/material';
 import { useAuth } from '../../contexts/AuthContext';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
     Person, Email, Lock, Visibility, VisibilityOff,
     HowToReg, ArrowBack, Check, ArrowForward
@@ -17,6 +18,7 @@ const Register = () => {
     const { register } = useAuth();
     const navigate = useNavigate();
     const theme = useTheme();
+    const { t } = useTranslation('auth'); // Spécifier le namespace auth
 
     // Modifié pour correspondre exactement aux champs attendus par le backend
     const [formData, setFormData] = useState({
@@ -57,32 +59,32 @@ const Register = () => {
         // Validation de base - s'assurer que tous les champs sont remplis
         // On utilise trim() comme le fait le backend
         if (!formData.username.trim() || !formData.email.trim() || !formData.password || !formData.confirmPassword) {
-            setError('Tous les champs sont obligatoires');
+            setError(t('allFieldsRequired'));
             return;
         }
 
         // Validation de l'email
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(formData.email.trim())) {
-            setError('Veuillez entrer une adresse email valide');
+            setError(t('emailInvalid'));
             return;
         }
 
         // Vérification que les mots de passe correspondent
         if (formData.password !== formData.confirmPassword) {
-            setError('Les mots de passe ne correspondent pas');
+            setError(t('passwordMismatch'));
             return;
         }
 
         // Vérification de la longueur minimale du mot de passe
         if (formData.password.length < 6) {
-            setError('Le mot de passe doit contenir au moins 6 caractères');
+            setError(t('passwordMinLength'));
             return;
         }
 
         // Vérification de l'acceptation des conditions
         if (!agreedToTerms) {
-            setError('Vous devez accepter les conditions d\'utilisation');
+            setError(t('termsRequired'));
             return;
         }
 
@@ -110,11 +112,11 @@ const Register = () => {
                 }, 1500);
             } else {
                 // Afficher le message d'erreur spécifique du serveur
-                setError(result?.message || 'Une erreur est survenue lors de l\'inscription');
+                setError(result?.message || t('registerError'));
             }
         } catch (err) {
             console.error('Erreur détaillée:', err);
-            setError('Une erreur est survenue lors de l\'inscription');
+            setError(t('registerError'));
         } finally {
             setLoading(false);
         }
@@ -147,7 +149,7 @@ const Register = () => {
                                 }}
                             >
                                 <Typography variant="h4" component="h1" align="center" fontWeight="bold">
-                                    Créer un compte
+                                    {t('registerTitle')}
                                 </Typography>
                             </Box>
                         </Grid>
@@ -166,7 +168,7 @@ const Register = () => {
                                                 '& .MuiAlert-icon': { alignItems: 'center' }
                                             }}
                                         >
-                                            Inscription réussie ! Vous allez être redirigé vers la page d'accueil...
+                                            {t('registerSuccess')}
                                         </Alert>
                                     </Zoom>
                                 ) : error ? (
@@ -194,7 +196,7 @@ const Register = () => {
                                         color: 'text.secondary'
                                     }}
                                 >
-                                    Rejoignez notre communauté pour accéder à des productions musicales exclusives
+                                    {t('registerSubtitle')}
                                 </Typography>
 
                                 <form onSubmit={handleSubmit}>
@@ -203,7 +205,7 @@ const Register = () => {
                                             <TextField
                                                 fullWidth
                                                 margin="normal"
-                                                label="Nom d'utilisateur"
+                                                label={t('username')}
                                                 name="username"
                                                 value={formData.username}
                                                 onChange={handleChange}
@@ -224,10 +226,10 @@ const Register = () => {
                                             <TextField
                                                 fullWidth
                                                 margin="normal"
-                                                label="Email"
+                                                label={t('email')}
                                                 name="email"
                                                 type="email"
-                                                placeholder="exemple@email.com"
+                                                placeholder={t('emailPlaceholder')}
                                                 value={formData.email}
                                                 onChange={handleChange}
                                                 autoComplete="email"
@@ -248,10 +250,10 @@ const Register = () => {
                                             <TextField
                                                 fullWidth
                                                 margin="normal"
-                                                label="Mot de passe"
+                                                label={t('password')}
                                                 name="password"
                                                 type={showPassword ? 'text' : 'password'}
-                                                placeholder="Votre mot de passe"
+                                                placeholder={t('passwordPlaceholder')}
                                                 value={formData.password}
                                                 onChange={handleChange}
                                                 autoComplete="new-password"
@@ -279,10 +281,10 @@ const Register = () => {
                                             <TextField
                                                 fullWidth
                                                 margin="normal"
-                                                label="Confirmer le mot de passe"
+                                                label={t('confirmPassword')}
                                                 name="confirmPassword"
                                                 type={showConfirmPassword ? 'text' : 'password'}
-                                                placeholder="Répétez le mot de passe"
+                                                placeholder={t('confirmPasswordPlaceholder')}
                                                 value={formData.confirmPassword}
                                                 onChange={handleChange}
                                                 autoComplete="new-password"
@@ -308,9 +310,8 @@ const Register = () => {
                                         </Grid>
                                         <Grid item xs={12} md={8} sx={{ display: 'flex', alignItems: 'center', mt: 0 }}>
                                             <FormControlLabel
-                                                control={<Checkbox checked={agreedToTerms} onChange={handleTermsChange} color="primary" />}
-                                                label={<Typography variant="body2">J'accepte les <RouterLink to="/cgu" style={{ color: theme.palette.primary.main, textDecoration: 'underline' }}>CGU</RouterLink></Typography>}
-                                                sx={{ ml: 0 }}
+                                                control={<Checkbox checked={agreedToTerms} onChange={handleTermsChange} />}
+                                                label={t('agreeToTerms')}
                                             />
                                         </Grid>
 
@@ -325,7 +326,7 @@ const Register = () => {
                                                 startIcon={<HowToReg />}
                                                 endIcon={loading ? <CircularProgress size={20} color="inherit" /> : null}
                                                 sx={{
-                                                    py: 1.5,
+                                                    py: 1.2,
                                                     mt: 2,
                                                     borderRadius: 4,
                                                     fontWeight: 'bold',
@@ -335,7 +336,7 @@ const Register = () => {
                                                     }
                                                 }}
                                             >
-                                                {loading ? 'Inscription en cours...' : 'S\'inscrire'}
+                                                {loading ? t('common.loading') : t('registerButton')}
                                             </Button>
                                         </Grid>
                                     </Grid>
@@ -344,7 +345,7 @@ const Register = () => {
                                 <Box sx={{ mt: 4, textAlign: 'center' }}>
                                     <Divider sx={{ mb: 3 }}>
                                         <Typography variant="body2" component="span" sx={{ px: 2, color: 'text.secondary' }}>
-                                            Déjà inscrit ?
+                                            {t('alreadyAccount')}
                                         </Typography>
                                     </Divider>
 
@@ -360,7 +361,7 @@ const Register = () => {
                                             px: 3
                                         }}
                                     >
-                                        Se connecter
+                                        {t('backToLogin')}
                                     </Button>
                                 </Box>
                             </Box>

@@ -7,3 +7,27 @@ yarn-error.log
 .DS_Store
 *.iml
 
+# Fichiers de développement local (ne pas pousser sur Railway)
+.env.local
+.env.development
+setup-local-dev.sh
+LOCAL_DEVELOPMENT_GUIDE.md
+
+# Uploads de développement local
+public/uploads/
+uploads/
+
+# Logs de développement
+logs/
+*.log
+
+# Scripts de développement local
+generateHashPassword.js
+setAdmin.js
+scripts/createAdmin.js
+scripts/resetAdminPassword.js
+
+# Configuration IDE locale
+.vscode/
+.idea/
+*.iml

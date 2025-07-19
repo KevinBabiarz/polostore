@@ -22,10 +22,13 @@ import {
 import config from '../../config/config';
 import { useAuth } from '../../contexts/AuthContext';
 import AudioPlayer from '../../components/productions/AudioPlayer';
-import SimpleAudioPlayer from '../../components/productions/SimpleAudioPlayer';
+import TimelineAudioPlayer from '../../components/productions/TimelineAudioPlayer';
 import { getImageUrl, getAudioUrl } from '../../utils/fileUtils';
+import { useTranslation } from 'react-i18next';
 
 const ProductionsList = () => {
+    const { t } = useTranslation('productions'); // Spécifier le namespace productions
+
     // États
     const [productions, setProductions] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -75,8 +78,8 @@ const ProductionsList = () => {
                 setProductions(result.productions || result);
                 setTotalPages(result.totalPages || Math.ceil(result.length / 9) || 1);
             } catch (err) {
-                console.error('Erreur lors du chargement des productions:', err);
-                setError('Impossible de charger les productions');
+                console.error(t('productions.errorLoading'), err);
+                setError(t('productions.errorLoading'));
             } finally {
                 setLoading(false);
             }
@@ -237,10 +240,10 @@ const ProductionsList = () => {
                 >
                     <MusicNoteIcon sx={{ fontSize: 60, color: 'error.main', mb: 2, opacity: 0.7 }} />
                     <Typography variant="h5" color="error" gutterBottom>
-                        {error}
+                        {t('loadError')}
                     </Typography>
                     <Typography variant="body1" sx={{ mb: 3 }}>
-                        Nous ne pouvons pas charger les productions pour le moment. Veuillez réessayer plus tard.
+                        {t('loadErrorMessage')}
                     </Typography>
                     <Button
                         variant="contained"
@@ -248,7 +251,7 @@ const ProductionsList = () => {
                         onClick={() => window.location.reload()}
                         sx={{ borderRadius: 10, px: 3, py: 1 }}
                     >
-                        Réessayer
+                        {t('retryButton')}
                     </Button>
                 </Paper>
             </Container>
@@ -260,40 +263,22 @@ const ProductionsList = () => {
             <Fade in={true} timeout={800}>
                 <Box>
                     {/* En-tête avec titre et description */}
-                    <Box sx={{ mb: 3, textAlign: { xs: 'center', md: 'left' } }}>
+                    <Box sx={{ mb: 3, textAlign: 'center' }}>
                         <Typography
                             variant="h3"
                             component="h1"
                             fontWeight="bold"
                             sx={{ fontSize: { xs: '2rem', md: '2.5rem' } }}
                         >
-                            Nos Productions Musicales
+                            {t('title')}
                         </Typography>
                         <Typography
                             variant="subtitle1"
                             color="text.secondary"
-                            sx={{ mt: 1, mb: 2, maxWidth: { md: '80%' } }}
+                            sx={{ mt: 1, mb: 2, maxWidth: { md: '80%' }, mx: 'auto' }}
                         >
-                            Découvrez notre collection de productions musicales originales, créées par des artistes talentueux du monde entier.
+                            {t('subtitle', { defaultValue: 'Découvrez notre collection de productions musicales originales' })}
                         </Typography>
-
-                        <Stack
-                            direction="row"
-                            spacing={2}
-                            sx={{
-                                mt: 3,
-                                display: { xs: 'none', md: 'flex' },
-                                justifyContent: { xs: 'center', md: 'flex-start' }
-                            }}
-                        >
-                            <Chip
-                                icon={<MusicNoteIcon fontSize="small" />}
-                                label="Tous les genres"
-                                color={!genre ? "primary" : "default"}
-                                onClick={() => setGenre('')}
-                                sx={{ fontWeight: 'medium', px: 1 }}
-                            />
-                        </Stack>
                     </Box>
 
                     {/* Barre de recherche et filtres */}
@@ -308,10 +293,10 @@ const ProductionsList = () => {
                     >
                         <Grid container spacing={2} alignItems="center">
                             {/* Barre de recherche */}
-                            <Grid item xs={12} sm={filtersExpanded ? 12 : 9} md={filtersExpanded ? 12 : 9}>
+                            <Grid item xs={12} sm={filtersExpanded ? 12 : 8} md={filtersExpanded ? 12 : 8}>
                                 <TextField
                                     fullWidth
-                                    placeholder="Rechercher une production..."
+                                    placeholder={t('searchPlaceholder')}
                                     variant="outlined"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -330,82 +315,113 @@ const ProductionsList = () => {
                                         ),
                                         sx: {
                                             borderRadius: 10,
-                                            px: 1
+                                            px: 1,
+                                            bgcolor: 'background.default'
                                         }
                                     }}
-                                    sx={{ bgcolor: 'background.default' }}
                                 />
                             </Grid>
 
                             {/* Filtres de base toujours visibles */}
                             {!filtersExpanded && (
-                                <>
-                                    <Grid item xs={12} sm={3} md={3}>
-                                        <FormControl fullWidth size="small" sx={{ bgcolor: 'background.default', borderRadius: 2 }}>
-                                            <Select
-                                                value={genre}
-                                                displayEmpty
-                                                onChange={handleGenreChange}
-                                                renderValue={(selected) => selected === '' ? 'Tous' : selected}
-                                                sx={{ borderRadius: 10 }}
-                                            >
-                                                <MenuItem value="">Tous</MenuItem>
-                                                <MenuItem value="Rock">Rock</MenuItem>
-                                                <MenuItem value="Hip-Hop">Hip-Hop</MenuItem>
-                                                <MenuItem value="Jazz">Jazz</MenuItem>
-                                                <MenuItem value="Classique">Classique</MenuItem>
-                                                <MenuItem value="Electronic">Electronic</MenuItem>
-                                                <MenuItem value="Pop">Pop</MenuItem>
-                                            </Select>
-                                        </FormControl>
-                                    </Grid>
-                                </>
+                                <Grid item xs={12} sm={4} md={4}>
+                                    <FormControl fullWidth size="small">
+                                        <Select
+                                            value={genre}
+                                            displayEmpty
+                                            onChange={handleGenreChange}
+                                            renderValue={(selected) => selected === '' ? t('allGenres') : selected}
+                                            sx={{
+                                                borderRadius: 10,
+                                                bgcolor: 'background.default'
+                                            }}
+                                        >
+                                            <MenuItem value="">{t('allGenres')}</MenuItem>
+                                            <MenuItem value="Rock">Rock</MenuItem>
+                                            <MenuItem value="Hip-Hop">Hip-Hop</MenuItem>
+                                            <MenuItem value="Jazz">Jazz</MenuItem>
+                                            <MenuItem value="Classique">Classique</MenuItem>
+                                            <MenuItem value="Electronic">Electronic</MenuItem>
+                                            <MenuItem value="Pop">Pop</MenuItem>
+                                        </Select>
+                                    </FormControl>
+                                </Grid>
                             )}
 
                             {/* Section expanded filters */}
                             {filtersExpanded && (
-                                <>
-                                    <Grid item xs={12} md={6}>
-                                        <Grid container spacing={2}>
-                                            <Grid item xs={12} sm={6}>
-                                                <FormControl fullWidth size="small" sx={{ bgcolor: 'background.default', borderRadius: 2 }}>
-                                                    <Select
-                                                        value={genre}
-                                                        displayEmpty
-                                                        onChange={handleGenreChange}
-                                                        renderValue={(selected) => selected === '' ? 'Tous' : selected}
-                                                        sx={{ borderRadius: 10 }}
+                                <Grid item xs={12}>
+                                    <Grid container spacing={2} sx={{ mt: 1 }}>
+                                        <Grid item xs={12} sm={6} md={4}>
+                                            <FormControl fullWidth size="small">
+                                                <Select
+                                                    value={genre}
+                                                    displayEmpty
+                                                    onChange={handleGenreChange}
+                                                    renderValue={(selected) => selected === '' ? t('allGenres') : selected}
+                                                    sx={{
+                                                        borderRadius: 10,
+                                                        bgcolor: 'background.default'
+                                                    }}
+                                                >
+                                                    <MenuItem value="">{t('allGenres')}</MenuItem>
+                                                    <MenuItem value="Rock">Rock</MenuItem>
+                                                    <MenuItem value="Hip-Hop">Hip-Hop</MenuItem>
+                                                    <MenuItem value="Jazz">Jazz</MenuItem>
+                                                    <MenuItem value="Classique">Classique</MenuItem>
+                                                    <MenuItem value="Electronic">Electronic</MenuItem>
+                                                    <MenuItem value="Pop">Pop</MenuItem>
+                                                </Select>
+                                            </FormControl>
+                                        </Grid>
+
+                                        <Grid item xs={12} sm={6} md={4}>
+                                            <FormControl fullWidth size="small">
+                                                <InputLabel>{t('releaseDate')}</InputLabel>
+                                                <Select
+                                                    value={releaseDateRange}
+                                                    label={t('releaseDate')}
+                                                    onChange={(e) => setReleaseDateRange(e.target.value)}
+                                                    sx={{
+                                                        borderRadius: 10,
+                                                        bgcolor: 'background.default'
+                                                    }}
+                                                >
+                                                    <MenuItem value="all">{t('allDates')}</MenuItem>
+                                                    <MenuItem value="last_week">{t('thisWeek')}</MenuItem>
+                                                    <MenuItem value="last_month">{t('thisMonth')}</MenuItem>
+                                                    <MenuItem value="last_year">{t('thisYear')}</MenuItem>
+                                                </Select>
+                                            </FormControl>
+                                        </Grid>
+
+                                        <Grid item xs={12} sm={12} md={4}>
+                                            <Box sx={{
+                                                display: 'flex',
+                                                justifyContent: { xs: 'center', md: 'flex-end' },
+                                                alignItems: 'center',
+                                                height: '100%'
+                                            }}>
+                                                {(searchTerm || genre || releaseDateRange !== 'all') && (
+                                                    <Button
+                                                        color="error"
+                                                        size="small"
+                                                        variant="outlined"
+                                                        onClick={handleResetFilters}
+                                                        startIcon={<ClearIcon />}
+                                                        sx={{
+                                                            textTransform: 'none',
+                                                            fontSize: '0.875rem',
+                                                            borderRadius: 10
+                                                        }}
                                                     >
-                                                        <MenuItem value="">Tous</MenuItem>
-                                                        <MenuItem value="Rock">Rock</MenuItem>
-                                                        <MenuItem value="Hip-Hop">Hip-Hop</MenuItem>
-                                                        <MenuItem value="Jazz">Jazz</MenuItem>
-                                                        <MenuItem value="Classique">Classique</MenuItem>
-                                                        <MenuItem value="Electronic">Electronic</MenuItem>
-                                                        <MenuItem value="Pop">Pop</MenuItem>
-                                                    </Select>
-                                                </FormControl>
-                                            </Grid>
+                                                        {t('clearFilters')}
+                                                    </Button>
+                                                )}
+                                            </Box>
                                         </Grid>
                                     </Grid>
-
-                                    <Grid item xs={12} sm={6} md={3}>
-                                        <FormControl fullWidth size="small" sx={{ bgcolor: 'background.default', borderRadius: 2 }}>
-                                            <InputLabel>Date de sortie</InputLabel>
-                                            <Select
-                                                value={releaseDateRange}
-                                                label="Date de sortie"
-                                                onChange={(e) => setReleaseDateRange(e.target.value)}
-                                                sx={{ borderRadius: 10 }}
-                                            >
-                                                <MenuItem value="all">Toutes dates</MenuItem>
-                                                <MenuItem value="last_week">Cette semaine</MenuItem>
-                                                <MenuItem value="last_month">Ce mois-ci</MenuItem>
-                                                <MenuItem value="last_year">Cette année</MenuItem>
-                                            </Select>
-                                        </FormControl>
-                                    </Grid>
-                                </>
+                                </Grid>
                             )}
 
                             {/* Boutons de contrôle des filtres */}
@@ -432,10 +448,10 @@ const ProductionsList = () => {
                                             fontSize: '0.875rem'
                                         }}
                                     >
-                                        {filtersExpanded ? 'Moins de filtres' : 'Plus de filtres'}
+                                        {filtersExpanded ? t('lessFilters') : t('moreFilters')}
                                     </Button>
 
-                                    {(searchTerm || genre || releaseDateRange !== 'all') && (
+                                    {!filtersExpanded && (searchTerm || genre || releaseDateRange !== 'all') && (
                                         <Button
                                             color="error"
                                             size="small"
@@ -448,47 +464,11 @@ const ProductionsList = () => {
                                                 borderRadius: 10
                                             }}
                                         >
-                                            Effacer les filtres
+                                            {t('clearFilters')}
                                         </Button>
                                     )}
                                 </Stack>
                             </Grid>
-
-                            {/* Affichage des filtres actifs */}
-                            {(searchTerm || genre || releaseDateRange !== 'all') && (
-                                <Grid item xs={12}>
-                                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
-                                        {searchTerm && (
-                                            <Chip
-                                                label={`Recherche: ${searchTerm}`}
-                                                size="small"
-                                                onDelete={() => setSearchTerm('')}
-                                                color="primary"
-                                                variant="outlined"
-                                            />
-                                        )}
-                                        {genre && (
-                                            <Chip
-                                                label={`Genre: ${genre}`}
-                                                size="small"
-                                                onDelete={() => setGenre('')}
-                                                color="primary"
-                                                variant="outlined"
-                                            />
-                                        )}
-                                        {releaseDateRange !== 'all' && (
-                                            <Chip
-                                                label={releaseDateRange === 'last_week' ? 'Date: Cette semaine' :
-                                                       releaseDateRange === 'last_month' ? 'Date: Ce mois-ci' : 'Date: Cette année'}
-                                                size="small"
-                                                onDelete={() => setReleaseDateRange('all')}
-                                                color="primary"
-                                                variant="outlined"
-                                            />
-                                        )}
-                                    </Box>
-                                </Grid>
-                            )}
                         </Grid>
                     </Card>
 
@@ -508,10 +488,10 @@ const ProductionsList = () => {
                         >
                             <MusicNoteIcon sx={{ fontSize: 60, color: 'text.secondary', opacity: 0.5, mb: 2 }} />
                             <Typography variant="h6" color="text.secondary" gutterBottom>
-                                Aucune production trouvée
+                                {t('noProductionsFound')}
                             </Typography>
                             <Typography variant="body2" color="text.secondary" sx={{ mb: 3, maxWidth: 500, mx: 'auto' }}>
-                                Aucune production ne correspond à vos critères de recherche. Essayez de modifier vos filtres ou consultez notre catalogue complet.
+                                {t('noProductionsMessage', { defaultValue: 'Aucune production ne correspond à vos critères de recherche.' })}
                             </Typography>
                             <Button
                                 variant="outlined"
@@ -519,7 +499,7 @@ const ProductionsList = () => {
                                 onClick={handleResetFilters}
                                 sx={{ borderRadius: 10, px: 3 }}
                             >
-                                Réinitialiser les filtres
+                                {t('resetFilters')}
                             </Button>
                         </Paper>
                     ) : (
@@ -550,7 +530,7 @@ const ProductionsList = () => {
                                                     sx={{
                                                         position: 'relative',
                                                         overflow: 'hidden',
-                                                        height: '150px', // Hauteur réduite de 180px à 150px
+                                                        height: '180px', // Augmenté de 150px à 180px pour plus d'espace image
                                                     }}
                                                 >
                                                     {/* Image absolument positionnée pour maintenir le ratio */}
@@ -604,7 +584,7 @@ const ProductionsList = () => {
                                                     width: '100%',
                                                     maxWidth: '100%',
                                                     overflow: 'hidden', // Empêche tout débordement
-                                                    boxSizing: 'border-box' // Inclut padding et border dans la largeur
+                                                    boxSizing: 'border-box' // Inclut le padding et la bordure dans la largeur
                                                 }}>
                                                     <Box sx={{
                                                         minHeight: 120,
@@ -648,7 +628,7 @@ const ProductionsList = () => {
                                                             color="text.secondary"
                                                             sx={{ mb: 1, height: '24px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
                                                         >
-                                                            {production.artist || 'Artiste inconnu'}
+                                                            {production.artist || t('unknownArtist')}
                                                         </Typography>
 
                                                         <Typography
@@ -672,10 +652,10 @@ const ProductionsList = () => {
                                                         {production.audio_url ? (
                                                             <>
                                                                 <Typography variant="subtitle2" color="primary.main" mb={1}>
-                                                                    Écouter un extrait
+                                                                    {t('listenPreview')}
                                                                 </Typography>
-                                                                <SimpleAudioPlayer
-                                                                    src={production.audio_url}
+                                                                <TimelineAudioPlayer
+                                                                    src={getAudioUrl(production.audio_url)}
                                                                 />
                                                             </>
                                                         ) : (
@@ -699,7 +679,7 @@ const ProductionsList = () => {
                                                             minWidth: '140px'
                                                         }}
                                                     >
-                                                        Détails
+                                                        {t('details')}
                                                     </Button>
                                                 </CardActions>
                                             </Card>

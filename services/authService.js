@@ -4,6 +4,7 @@ import bcrypt from 'bcrypt';
 import User from '../models/User.js';
 import { createTokenWithJTI, revokeToken } from '../middleware/authMiddleware.js';
 import logger from '../utils/logger.js';
+import { i18n } from '../utils/i18n.js';
 
 /**
  * Service d'authentification - gère la logique métier liée à l'authentification
@@ -16,7 +17,7 @@ export const AuthService = {
      */
     generateSecureToken: (user) => {
         if (!process.env.JWT_SECRET) {
-            throw new Error("Variable d'environnement JWT_SECRET non définie");
+            throw new Error(i18n.t('authService.jwtSecretNotDefined'));
         }
 
         const payload = {
@@ -49,17 +50,17 @@ export const AuthService = {
 
         // Validation des données d'entrée
         if (!username || !email || !password) {
-            throw new Error("Tous les champs sont requis");
+            throw new Error(i18n.t('authService.allFieldsRequired'));
         }
 
         if (password.length < 8) {
-            throw new Error("Le mot de passe doit contenir au moins 8 caractères");
+            throw new Error(i18n.t('authService.passwordTooShort'));
         }
 
         // Validation de l'email
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
-            throw new Error("Format d'email invalide");
+            throw new Error(i18n.t('authService.invalidEmailFormat'));
         }
 
         // Vérifier si l'utilisateur existe déjà
@@ -67,11 +68,11 @@ export const AuthService = {
         const existingUsername = await User.findOne({ where: { username } });
 
         if (existingEmail) {
-            throw new Error("Cette adresse email est déjà utilisée");
+            throw new Error(i18n.t('authService.emailAlreadyUsed'));
         }
 
         if (existingUsername) {
-            throw new Error("Ce nom d'utilisateur est déjà pris");
+            throw new Error(i18n.t('authService.usernameAlreadyTaken'));
         }
 
         // Créer l'utilisateur avec Sequelize (le mot de passe sera hashé automatiquement par le hook beforeCreate)

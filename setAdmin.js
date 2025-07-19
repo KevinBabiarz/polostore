@@ -1,6 +1,7 @@
 // Script pour mettre à jour un utilisateur en tant qu'admin
 import pool from './config/db.js';
 import dotenv from 'dotenv';
+import { i18n } from './utils/i18n.js';
 
 
 // En production (Railway), les variables d'environnement sont automatiquement disponibles
@@ -31,7 +32,7 @@ async function setAdminRole() {
       );
     } else {
       // Sinon, vérifier si role existe et le transformer en is_admin
-      console.log("La colonne is_admin n'existe pas, vérifions role...");
+      console.log(i18n.t('setAdmin.checkingRoleColumn'));
 
       const checkRoleResult = await pool.query(`
         SELECT column_name 
@@ -51,7 +52,7 @@ async function setAdminRole() {
           [userEmail]
         );
       } else {
-        throw new Error("Ni is_admin ni role n'existent dans la table users");
+        throw new Error(i18n.t('setAdmin.noAdminColumns'));
       }
     }
 

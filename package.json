@@ -8,6 +8,7 @@
   },
   "scripts": {
     "start": "node server.js",
+    "dev-local": "nodemon server.js",
     "server": "nodemon server.js",
     "client": "cd client && npm start",
     "client-install": "cd client && npm install",
@@ -35,6 +36,8 @@
     "express-rate-limit": "^6.10.0",
     "express-validator": "^7.2.1",
     "helmet": "^8.1.0",
+    "i18next": "^25.3.2",
+    "i18next-fs-backend": "^2.6.0",
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.0.1",
     "pg": "^8.16.2",

@@ -1,0 +1,57 @@
+{
+  "title": "Conditions Générales d'Utilisation",
+  "lastUpdate": "Dernière mise à jour : {{date}}",
+  "section1": {
+    "title": "1. Objet",
+    "content1": "Les présentes conditions générales d'utilisation (CGU) ont pour objet de définir les modalités et conditions d'utilisation du site web POLOBEATSPROD ainsi que les droits et obligations de ses utilisateurs.",
+    "content2": "Le site POLOBEATSPROD est une plateforme dédiée à la production musicale, proposant des beats, instrumentales et services de production musicale de haute qualité."
+  },
+  "section2": {
+    "title": "2. Acceptation des CGU",
+    "content1": "L'utilisation du site POLOBEATSPROD implique l'acceptation pleine et entière des présentes CGU. Si vous n'acceptez pas ces conditions, vous devez vous abstenir d'utiliser le site.",
+    "content2": "Ces CGU peuvent être modifiées à tout moment. Les utilisateurs seront informés de toute modification via le site."
+  },
+  "section3": {
+    "title": "3. Accès au site",
+    "content1": "Le site est accessible gratuitement en tout lieu à tout utilisateur ayant un accès à Internet. Tous les frais supportés par l'utilisateur pour accéder au service (matériel informatique, logiciels, connexion Internet, etc.) sont à sa charge.",
+    "content2": "Certaines fonctionnalités peuvent nécessiter la création d'un compte utilisateur. L'utilisateur s'engage à fournir des informations exactes et à maintenir ses informations à jour."
+  },
+  "section4": {
+    "title": "4. Propriété intellectuelle",
+    "content1": "Tous les contenus présents sur le site POLOBEATSPROD (textes, images, sons, vidéos, logos, etc.) sont protégés par les droits de propriété intellectuelle et appartiennent à POLOBEATSPROD ou à ses partenaires.",
+    "content2": "Toute reproduction, distribution, modification, adaptation, retransmission ou publication de ces différents éléments est strictement interdite sans l'accord exprès par écrit de POLOBEATSPROD.",
+    "content3": "Les productions musicales proposées sur le site sont soumises à des licences spécifiques détaillées lors de l'achat ou du téléchargement."
+  },
+  "section5": {
+    "title": "5. Utilisation du site",
+    "content1": "L'utilisateur s'engage à utiliser le site conformément aux présentes CGU et à la législation en vigueur. Il est notamment interdit de :",
+    "restriction1": "Utiliser le site à des fins illégales ou non autorisées",
+    "restriction2": "Télécharger, diffuser ou distribuer des contenus sans autorisation",
+    "restriction3": "Porter atteinte aux droits de propriété intellectuelle",
+    "restriction4": "Perturber le fonctionnement du site ou des serveurs"
+  },
+  "section6": {
+    "title": "6. Protection des données personnelles",
+    "content1": "Les données personnelles collectées sur le site sont traitées conformément au Règlement Général sur la Protection des Données (RGPD) et à la législation française en vigueur.",
+    "content2": "Les utilisateurs disposent d'un droit d'accès, de rectification, de suppression et de portabilité de leurs données personnelles. Pour exercer ces droits, contactez-nous via la page de contact."
+  },
+  "section7": {
+    "title": "7. Limitation de responsabilité",
+    "content1": "POLOBEATSPROD s'efforce de fournir des informations aussi précises que possible. Toutefois, il ne pourra être tenu responsable des omissions, des inexactitudes et des carences dans la mise à jour.",
+    "content2": "L'utilisateur assume l'entière responsabilité de l'utilisation qu'il fait des informations et contenus présents sur le site."
+  },
+  "section8": {
+    "title": "8. Droit applicable et juridiction compétente",
+    "content1": "Les présentes CGU sont régies par le droit français. En cas de litige, les tribunaux français seront seuls compétents."
+  },
+  "section9": {
+    "title": "9. Contact",
+    "content1": "Pour toute question concernant ces CGU, vous pouvez nous contacter via notre",
+    "contactLink": "page de contact",
+    "content2": "ou par email."
+  },
+  "footer": {
+    "copyright": "© {{year}} POLOBEATSPROD - Tous droits réservés"
+  }
+}
+

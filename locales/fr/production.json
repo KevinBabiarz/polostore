@@ -1,0 +1,39 @@
+{
+  "created": "Production créée avec succès",
+  "updated": "Production mise à jour avec succès",
+  "deleted": "Production supprimée avec succès",
+  "notFound": "Production non trouvée",
+  "addProduction": {
+    "addTitle": "Ajouter une production",
+    "editTitle": "Modifier la production",
+    "title": "Titre",
+    "artist": "Artiste",
+    "genre": "Genre",
+    "releaseDate": "Date de sortie",
+    "description": "Description",
+    "addCoverImage": "Ajouter une image de couverture",
+    "changeImage": "Changer l'image de couverture",
+    "previewAlt": "Aperçu de l'image de couverture",
+    "addAudioFiles": "Ajouter des fichiers audio",
+    "update": "Mettre à jour",
+    "add": "Ajouter",
+    "successAdd": "Production ajoutée avec succès!",
+    "successUpdate": "Production mise à jour avec succès!",
+    "errorLoad": "Impossible de charger les données de cette production",
+    "errorSave": "Une erreur est survenue lors de l'enregistrement",
+    "requiredFields": "Le titre et l'artiste sont requis."
+  },
+  "genres": {
+    "rock": "Rock",
+    "hiphop": "Hip-Hop",
+    "jazz": "Jazz",
+    "classical": "Classique",
+    "electronic": "Électronique",
+    "pop": "Pop",
+    "rnb": "R&B",
+    "other": "Autre"
+  },
+  "common": {
+    "back": "Retour"
+  }
+}

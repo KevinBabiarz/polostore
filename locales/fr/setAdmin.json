@@ -1,0 +1,9 @@
+{
+  "checkingRoleColumn": "La colonne is_admin n'existe pas, vérifions role...",
+  "noAdminColumns": "Ni is_admin ni role n'existent dans la table users",
+  "admin.setAdmin.attempting": "Tentative de définition de l'utilisateur {{email}} comme administrateur...",
+  "admin.setAdmin.userNotFound": "Utilisateur non trouvé.",
+  "admin.setAdmin.success": "L'utilisateur a été défini comme administrateur avec succès.",
+  "admin.setAdmin.alreadyAdmin": "L'utilisateur est déjà administrateur.",
+  "admin.setAdmin.error": "Erreur lors de la définition de l'utilisateur comme administrateur."
+}

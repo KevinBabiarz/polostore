@@ -11,6 +11,7 @@ import {
     PlayArrow, ArrowForwardIos
 } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
+import { useTranslation } from 'react-i18next';
 
 const Home = () => {
     const navigate = useNavigate();
@@ -18,14 +19,16 @@ const Home = () => {
     const isSmallMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const { user } = useAuth();
     const isUserLoggedIn = !!user;
+    const { t } = useTranslation();
 
     const handleImageClick = () => {
-        console.log('Image cliquée!'); // Pour debug
+        console.log(t('home:imageClicked')); // Namespace:clé
         window.open('https://distrokid.com/hyperfollow/polobeatsprod/121-bpm', '_blank');
     };
 
     return (
         <Container maxWidth="lg" sx={{ py: { xs: 3, sm: 4, md: 8 } }}>
+            {/* Suppression du texte animé et de l'animation */}
             <Box
                 sx={{
                     display: 'flex',
@@ -48,14 +51,14 @@ const Home = () => {
                         color="primary.main"
                         sx={{ fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' } }}
                     >
-                        Bienvenue sur PoloBeatsProd
+                        {t('home:welcomeTitle')}
                     </Typography>
                     <Typography
                         variant={isSmallMobile ? "body1" : "h5"}
                         color="text.secondary"
                         sx={{ mb: 3 }}
                     >
-                        La plateforme pour découvrir, écouter et acheter des productions musicales exclusives.
+                        {t('home:welcomeSubtitle')}
                     </Typography>
                     <Stack
                         direction={{ xs: 'column', sm: 'row' }}
@@ -75,7 +78,7 @@ const Home = () => {
                                 width: { xs: '100%', sm: 'auto' }
                             }}
                         >
-                            Explorer
+                            {t('home:explore')}
                         </Button>
                         {!isUserLoggedIn && (
                             <Button
@@ -89,7 +92,7 @@ const Home = () => {
                                     width: { xs: '100%', sm: 'auto' }
                                 }}
                             >
-                                S'inscrire
+                                {t('home:signUp')}
                             </Button>
                         )}
                     </Stack>
@@ -108,10 +111,11 @@ const Home = () => {
                         maxWidth: { xs: '100%', sm: 500, md: 600 },
                         margin: '0 auto',
                         cursor: 'pointer',
+                        position: 'relative',
                         transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
                         '&:hover': {
-                            transform: 'scale(1.02)',
-                            boxShadow: 6
+                            transform: 'scale(1.08)',
+                            boxShadow: 20,
                         }
                     }}
                     onClick={handleImageClick}
@@ -125,12 +129,14 @@ const Home = () => {
                 >
                     <img
                         src="/images/COVER121BPM3000x3000.jpg"
-                        alt="121 BPM - Cliquez pour écouter sur DistroKid"
+                        alt={t('home:coverAlt')}
                         style={{
                             width: '100%',
                             height: '100%',
                             objectFit: 'cover',
-                            pointerEvents: 'none' // Empêche l'img d'intercepter les clics
+                            filter: 'brightness(0.85)',
+                            transition: 'filter 0.3s',
+                            zIndex: 0,
                         }}
                     />
                 </Box>
@@ -155,13 +161,13 @@ const Home = () => {
                         </Box>
                         <CardContent>
                             <Typography variant="h6" fontWeight="bold" gutterBottom>
-                                Productions exclusives
+                                {t('home:exclusiveProductions')}
                             </Typography>
                             <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
-                                Accédez à un catalogue unique de beats et musiques pour tous vos projets.
+                                {t('home:exclusiveProductionsDescription')}
                             </Typography>
                             <Button variant="text" onClick={() => navigate('/productions')} endIcon={<PlayArrow />}>
-                                Découvrir
+                                {t('home:discover')}
                             </Button>
                         </CardContent>
                     </Card>
@@ -184,10 +190,10 @@ const Home = () => {
                         </Box>
                         <CardContent>
                             <Typography variant="h6" fontWeight="bold" gutterBottom>
-                                Qualité professionnelle
+                                {t('home:professionalQuality')}
                             </Typography>
                             <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
-                                Toutes nos productions sont réalisées par des artistes et beatmakers expérimentés.
+                                {t('home:professionalQualityDescription')}
                             </Typography>
                         </CardContent>
                     </Card>
@@ -211,13 +217,13 @@ const Home = () => {
                             </Box>
                             <CardContent>
                                 <Typography variant="h6" fontWeight="bold" gutterBottom>
-                                    Rejoignez la communauté
+                                    {t('home:joinCommunity')}
                                 </Typography>
                                 <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
-                                    Inscrivez-vous pour sauvegarder vos favoris et recevoir nos nouveautés.
+                                    {t('home:joinCommunityDescription')}
                                 </Typography>
                                 <Button variant="text" onClick={() => navigate('/register')} endIcon={<ArrowForward />}>
-                                    S'inscrire
+                                    {t('home:signUp')}
                                 </Button>
                             </CardContent>
                         </Card>

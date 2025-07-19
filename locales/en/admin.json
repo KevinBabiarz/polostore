@@ -1,0 +1,18 @@
+{
+  "addProduction": {
+    "addTitle": "Add a production",
+    "editTitle": "Edit production",
+    "title": "Title",
+    "artist": "Artist",
+    "genre": "Genre",
+    "releaseDate": "Release date",
+    "description": "Description",
+    "addCoverImage": "Add cover image",
+    "changeImage": "Change image",
+    "previewAlt": "Image preview",
+    "addAudioFiles": "Add audio files",
+    "update": "Update",
+    "add": "Add"
+  }
+}
+

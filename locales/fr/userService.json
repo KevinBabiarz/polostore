@@ -1,0 +1,12 @@
+{
+  "searchUser": "Recherche de l'utilisateur avec l'ID: {{id}}",
+  "userNotFound": "Utilisateur non trouvé avec l'ID: {{id}}",
+  "userFound": "Utilisateur trouvé avec l'ID: {{id}}",
+  "errorFetchingUser": "Erreur lors de la récupération de l'utilisateur {{id}}: {{error}}",
+  "invalidCurrentPassword": "Mot de passe actuel invalide",
+  "fetchingUsers": "[USER SERVICE] Récupération des utilisateurs avec options: {{options}}",
+  "errorFetchingUsers": "[USER SERVICE] Erreur lors de la récupération des utilisateurs: {{error}}",
+  "adminStatusMustBeBoolean": "Le statut administrateur doit être un booléen",
+  "userNotFoundSimple": "Utilisateur non trouvé"
+}
+

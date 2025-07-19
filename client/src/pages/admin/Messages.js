@@ -7,8 +7,10 @@ import {
     IconButton, CircularProgress, Alert, TablePagination
 } from '@mui/material';
 import { MarkEmailRead, Email } from '@mui/icons-material';
+import { useTranslation } from 'react-i18next';
 
 const AdminMessages = () => {
+    const { t } = useTranslation();
     const [messages, setMessages] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -63,7 +65,7 @@ const AdminMessages = () => {
     if (error) {
         return (
             <Container sx={{ py: 4 }}>
-                <Alert severity="error">{error}</Alert>
+                <Alert severity="error">{t(error)}</Alert>
             </Container>
         );
     }
@@ -71,7 +73,7 @@ const AdminMessages = () => {
     return (
         <Container maxWidth="lg" sx={{ py: 4 }}>
             <Typography variant="h4" component="h1" gutterBottom>
-                Gestion des Messages
+                {t('admin.messages.title')}
             </Typography>
 
             <Paper sx={{ width: '100%', overflow: 'hidden' }}>
@@ -79,12 +81,12 @@ const AdminMessages = () => {
                     <Table stickyHeader>
                         <TableHead>
                             <TableRow>
-                                <TableCell>État</TableCell>
-                                <TableCell>Date</TableCell>
-                                <TableCell>De</TableCell>
-                                <TableCell>Sujet</TableCell>
-                                <TableCell>Message</TableCell>
-                                <TableCell>Actions</TableCell>
+                                <TableCell>{t('admin.messages.state')}</TableCell>
+                                <TableCell>{t('admin.messages.date')}</TableCell>
+                                <TableCell>{t('admin.messages.from')}</TableCell>
+                                <TableCell>{t('admin.messages.subject')}</TableCell>
+                                <TableCell>{t('admin.messages.message')}</TableCell>
+                                <TableCell>{t('admin.messages.actions')}</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -102,14 +104,14 @@ const AdminMessages = () => {
                                             {message.read ? (
                                                 <Chip
                                                     icon={<MarkEmailRead />}
-                                                    label="Lu"
+                                                    label={t('admin.messages.read')}
                                                     color="success"
                                                     size="small"
                                                 />
                                             ) : (
                                                 <Chip
                                                     icon={<Email />}
-                                                    label="Non lu"
+                                                    label={t('admin.messages.unread')}
                                                     color="primary"
                                                     size="small"
                                                 />
@@ -144,7 +146,7 @@ const AdminMessages = () => {
                                                 <IconButton
                                                     color="primary"
                                                     onClick={() => handleMarkAsRead(message.id)}
-                                                    title="Marquer comme lu"
+                                                    title={t('admin.messages.markAsRead')}
                                                 >
                                                     <MarkEmailRead />
                                                 </IconButton>
@@ -156,7 +158,7 @@ const AdminMessages = () => {
                             {messages.length === 0 && (
                                 <TableRow>
                                     <TableCell colSpan={6} align="center">
-                                        Aucun message reçu
+                                        {t('admin.messages.noMessages')}
                                     </TableCell>
                                 </TableRow>
                             )}
@@ -172,7 +174,7 @@ const AdminMessages = () => {
                     page={page}
                     onPageChange={handleChangePage}
                     onRowsPerPageChange={handleChangeRowsPerPage}
-                    labelRowsPerPage="Messages par page:"
+                    labelRowsPerPage={t('admin.messages.rowsPerPage')}
                 />
             </Paper>
         </Container>

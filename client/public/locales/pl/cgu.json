@@ -1,0 +1,57 @@
+{
+  "title": "Regulamin Użytkowania",
+  "lastUpdate": "Ostatnia aktualizacja: {{date}}",
+  "section1": {
+    "title": "1. Przedmiot",
+    "content1": "Niniejszy regulamin użytkowania ma na celu określenie warunków korzystania ze strony internetowej POLOBEATSPROD oraz praw i obowiązków jej użytkowników.",
+    "content2": "Strona POLOBEATSPROD to platforma dedykowana produkcji muzycznej, oferująca beaty, instrumentale i wysokiej jakości usługi produkcji muzycznej."
+  },
+  "section2": {
+    "title": "2. Akceptacja Regulaminu",
+    "content1": "Korzystanie ze strony POLOBEATSPROD oznacza pełną akceptację niniejszego regulaminu. Jeśli nie akceptujesz tych warunków, musisz powstrzymać się od korzystania ze strony.",
+    "content2": "Niniejszy regulamin może być modyfikowany w dowolnym momencie. Użytkownicy będą informowani o wszelkich zmianach za pośrednictwem strony."
+  },
+  "section3": {
+    "title": "3. Dostęp do strony",
+    "content1": "Strona jest dostępna bezpłatnie w każdym miejscu dla każdego użytkownika mającego dostęp do Internetu. Wszystkie koszty ponoszone przez użytkownika w celu uzyskania dostępu do usługi (sprzęt komputerowy, oprogramowanie, połączenie internetowe itp.) są na jego koszt.",
+    "content2": "Niektóre funkcje mogą wymagać utworzenia konta użytkownika. Użytkownik zobowiązuje się do podania dokładnych informacji i utrzymania ich aktualności."
+  },
+  "section4": {
+    "title": "4. Własność intelektualna",
+    "content1": "Wszystkie treści obecne na stronie POLOBEATSPROD (teksty, obrazy, dźwięki, filmy, loga itp.) są chronione prawami własności intelektualnej i należą do POLOBEATSPROD lub jego partnerów.",
+    "content2": "Wszelkie reprodukcje, dystrybucje, modyfikacje, adaptacje, retransmisje lub publikacje tych różnych elementów są surowo zabronione bez wyraźnej pisemnej zgody POLOBEATSPROD.",
+    "content3": "Produkcje muzyczne oferowane na stronie podlegają określonym licencjom szczegółowo opisanym podczas zakupu lub pobierania."
+  },
+  "section5": {
+    "title": "5. Korzystanie ze strony",
+    "content1": "Użytkownik zobowiązuje się do korzystania ze strony zgodnie z niniejszym regulaminem i obowiązującym prawem. W szczególności zabronione jest:",
+    "restriction1": "Używanie strony do celów nielegalnych lub nieautoryzowanych",
+    "restriction2": "Pobieranie, nadawanie lub dystrybucja treści bez autoryzacji",
+    "restriction3": "Naruszanie praw własności intelektualnej",
+    "restriction4": "Zakłócanie działania strony lub serwerów"
+  },
+  "section6": {
+    "title": "6. Ochrona danych osobowych",
+    "content1": "Dane osobowe zbierane na stronie są przetwarzane zgodnie z Ogólnym Rozporządzeniem o Ochronie Danych (RODO) i obowiązującym prawem francuskim.",
+    "content2": "Użytkownicy mają prawo dostępu, sprostowania, usunięcia i przenoszenia swoich danych osobowych. Aby skorzystać z tych praw, skontaktuj się z nami za pośrednictwem strony kontaktowej."
+  },
+  "section7": {
+    "title": "7. Ograniczenie odpowiedzialności",
+    "content1": "POLOBEATSPROD stara się dostarczać informacje tak dokładne, jak to możliwe. Jednak nie może ponosić odpowiedzialności za pominięcia, nieścisłości i braki w aktualizacjach.",
+    "content2": "Użytkownik ponosi pełną odpowiedzialność za korzystanie z informacji i treści obecnych na stronie."
+  },
+  "section8": {
+    "title": "8. Prawo właściwe i właściwość sądowa",
+    "content1": "Niniejszy regulamin podlega prawu francuskiemu. W przypadku sporu, sądy francuskie będą jedynie właściwe."
+  },
+  "section9": {
+    "title": "9. Kontakt",
+    "content1": "W przypadku jakichkolwiek pytań dotyczących tego regulaminu możesz skontaktować się z nami za pośrednictwem naszej",
+    "contactLink": "strony kontaktowej",
+    "content2": "lub przez e-mail."
+  },
+  "footer": {
+    "copyright": "© {{year}} POLOBEATSPROD - Wszelkie prawa zastrzeżone"
+  }
+}
+

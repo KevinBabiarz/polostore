@@ -22,8 +22,11 @@ import EmailIcon from '@mui/icons-material/Email';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import LanguageSelector from '../ui/LanguageSelector';
 
 const Footer = () => {
+    const { t } = useTranslation('footer'); // Spécifier le namespace footer
     const currentYear = new Date().getFullYear();
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -72,14 +75,14 @@ const Footer = () => {
                     zIndex: 10
                 }}
                 size="large"
-                aria-label="Remonter en haut"
+                aria-label={t('backToTop')}
             >
                 <ArrowUpwardIcon />
             </IconButton>
             <Container maxWidth="lg">
-                <Grid container spacing={4} justifyContent="center" alignItems="flex-start">
+                <Grid container spacing={4} justifyContent="space-between" alignItems="flex-start">
                     {/* Logo & Slogan */}
-                    <Grid item xs={12} md={4} sx={{ mb: { xs: 3, md: 0 }, textAlign: { xs: 'center', md: 'left' } }}>
+                    <Grid item xs={12} md={3.5} sx={{ mb: { xs: 3, md: 0 }, textAlign: { xs: 'center', md: 'left' } }}>
                         <Box display="flex" alignItems="center" justifyContent={{ xs: 'center', md: 'flex-start' }} mb={1}>
                             <MusicNoteIcon color="primary" sx={{ fontSize: 32, mr: 1 }} />
                             <Typography variant="h6" fontWeight="bold" color="primary.main">
@@ -87,28 +90,119 @@ const Footer = () => {
                             </Typography>
                         </Box>
                         <Typography variant="body2" color="text.secondary">
-                            Productions musicales exclusives & qualité pro.
+                            {t('slogan')}
                         </Typography>
                     </Grid>
                     {/* Navigation */}
-                    <Grid item xs={12} md={4} sx={{ textAlign: 'center', display: { xs: 'flex', md: 'block' }, flexDirection: { xs: 'column', md: 'unset' }, alignItems: { xs: 'center', md: 'unset' }, justifyContent: { xs: 'center', md: 'unset' } }}>
-                        <Box mb={1} sx={{ width: '100%', display: { xs: 'flex', md: 'block' }, flexDirection: { xs: 'column', md: 'unset' }, alignItems: { xs: 'center', md: 'unset' }, justifyContent: { xs: 'center', md: 'unset' } }}>
-                            <Button component={RouterLink} to="/" color="inherit" sx={{ mx: 1 }} size="small">Accueil</Button>
-                            <Button component={RouterLink} to="/productions" color="inherit" sx={{ mx: 1 }} size="small">Productions</Button>
-                            <Button component={RouterLink} to="/contact" color="inherit" sx={{ mx: 1 }} size="small">Contact</Button>
+                    <Grid item xs={12} md={5} sx={{
+                        textAlign: 'center',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        minHeight: { md: '120px' } // Hauteur minimale pour éviter les décalages
+                    }}>
+                        <Box sx={{
+                            display: 'flex',
+                            flexDirection: { xs: 'column', sm: 'row', md: 'column' },
+                            flexWrap: 'wrap',
+                            gap: { xs: 0.5, sm: 1 },
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            mb: 1,
+                            maxWidth: '100%'
+                        }}>
+                            <Button
+                                component={RouterLink}
+                                to="/"
+                                color="inherit"
+                                size="small"
+                                sx={{
+                                    minWidth: 'auto',
+                                    px: { xs: 0.5, sm: 1 },
+                                    fontSize: { xs: '0.7rem', sm: '0.8rem' },
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis'
+                                }}
+                            >
+                                {t('home')}
+                            </Button>
+                            <Button
+                                component={RouterLink}
+                                to="/productions"
+                                color="inherit"
+                                size="small"
+                                sx={{
+                                    minWidth: 'auto',
+                                    px: { xs: 0.5, sm: 1 },
+                                    fontSize: { xs: '0.7rem', sm: '0.8rem' },
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis'
+                                }}
+                            >
+                                {t('productions')}
+                            </Button>
+                            <Button
+                                component={RouterLink}
+                                to="/contact"
+                                color="inherit"
+                                size="small"
+                                sx={{
+                                    minWidth: 'auto',
+                                    px: { xs: 0.5, sm: 1 },
+                                    fontSize: { xs: '0.7rem', sm: '0.8rem' },
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis'
+                                }}
+                            >
+                                {t('contact')}
+                            </Button>
+                            <Button
+                                component={RouterLink}
+                                to="/cgu"
+                                color="inherit"
+                                size="small"
+                                sx={{
+                                    minWidth: 'auto',
+                                    px: { xs: 0.5, sm: 1 },
+                                    fontSize: { xs: '0.7rem', sm: '0.8rem' },
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis'
+                                }}
+                            >
+                                {t('cgu')}
+                            </Button>
                             {isAuthenticated && (
-                                <Button component={RouterLink} to="/favorites" color="inherit" sx={{ mx: 1 }} size="small">Favoris</Button>
+                                <Button
+                                    component={RouterLink}
+                                    to="/favorites"
+                                    color="inherit"
+                                    size="small"
+                                    sx={{
+                                        minWidth: 'auto',
+                                        px: { xs: 0.5, sm: 1 },
+                                        fontSize: { xs: '0.7rem', sm: '0.8rem' },
+                                        whiteSpace: 'nowrap',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis'
+                                    }}
+                                >
+                                    {t('favorites')}
+                                </Button>
                             )}
                         </Box>
-                        <Divider sx={{ my: 1, display: { xs: 'block', md: 'none' } }} />
+                        <Divider sx={{ my: 1, display: { xs: 'block', md: 'none' }, width: '100%' }} />
                     </Grid>
                     {/* Contact & Réseaux */}
-                    <Grid item xs={12} md={4} sx={{ textAlign: { xs: 'center', md: 'right' } }}>
-                        <Box mb={1} sx={{ display: 'flex', justifyContent: { xs: 'center', md: 'flex-end' } }}>
+                    <Grid item xs={12} md={3.5} sx={{ textAlign: { xs: 'center', md: 'right' } }}>
+                        <Box mb={1} sx={{ display: 'flex', justifyContent: { xs: 'center', md: 'flex-end' }, flexWrap: 'wrap', gap: 0.5 }}>
                             <IconButton
                                 onClick={goToContact}
                                 color="primary"
-                                aria-label="Contact"
+                                aria-label={t('contactAria')}
                                 sx={{
                                     transition: 'transform 0.2s',
                                     '&:hover': { transform: 'scale(1.1)' }
@@ -122,7 +216,7 @@ const Footer = () => {
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 color="primary"
-                                aria-label="Facebook"
+                                aria-label={t('facebookAria')}
                                 sx={{
                                     transition: 'transform 0.2s',
                                     '&:hover': { transform: 'scale(1.1)' }
@@ -136,7 +230,7 @@ const Footer = () => {
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 color="primary"
-                                aria-label="Twitter"
+                                aria-label={t('twitterAria')}
                                 sx={{
                                     transition: 'transform 0.2s',
                                     '&:hover': { transform: 'scale(1.1)' }
@@ -150,7 +244,7 @@ const Footer = () => {
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 color="primary"
-                                aria-label="Instagram"
+                                aria-label={t('instagramAria')}
                                 sx={{
                                     transition: 'transform 0.2s',
                                     '&:hover': { transform: 'scale(1.1)' }
@@ -164,7 +258,7 @@ const Footer = () => {
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 color="primary"
-                                aria-label="YouTube"
+                                aria-label={t('youtubeAria')}
                                 sx={{
                                     transition: 'transform 0.2s',
                                     '&:hover': { transform: 'scale(1.1)' }
@@ -173,8 +267,18 @@ const Footer = () => {
                                 <YouTubeIcon />
                             </IconButton>
                         </Box>
-                        <Typography variant="body2" color="text.secondary">
-                            &copy; {currentYear} POLOBEATSPROD. Tous droits réservés.
+                        <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{
+                                fontSize: { xs: '0.7rem', sm: '0.8rem' },
+                                lineHeight: 1.4,
+                                maxWidth: '100%',
+                                wordBreak: 'break-word',
+                                hyphens: 'auto'
+                            }}
+                        >
+                            {t('copyright', { year: currentYear })} - {t('allRightsReserved')}
                         </Typography>
                     </Grid>
                 </Grid>

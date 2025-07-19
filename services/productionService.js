@@ -4,6 +4,7 @@ import { Op } from 'sequelize';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { i18n } from '../utils/i18n.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -18,7 +19,7 @@ export const ProductionService = {
      * @returns {Promise<Object[]>} Liste des productions
      */
     getAllProductions: async (options = {}) => {
-        console.log("[PROD SERVICE] Récupération des productions avec options:", options);
+        console.log(i18n.t('productionService.fetchingProductions', { options: JSON.stringify(options) }));
 
         try {
             let {
@@ -139,7 +140,7 @@ export const ProductionService = {
                 offset: parseInt(offset)
             };
 
-            console.log(`[PROD SERVICE] Exécution de la requête:`, JSON.stringify(query, null, 2));
+            console.log(i18n.t('productionService.executingQuery', { query: JSON.stringify(query, null, 2) }));
 
             // Exécution de la requête
             const productions = await Production.findAndCountAll(query);
@@ -147,7 +148,10 @@ export const ProductionService = {
             // Calcul du nombre total de pages
             const totalPages = Math.ceil(productions.count / limit);
 
-            console.log(`[PROD SERVICE] ${productions.rows.length} productions récupérées sur ${productions.count} total`);
+            console.log(i18n.t('productionService.productionsFetched', {
+                fetched: productions.rows.length,
+                total: productions.count
+            }));
 
             // Retourner les données paginées
             return {
@@ -157,7 +161,7 @@ export const ProductionService = {
                 currentPage: page || Math.floor(offset / limit) + 1
             };
         } catch (error) {
-            console.error("[PROD SERVICE] Erreur lors de la récupération des productions:", error.message);
+            console.error(i18n.t('productionService.errorFetchingProductions', { error: error.message }));
             throw error;
         }
     },
@@ -175,7 +179,7 @@ export const ProductionService = {
 
             if (!production) {
                 console.log(`[PROD SERVICE] Production non trouvée avec l'ID: ${id}`);
-                throw new Error("Production non trouvée");
+                throw new Error(i18n.t('productionService.productionNotFound'));
             }
 
             console.log(`[PROD SERVICE] Production trouvée avec l'ID: ${id}`);
@@ -192,7 +196,7 @@ export const ProductionService = {
      * @returns {Promise<Object>} La production créée
      */
     createProduction: async (productionData) => {
-        console.log("[PROD SERVICE] Données reçues pour la création:", JSON.stringify(productionData));
+        console.log(i18n.t('productionService.dataReceivedForCreation', { data: JSON.stringify(productionData) }));
 
         try {
             // Vérification et gestion des valeurs par défaut pour les champs obligatoires
@@ -202,14 +206,14 @@ export const ProductionService = {
                 created_at: new Date()
             };
 
-            console.log("[PROD SERVICE] Données prêtes pour création:", JSON.stringify(dataToCreate));
+            console.log(i18n.t('productionService.dataReadyForCreation', { data: JSON.stringify(dataToCreate) }));
 
             const newProduction = await Production.create(dataToCreate);
 
             console.log(`[PROD SERVICE] Production créée avec succès, ID: ${newProduction.id}`);
             return newProduction;
         } catch (error) {
-            console.error("[PROD SERVICE] Erreur lors de la création de la production:", error.message);
+            console.error(i18n.t('productionService.errorCreatingProduction', { error: error.message }));
             throw error;
         }
     },
@@ -229,7 +233,7 @@ export const ProductionService = {
 
             if (!production) {
                 console.log(`[PROD SERVICE] Production non trouvée avec l'ID: ${id}`);
-                throw new Error("Production non trouvée");
+                throw new Error(i18n.t('productionService.productionNotFound'));
             }
 
             // Gestion du fichier audio si un nouveau fichier est envoyé
@@ -290,7 +294,7 @@ export const ProductionService = {
             });
 
             if (updatedCount === 0) {
-                throw new Error("Aucune mise à jour effectuée");
+                throw new Error(i18n.t('productionService.noUpdatePerformed'));
             }
 
             // Récupérer la production mise à jour
@@ -317,7 +321,7 @@ export const ProductionService = {
 
             if (!production) {
                 console.log(`[PROD SERVICE] Production non trouvée avec l'ID: ${id}`);
-                throw new Error("Production non trouvée");
+                throw new Error(i18n.t('productionService.productionNotFound'));
             }
 
             // Suppression des fichiers associés

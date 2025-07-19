@@ -21,9 +21,11 @@ import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import Contact from './pages/contact/Contact';
 import Favorites from './pages/favorites/Favorites';
 import UserProfile from './pages/profile/UserProfile';
+import CGU from './pages/legal/CGU';
 import ThemeToggle from './components/ui/ThemeToggle';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import DiagnosticPage from './pages/DiagnosticPage';
+import { useTranslation } from 'react-i18next';
 
 // Personnalisation globale des champs de formulaire MUI
 // const theme = createTheme({
@@ -79,6 +81,11 @@ import DiagnosticPage from './pages/DiagnosticPage';
 // });
 
 function App() {
+  const { t } = useTranslation();
+
+  // Exemple d'utilisation de la traduction
+  const pageTitle = t('app.pageTitle');
+
   // Gestion du thème clair/sombre
   const [mode, setMode] = useState(() => {
     // Récupérer le mode depuis localStorage ou utiliser 'light' par défaut
@@ -183,6 +190,7 @@ function App() {
                   </ProtectedRoute>
                 } />
                 <Route path="/diagnostic" element={<DiagnosticPage />} />
+                <Route path="/cgu" element={<CGU />} />
 
                 {/* Page d'accès refusé */}
                 <Route path="/access-denied" element={<AccessDenied />} />

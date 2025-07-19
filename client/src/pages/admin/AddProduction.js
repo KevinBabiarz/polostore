@@ -8,11 +8,13 @@ import {
 } from '@mui/material';
 import { CloudUpload, ArrowBack, Delete } from '@mui/icons-material';
 import { createProduction, getProductionById } from '../../services/productionService';
+import { useTranslation } from 'react-i18next';
 
 const AddProduction = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const isEditMode = !!id;
+    const { t } = useTranslation('admin');
 
     const [formData, setFormData] = useState({
         title: '',
@@ -101,7 +103,7 @@ const AddProduction = () => {
         try {
             // Valider les données avant envoi
             if (!formData.title.trim() || !formData.artist.trim()) {
-                throw new Error("Le titre et l'artiste sont requis.");
+                throw new Error("admin.addProduction.requiredFields");
             }
 
             // Préparer les données pour l'envoi
@@ -132,8 +134,8 @@ const AddProduction = () => {
             await createProduction(productionData, isEditMode ? 'put' : 'post');
 
             setSuccess(isEditMode ?
-                'Production mise à jour avec succès!' :
-                'Production ajoutée avec succès!'
+                'admin.addProduction.updated' :
+                'admin.addProduction.added'
             );
 
             // Redirection après un court délai
@@ -143,7 +145,7 @@ const AddProduction = () => {
 
         } catch (error) {
             console.error("Erreur lors de l'enregistrement:", error);
-            setError(error.message || "Une erreur est survenue lors de l'enregistrement");
+            setError(error.message || "admin.addProduction.error");
         } finally {
             setLoading(false);
         }
@@ -164,23 +166,23 @@ const AddProduction = () => {
                 onClick={() => navigate(-1)}
                 sx={{ mb: 3 }}
             >
-                Retour
+                {t('common.back')}
             </Button>
 
             <Paper sx={{ p: 3 }}>
                 <Typography variant="h4" component="h1" gutterBottom>
-                    {isEditMode ? 'Modifier la production' : 'Ajouter une nouvelle production'}
+                    {isEditMode ? t('addProduction.editTitle') : t('addProduction.addTitle')}
                 </Typography>
 
-                {error && <Alert severity="error" sx={{ mt: 2, mb: 2 }}>{error}</Alert>}
-                {success && <Alert severity="success" sx={{ mt: 2, mb: 2 }}>{success}</Alert>}
+                {error && <Alert severity="error" sx={{ mt: 2, mb: 2 }}>{t(error)}</Alert>}
+                {success && <Alert severity="success" sx={{ mt: 2, mb: 2 }}>{t(success)}</Alert>}
 
                 <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
                     <Grid container spacing={3}>
                         <Grid item xs={12} sm={6}>
                             <TextField
                                 name="title"
-                                label="Titre"
+                                label={t('addProduction.title')}
                                 value={formData.title}
                                 onChange={handleChange}
                                 fullWidth
@@ -190,7 +192,7 @@ const AddProduction = () => {
                         <Grid item xs={12} sm={6}>
                             <TextField
                                 name="artist"
-                                label="Artiste"
+                                label={t('addProduction.artist')}
                                 value={formData.artist}
                                 onChange={handleChange}
                                 fullWidth
@@ -199,28 +201,28 @@ const AddProduction = () => {
                         </Grid>
                         <Grid item xs={12} sm={6}>
                             <FormControl fullWidth>
-                                <InputLabel>Genre</InputLabel>
+                                <InputLabel>{t('addProduction.genre')}</InputLabel>
                                 <Select
                                     name="genre"
                                     value={formData.genre}
                                     label="Genre"
                                     onChange={handleChange}
                                 >
-                                    <MenuItem value="Rock">Rock</MenuItem>
-                                    <MenuItem value="Hip-Hop">Hip-Hop</MenuItem>
-                                    <MenuItem value="Jazz">Jazz</MenuItem>
-                                    <MenuItem value="Classique">Classique</MenuItem>
-                                    <MenuItem value="Electronic">Electronic</MenuItem>
-                                    <MenuItem value="Pop">Pop</MenuItem>
-                                    <MenuItem value="R&B">R&B</MenuItem>
-                                    <MenuItem value="Autre">Autre</MenuItem>
+                                    <MenuItem value="Rock">{t('genres.rock')}</MenuItem>
+                                    <MenuItem value="Hip-Hop">{t('genres.hiphop')}</MenuItem>
+                                    <MenuItem value="Jazz">{t('genres.jazz')}</MenuItem>
+                                    <MenuItem value="Classique">{t('genres.classical')}</MenuItem>
+                                    <MenuItem value="Electronic">{t('genres.electronic')}</MenuItem>
+                                    <MenuItem value="Pop">{t('genres.pop')}</MenuItem>
+                                    <MenuItem value="R&B">{t('genres.rnb')}</MenuItem>
+                                    <MenuItem value="Autre">{t('genres.other')}</MenuItem>
                                 </Select>
                             </FormControl>
                         </Grid>
                         <Grid item xs={12} sm={6}>
                             <TextField
                                 name="release_date"
-                                label="Date de sortie"
+                                label={t('addProduction.releaseDate')}
                                 type="date"
                                 value={formData.release_date}
                                 onChange={handleChange}
@@ -231,7 +233,7 @@ const AddProduction = () => {
                         <Grid item xs={12}>
                             <TextField
                                 name="description"
-                                label="Description"
+                                label={t('addProduction.description')}
                                 value={formData.description}
                                 onChange={handleChange}
                                 fullWidth
@@ -248,7 +250,7 @@ const AddProduction = () => {
                                 color="primary"
                                 sx={{ mt: 2 }}
                             >
-                                {preview ? "Changer l'image" : "Ajouter une image de couverture"}
+                                {preview ? t('addProduction.changeImage') : t('addProduction.addCoverImage')}
                                 <input
                                     type="file"
                                     hidden
@@ -261,7 +263,7 @@ const AddProduction = () => {
                                 <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
                                     <img
                                         src={preview}
-                                        alt="Prévisualisation"
+                                        alt={t('addProduction.previewAlt')}
                                         style={{ maxWidth: '100%', maxHeight: '200px' }}
                                     />
                                 </Box>
@@ -276,7 +278,7 @@ const AddProduction = () => {
                                 color="secondary"
                                 sx={{ mt: 2 }}
                             >
-                                Ajouter des fichiers audio
+                                {t('addProduction.addAudioFiles')}
                                 <input
                                     type="file"
                                     hidden
@@ -309,7 +311,7 @@ const AddProduction = () => {
                                     disabled={loading}
                                     sx={{ minWidth: 150 }}
                                 >
-                                    {loading ? <CircularProgress size={24} /> : isEditMode ? 'Mettre à jour' : 'Ajouter'}
+                                    {loading ? <CircularProgress size={24} /> : isEditMode ? t('addProduction.update') : t('addProduction.add')}
                                 </Button>
                             </Box>
                         </Grid>
@@ -321,3 +323,4 @@ const AddProduction = () => {
 };
 
 export default AddProduction;
+

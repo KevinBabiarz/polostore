@@ -41,9 +41,11 @@ import {
 } from '@mui/icons-material';
 import * as userService from '../../services/userService';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTranslation } from 'react-i18next';
 
 const UserManagement = () => {
   const { user: currentUser } = useAuth();
+  const { t } = useTranslation('admin'); // Spécifier le namespace admin
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -113,7 +115,7 @@ const UserManagement = () => {
       }
     } catch (err) {
       console.error('Erreur lors du chargement des utilisateurs:', err);
-      setError('Impossible de charger les utilisateurs. Veuillez réessayer plus tard.');
+      setError('userManagement.errors.loadUsers');
     } finally {
       setLoading(false);
     }
@@ -260,13 +262,13 @@ const UserManagement = () => {
   return (
     <Box sx={{ padding: 3 }}>
       <Typography variant="h4" component="h1" gutterBottom>
-        Gestion des utilisateurs
+        {t('userManagement.title')}
       </Typography>
 
       {/* Barre de recherche et filtres */}
       <Box sx={{ display: 'flex', mb: 2, gap: 2, flexWrap: 'wrap' }}>
         <TextField
-          label="Rechercher"
+          label={t('userManagement.search')}
           variant="outlined"
           size="small"
           value={searchTerm}
@@ -282,29 +284,29 @@ const UserManagement = () => {
         />
 
         <FormControl size="small" variant="outlined" sx={{ minWidth: 120 }}>
-          <InputLabel id="sort-by-label">Trier par</InputLabel>
+          <InputLabel id="sort-by-label">{t('userManagement.sortBy')}</InputLabel>
           <Select
             labelId="sort-by-label"
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
             label="Trier par"
           >
-            <MenuItem value="created_at">Date de création</MenuItem>
-            <MenuItem value="username">Nom d'utilisateur</MenuItem>
-            <MenuItem value="email">Email</MenuItem>
+            <MenuItem value="created_at">{t('userManagement.createdAt')}</MenuItem>
+            <MenuItem value="username">{t('userManagement.username')}</MenuItem>
+            <MenuItem value="email">{t('userManagement.email')}</MenuItem>
           </Select>
         </FormControl>
 
         <FormControl size="small" variant="outlined" sx={{ minWidth: 120 }}>
-          <InputLabel id="order-label">Ordre</InputLabel>
+          <InputLabel id="order-label">{t('userManagement.order')}</InputLabel>
           <Select
             labelId="order-label"
             value={sortOrder}
             onChange={(e) => setSortOrder(e.target.value)}
             label="Ordre"
           >
-            <MenuItem value="ASC">Ascendant</MenuItem>
-            <MenuItem value="DESC">Descendant</MenuItem>
+            <MenuItem value="ASC">{t('userManagement.asc')}</MenuItem>
+            <MenuItem value="DESC">{t('userManagement.desc')}</MenuItem>
           </Select>
         </FormControl>
 
@@ -313,28 +315,28 @@ const UserManagement = () => {
           startIcon={<RefreshIcon />}
           onClick={() => loadUsers()}
         >
-          Actualiser
+          {t('userManagement.refresh')}
         </Button>
       </Box>
 
       {/* Messages d'erreur */}
       {error && (
         <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
+          {t(error)}
         </Alert>
       )}
 
       {/* Tableau des utilisateurs */}
       <TableContainer component={Paper}>
-        <Table sx={{ minWidth: 650 }} aria-label="tableau des utilisateurs">
+        <Table sx={{ minWidth: 650 }} aria-label={t('userManagement.tableAriaLabel')}>
           <TableHead>
             <TableRow>
-              <TableCell>Utilisateur</TableCell>
-              <TableCell>Email</TableCell>
-              <TableCell>Rôle</TableCell>
-              <TableCell>Statut</TableCell>
-              <TableCell>Date de création</TableCell>
-              <TableCell align="center">Actions</TableCell>
+              <TableCell>{t('userManagement.user')}</TableCell>
+              <TableCell>{t('userManagement.email')}</TableCell>
+              <TableCell>{t('userManagement.role')}</TableCell>
+              <TableCell>{t('userManagement.status')}</TableCell>
+              <TableCell>{t('userManagement.createdAt')}</TableCell>
+              <TableCell align="center">{t('userManagement.actions')}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -347,7 +349,7 @@ const UserManagement = () => {
             ) : users.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} align="center">
-                  Aucun utilisateur trouvé
+                  {t('userManagement.noUsers')}
                 </TableCell>
               </TableRow>
             ) : (
@@ -360,7 +362,7 @@ const UserManagement = () => {
                     <TableCell>
                       <Chip
                         icon={isAdmin ? <AdminIcon /> : <UserIcon />}
-                        label={isAdmin ? 'Admin' : 'Utilisateur'}
+                        label={isAdmin ? t('userManagement.admin') : t('userManagement.user')}
                         color={isAdmin ? 'primary' : 'default'}
                         size="small"
                       />
@@ -368,7 +370,7 @@ const UserManagement = () => {
                     <TableCell>
                       <Chip
                         icon={user.isActive ? <CheckCircleIcon /> : <BlockIcon />}
-                        label={user.isActive ? 'Actif' : 'Inactif'}
+                        label={user.isActive ? t('userManagement.active') : t('userManagement.inactive')}
                         color={user.isActive ? 'success' : 'error'}
                         size="small"
                       />
@@ -381,13 +383,13 @@ const UserManagement = () => {
                         {/* Ne pas permettre les actions sur son propre compte */}
                         {currentUser && user.id !== currentUser.id && (
                           <>
-                            <Tooltip title="Modifier">
+                            <Tooltip title={t('userManagement.edit')}>
                               <IconButton onClick={() => handleEditUser(user.id)} size="small">
                                 <EditIcon />
                               </IconButton>
                             </Tooltip>
 
-                            <Tooltip title={isAdmin ? "Rétrograder" : "Promouvoir admin"}>
+                            <Tooltip title={isAdmin ? t('userManagement.demote') : t('userManagement.promote')}>
                               <IconButton
                                 onClick={() => handleToggleAdmin(user)}
                                 size="small"
@@ -397,7 +399,7 @@ const UserManagement = () => {
                               </IconButton>
                             </Tooltip>
 
-                            <Tooltip title={user.isActive ? "Désactiver" : "Activer"}>
+                            <Tooltip title={user.isActive ? t('userManagement.deactivate') : t('userManagement.activate')}>
                               <IconButton
                                 onClick={() => handleToggleStatus(user)}
                                 size="small"
@@ -407,7 +409,7 @@ const UserManagement = () => {
                               </IconButton>
                             </Tooltip>
 
-                            <Tooltip title="Supprimer">
+                            <Tooltip title={t('userManagement.delete')}>
                               <IconButton
                                 onClick={() => handleDeleteClick(user)}
                                 size="small"
@@ -420,7 +422,7 @@ const UserManagement = () => {
                         )}
                         {currentUser && user.id === currentUser.id && (
                           <Typography variant="caption" color="textSecondary">
-                            Compte courant
+                            {t('userManagement.currentAccount')}
                           </Typography>
                         )}
                       </Box>
@@ -441,20 +443,21 @@ const UserManagement = () => {
         onPageChange={handleChangePage}
         rowsPerPage={rowsPerPage}
         onRowsPerPageChange={handleChangeRowsPerPage}
-        labelRowsPerPage="Lignes par page:"
+        labelRowsPerPage={t('userManagement.rowsPerPage')}
         labelDisplayedRows={({ from, to, count }) =>
-          `${from}-${to} sur ${count !== -1 ? count : `plus de ${to}`}`}
+          t('userManagement.displayedRows', { from, to, count })
+        }
       />
 
       {/* Modal d'édition */}
       <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Modifier l'utilisateur</DialogTitle>
+        <DialogTitle>{t('userManagement.editDialogTitle')}</DialogTitle>
         <DialogContent>
           <TextField
             autoFocus
             margin="dense"
             name="username"
-            label="Nom d'utilisateur"
+            label={t('userManagement.username')}
             type="text"
             fullWidth
             variant="outlined"
@@ -465,7 +468,7 @@ const UserManagement = () => {
           <TextField
             margin="dense"
             name="email"
-            label="Email"
+            label={t('userManagement.email')}
             type="email"
             fullWidth
             variant="outlined"
@@ -476,7 +479,7 @@ const UserManagement = () => {
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
               <Typography component="label" htmlFor="isAdmin" sx={{ mr: 1 }}>
-                Administrateur
+                {t('userManagement.admin')}
               </Typography>
               <input
                 type="checkbox"
@@ -488,7 +491,7 @@ const UserManagement = () => {
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
               <Typography component="label" htmlFor="isActive" sx={{ mr: 1 }}>
-                Actif
+                {t('userManagement.active')}
               </Typography>
               <input
                 type="checkbox"
@@ -501,26 +504,25 @@ const UserManagement = () => {
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setEditDialogOpen(false)}>Annuler</Button>
+          <Button onClick={() => setEditDialogOpen(false)}>{t('common.cancel')}</Button>
           <Button onClick={handleSaveUser} color="primary" variant="contained">
-            Enregistrer
+            {t('common.save')}
           </Button>
         </DialogActions>
       </Dialog>
 
       {/* Modal de confirmation de suppression */}
       <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
-        <DialogTitle>Confirmer la suppression</DialogTitle>
+        <DialogTitle>{t('userManagement.confirmDeleteTitle')}</DialogTitle>
         <DialogContent>
           <Typography>
-            Êtes-vous sûr de vouloir supprimer l'utilisateur "{userToDelete?.username}" ?
-            Cette action est irréversible.
+            {t('userManagement.confirmDeleteText', { username: userToDelete?.username })}
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeleteDialogOpen(false)}>Annuler</Button>
+          <Button onClick={() => setDeleteDialogOpen(false)}>{t('common.cancel')}</Button>
           <Button onClick={handleConfirmDelete} color="error" variant="contained">
-            Supprimer
+            {t('userManagement.delete')}
           </Button>
         </DialogActions>
       </Dialog>

@@ -1,6 +1,7 @@
 // services/contactService.js
 import ContactMessage from '../models/ContactMessage.js';
 import Production from '../models/Production.js';
+import { i18n } from '../utils/i18n.js';
 
 /**
  * Service de gestion des messages de contact
@@ -47,7 +48,7 @@ export const ContactService = {
         });
 
         if (!message) {
-            throw new Error("Message non trouvé");
+            throw new Error(i18n.t('contactService.messageNotFound'));
         }
 
         return message;
@@ -75,7 +76,7 @@ export const ContactService = {
         const message = await ContactMessage.findByPk(id);
 
         if (!message) {
-            throw new Error("Message non trouvé");
+            throw new Error(i18n.t('contactService.messageNotFound'));
         }
 
         await message.update({ read: true });
@@ -91,7 +92,7 @@ export const ContactService = {
         const message = await ContactMessage.findByPk(id);
 
         if (!message) {
-            throw new Error("Message non trouvé");
+            throw new Error(i18n.t('contactService.messageNotFound'));
         }
 
         await message.destroy();

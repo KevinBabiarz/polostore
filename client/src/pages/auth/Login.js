@@ -7,6 +7,7 @@ import {
 } from '@mui/material';
 import { useAuth } from '../../contexts/AuthContext';
 import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
     Email, Lock, Visibility, VisibilityOff,
     LoginOutlined, ArrowForward
@@ -17,6 +18,7 @@ const Login = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const theme = useTheme();
+    const { t } = useTranslation('auth'); // Spécifier le namespace auth
 
     const [formData, setFormData] = useState({
         email: '',
@@ -44,14 +46,14 @@ const Login = () => {
 
         // Validation de base
         if (!formData.email.trim() || !formData.password) {
-            setError('Tous les champs sont obligatoires');
+            setError(t('allFieldsRequired'));
             return;
         }
 
         // Validation de l'email
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(formData.email.trim())) {
-            setError('Veuillez entrer une adresse email valide');
+            setError(t('emailInvalid'));
             return;
         }
 
@@ -65,10 +67,10 @@ const Login = () => {
                 navigate(from);
             } else {
                 // Affichage du message d'erreur retourné par le backend
-                setError(result?.message || 'Identifiants incorrects. Veuillez réessayer.');
+                setError(result?.message || t('loginError'));
             }
         } catch (err) {
-            setError('Une erreur est survenue lors de la connexion.');
+            setError(t('loginError'));
         } finally {
             setLoading(false);
         }
@@ -101,7 +103,7 @@ const Login = () => {
                                 }}
                             >
                                 <Typography variant="h4" component="h1" align="center" fontWeight="bold">
-                                    Connexion
+                                    {t('loginTitle')}
                                 </Typography>
                             </Box>
                         </Grid>
@@ -134,7 +136,7 @@ const Login = () => {
                                         color: 'text.secondary'
                                     }}
                                 >
-                                    Connectez-vous pour accéder à votre espace personnel
+                                    {t('loginSubtitle', { defaultValue: 'Connectez-vous pour accéder à votre espace personnel' })}
                                 </Typography>
 
                                 <form onSubmit={handleSubmit}>
@@ -143,20 +145,60 @@ const Login = () => {
                                             <TextField
                                                 fullWidth
                                                 margin="normal"
-                                                label="Email"
+                                                label={t('email')}
                                                 name="email"
                                                 type="email"
-                                                placeholder="exemple@email.com"
+                                                placeholder={t('emailPlaceholder', { defaultValue: 'exemple@email.com' })}
                                                 value={formData.email}
                                                 onChange={handleChange}
                                                 autoComplete="email"
                                                 required
                                                 variant="outlined"
                                                 disabled={loading}
+                                                sx={{
+                                                    '& .MuiInputBase-input': {
+                                                        color: theme.palette.mode === 'dark' ? 'white' : 'black !important',
+                                                        backgroundColor: theme.palette.mode === 'dark' ? 'transparent' : 'white !important',
+                                                        '&:-webkit-autofill': {
+                                                            WebkitBoxShadow: theme.palette.mode === 'dark'
+                                                                ? '0 0 0 1000px #424242 inset'
+                                                                : '0 0 0 1000px white inset !important',
+                                                            WebkitTextFillColor: theme.palette.mode === 'dark' ? 'white !important' : 'black !important',
+                                                            transition: 'background-color 5000s ease-in-out 0s',
+                                                        },
+                                                        '&:-webkit-autofill:hover': {
+                                                            WebkitBoxShadow: theme.palette.mode === 'dark'
+                                                                ? '0 0 0 1000px #424242 inset'
+                                                                : '0 0 0 1000px white inset !important',
+                                                            WebkitTextFillColor: theme.palette.mode === 'dark' ? 'white !important' : 'black !important',
+                                                        },
+                                                        '&:-webkit-autofill:focus': {
+                                                            WebkitBoxShadow: theme.palette.mode === 'dark'
+                                                                ? '0 0 0 1000px #424242 inset'
+                                                                : '0 0 0 1000px white inset !important',
+                                                            WebkitTextFillColor: theme.palette.mode === 'dark' ? 'white !important' : 'black !important',
+                                                        },
+                                                    },
+                                                    '& .MuiOutlinedInput-root': {
+                                                        backgroundColor: theme.palette.mode === 'dark' ? 'transparent' : 'white !important',
+                                                        '& fieldset': {
+                                                            borderColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.23)' : 'rgba(0, 0, 0, 0.23)',
+                                                        },
+                                                        '&:hover fieldset': {
+                                                            borderColor: theme.palette.primary.main,
+                                                        },
+                                                        '&.Mui-focused fieldset': {
+                                                            borderColor: theme.palette.primary.main,
+                                                        },
+                                                    },
+                                                    '& .MuiInputLabel-root': {
+                                                        color: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.6)',
+                                                    },
+                                                }}
                                                 InputProps={{
                                                     startAdornment: (
                                                         <InputAdornment position="start">
-                                                            <Email color="primary" />
+                                                            <Email sx={{ color: theme.palette.mode === 'dark' ? 'primary.main' : 'rgba(0, 0, 0, 0.54)' }} />
                                                         </InputAdornment>
                                                     )
                                                 }}
@@ -166,26 +208,68 @@ const Login = () => {
                                             <TextField
                                                 fullWidth
                                                 margin="normal"
-                                                label="Mot de passe"
+                                                label={t('password')}
                                                 name="password"
                                                 type={showPassword ? 'text' : 'password'}
-                                                placeholder="Votre mot de passe"
+                                                placeholder={t('passwordPlaceholder', { defaultValue: 'Votre mot de passe' })}
                                                 value={formData.password}
                                                 onChange={handleChange}
                                                 autoComplete="current-password"
                                                 required
                                                 variant="outlined"
                                                 disabled={loading}
+                                                sx={{
+                                                    '& .MuiInputBase-input': {
+                                                        color: theme.palette.mode === 'dark' ? 'white' : 'black !important',
+                                                        backgroundColor: theme.palette.mode === 'dark' ? 'transparent' : 'white !important',
+                                                        '&:-webkit-autofill': {
+                                                            WebkitBoxShadow: theme.palette.mode === 'dark'
+                                                                ? '0 0 0 1000px #424242 inset'
+                                                                : '0 0 0 1000px white inset !important',
+                                                            WebkitTextFillColor: theme.palette.mode === 'dark' ? 'white !important' : 'black !important',
+                                                            transition: 'background-color 5000s ease-in-out 0s',
+                                                        },
+                                                        '&:-webkit-autofill:hover': {
+                                                            WebkitBoxShadow: theme.palette.mode === 'dark'
+                                                                ? '0 0 0 1000px #424242 inset'
+                                                                : '0 0 0 1000px white inset !important',
+                                                            WebkitTextFillColor: theme.palette.mode === 'dark' ? 'white !important' : 'black !important',
+                                                        },
+                                                        '&:-webkit-autofill:focus': {
+                                                            WebkitBoxShadow: theme.palette.mode === 'dark'
+                                                                ? '0 0 0 1000px #424242 inset'
+                                                                : '0 0 0 1000px white inset !important',
+                                                            WebkitTextFillColor: theme.palette.mode === 'dark' ? 'white !important' : 'black !important',
+                                                        },
+                                                    },
+                                                    '& .MuiOutlinedInput-root': {
+                                                        '& fieldset': {
+                                                            borderColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.23)' : 'rgba(0, 0, 0, 0.23)',
+                                                        },
+                                                        '&:hover fieldset': {
+                                                            borderColor: theme.palette.primary.main,
+                                                        },
+                                                        '&.Mui-focused fieldset': {
+                                                            borderColor: theme.palette.primary.main,
+                                                        },
+                                                    },
+                                                    '& .MuiInputLabel-root': {
+                                                        color: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.6)',
+                                                    },
+                                                }}
                                                 InputProps={{
                                                     startAdornment: (
                                                         <InputAdornment position="start">
-                                                            <Lock color="primary" />
+                                                            <Lock sx={{ color: theme.palette.mode === 'dark' ? 'primary.main' : 'rgba(0, 0, 0, 0.54)' }} />
                                                         </InputAdornment>
                                                     ),
                                                     endAdornment: (
                                                         <InputAdornment position="end">
                                                             <IconButton onClick={toggleShowPassword} edge="end">
-                                                                {showPassword ? <VisibilityOff /> : <Visibility />}
+                                                                {showPassword ?
+                                                                    <VisibilityOff sx={{ color: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.54)' }} /> :
+                                                                    <Visibility sx={{ color: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.54)' }} />
+                                                                }
                                                             </IconButton>
                                                         </InputAdornment>
                                                     )
@@ -214,7 +298,7 @@ const Login = () => {
                                                     }
                                                 }}
                                             >
-                                                {loading ? 'Connexion en cours...' : 'Se connecter'}
+                                                {loading ? t('common.loading') : t('loginButton')}
                                             </Button>
                                         </Grid>
                                     </Grid>
@@ -223,7 +307,7 @@ const Login = () => {
                                 <Box sx={{ mt: 4, textAlign: 'center' }}>
                                     <Divider sx={{ mb: 3 }}>
                                         <Typography variant="body2" component="span" sx={{ px: 2, color: 'text.secondary' }}>
-                                            Nouveau sur le site ?
+                                            {t('noAccount')}
                                         </Typography>
                                     </Divider>
 
@@ -239,7 +323,7 @@ const Login = () => {
                                             px: 3
                                         }}
                                     >
-                                        Créer un compte
+                                        {t('registerButton')}
                                     </Button>
                                 </Box>
                             </Box>

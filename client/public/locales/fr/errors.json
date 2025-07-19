@@ -1,0 +1,11 @@
+{
+  "pageNotFound": "Page non trouvée",
+  "pageNotFoundDescription": "La page que vous recherchez n'existe pas.",
+  "backToHome": "Retour à l'accueil",
+  "serverError": "Erreur serveur",
+  "networkError": "Erreur de réseau",
+  "unauthorized": "Non autorisé",
+  "forbidden": "Accès interdit",
+  "accessDenied": "Accès refusé",
+  "somethingWentWrong": "Quelque chose s'est mal passé"
+}

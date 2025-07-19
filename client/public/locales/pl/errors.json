@@ -1,0 +1,10 @@
+{
+  "pageNotFound": "Strona nie znaleziona",
+  "pageNotFoundDescription": "Strona, której szukasz, nie istnieje lub została przeniesiona.",
+  "backToHome": "Powrót na stronę główną",
+  "accessDenied": "Dostęp zabroniony",
+  "serverError": "Błąd serwera",
+  "networkError": "Błąd sieci",
+  "somethingWentWrong": "Coś poszło nie tak"
+}
+

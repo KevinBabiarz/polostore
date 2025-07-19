@@ -1,0 +1,12 @@
+{
+  "fetchingProductions": "Récupération des productions avec options: {{options}}",
+  "executingQuery": "Exécution de la requête: {{query}}",
+  "productionsFetched": "{{fetched}} productions récupérées sur {{total}} au total",
+  "errorFetchingProductions": "Erreur lors de la récupération des productions: {{error}}",
+  "productionNotFound": "Production non trouvée",
+  "dataReceivedForCreation": "[PROD SERVICE] Données reçues pour la création: {{data}}",
+  "dataReadyForCreation": "[PROD SERVICE] Données prêtes pour création: {{data}}",
+  "errorCreatingProduction": "[PROD SERVICE] Erreur lors de la création de la production: {{error}}",
+  "noUpdatePerformed": "Aucune mise à jour effectuée"
+}
+

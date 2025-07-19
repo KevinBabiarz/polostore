@@ -11,7 +11,6 @@ import {
     Chip,
     Divider,
     useScrollTrigger,
-    Fade,
     Slide,
     IconButton,
     Menu,
@@ -22,6 +21,9 @@ import {
 } from '@mui/material';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTranslation } from 'react-i18next';
+import LanguageSelector from '../ui/LanguageSelector';
+import './AuthButtons.css';
 import MenuIcon from '@mui/icons-material/Menu';
 import HomeIcon from '@mui/icons-material/Home';
 import LibraryMusicIcon from '@mui/icons-material/LibraryMusic';
@@ -55,7 +57,9 @@ const Layout = ({ themeToggle }) => {
     const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
     const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
+    const isLarge = useMediaQuery(theme.breakpoints.up('lg'));
     const location = useLocation();
+    const { t } = useTranslation();
 
     // État pour suivre si l'utilisateur est admin (mis à jour à chaque rendu)
     const [userIsAdmin, setUserIsAdmin] = useState(false);
@@ -174,13 +178,15 @@ const Layout = ({ themeToggle }) => {
             transformOrigin={{ vertical: 'top', horizontal: 'right' }}
             open={isMobileMenuOpen}
             onClose={handleMobileMenuClose}
-            PaperProps={{
-                elevation: 3,
-                sx: {
-                    mt: 1.5,
-                    borderRadius: 2,
-                    minWidth: { xs: '90vw', sm: 250 },
-                    maxWidth: '95vw',
+            slotProps={{
+                paper: {
+                    elevation: 3,
+                    sx: {
+                        mt: 1.5,
+                        borderRadius: 2,
+                        minWidth: { xs: '90vw', sm: 250 },
+                        maxWidth: '95vw',
+                    }
                 }
             }}
         >
@@ -188,14 +194,14 @@ const Layout = ({ themeToggle }) => {
                 <IconButton size="small" color="inherit">
                     <HomeIcon />
                 </IconButton>
-                <Typography sx={{ ml: 1 }}>Accueil</Typography>
+                <Typography sx={{ ml: 1 }}>{t('navigation:home')}</Typography>
             </MenuItem>
 
             <MenuItem component={RouterLink} to="/productions" onClick={handleMobileMenuClose}>
                 <IconButton size="small" color="inherit">
                     <LibraryMusicIcon />
                 </IconButton>
-                <Typography sx={{ ml: 1 }}>Productions</Typography>
+                <Typography sx={{ ml: 1 }}>{t('navigation:productions')}</Typography>
             </MenuItem>
 
             {(!isAuthenticated() || !isAdmin()) && (
@@ -203,7 +209,7 @@ const Layout = ({ themeToggle }) => {
                     <IconButton size="small" color="inherit">
                         <EmailIcon />
                     </IconButton>
-                    <Typography sx={{ ml: 1 }}>Contact</Typography>
+                    <Typography sx={{ ml: 1 }}>{t('navigation:contact')}</Typography>
                 </MenuItem>
             )}
 
@@ -214,7 +220,7 @@ const Layout = ({ themeToggle }) => {
                             <IconButton size="small" color="inherit">
                                 <DashboardIcon />
                             </IconButton>
-                            <Typography sx={{ ml: 1 }}>Dashboard Admin</Typography>
+                            <Typography sx={{ ml: 1 }}>{t('admin:dashboard')}</Typography>
                         </MenuItem>
                     )}
 
@@ -222,7 +228,7 @@ const Layout = ({ themeToggle }) => {
                         <Avatar sx={{ width: 24, height: 24, bgcolor: isAdmin() ? 'secondary.main' : 'primary.main' }}>
                             {username.charAt(0).toUpperCase()}
                         </Avatar>
-                        <Typography sx={{ ml: 1 }}>Mon Profil</Typography>
+                        <Typography sx={{ ml: 1 }}>{t('navigation:profile')}</Typography>
                     </MenuItem>
 
                     <Divider />
@@ -231,7 +237,7 @@ const Layout = ({ themeToggle }) => {
                         <IconButton size="small" color="inherit">
                             <ExitToAppIcon />
                         </IconButton>
-                        <Typography sx={{ ml: 1 }}>Déconnexion</Typography>
+                        <Typography sx={{ ml: 1 }}>{t('navigation:logout')}</Typography>
                     </MenuItem>
                 </>
             ) : (
@@ -240,14 +246,14 @@ const Layout = ({ themeToggle }) => {
                         <IconButton size="small" color="inherit">
                             <LockOpenIcon />
                         </IconButton>
-                        <Typography sx={{ ml: 1 }}>Connexion</Typography>
+                        <Typography sx={{ ml: 1 }}>{t('navigation:login')}</Typography>
                     </MenuItem>
 
                     <MenuItem component={RouterLink} to="/register" onClick={handleMobileMenuClose}>
                         <IconButton size="small" color="inherit">
                             <PersonAddIcon />
                         </IconButton>
-                        <Typography sx={{ ml: 1 }}>Inscription</Typography>
+                        <Typography sx={{ ml: 1 }}>{t('navigation:register')}</Typography>
                     </MenuItem>
                 </>
             )}
@@ -262,35 +268,37 @@ const Layout = ({ themeToggle }) => {
             transformOrigin={{ vertical: 'top', horizontal: 'center' }}
             open={isAdminMenuOpen}
             onClose={handleAdminMenuClose}
-            PaperProps={{
-                elevation: 3,
-                sx: {
-                    borderRadius: 2,
-                    width: { xs: '90vw', sm: 'auto' },
-                    maxWidth: { xs: '95vw', sm: '400px' }
+            slotProps={{
+                paper: {
+                    elevation: 3,
+                    sx: {
+                        borderRadius: 2,
+                        width: { xs: '90vw', sm: 'auto' },
+                        maxWidth: { xs: '95vw', sm: '400px' }
+                    }
                 }
             }}
         >
             <MenuItem component={RouterLink} to="/admin/dashboard" onClick={handleAdminMenuClose}>
                 <DashboardIcon fontSize="small" sx={{ mr: 1 }} />
-                Dashboard
+                {t('admin:dashboard')}
             </MenuItem>
 
             <MenuItem component={RouterLink} to="/admin/productions" onClick={handleAdminMenuClose}>
                 <LibraryMusicIcon fontSize="small" sx={{ mr: 1 }} />
-                Gérer Productions
+                {t('admin:productionsManagement')}
             </MenuItem>
 
             <MenuItem component={RouterLink} to="/admin/productions/add" onClick={handleAdminMenuClose}>
                 <AddCircleIcon fontSize="small" sx={{ mr: 1 }} />
-                Ajouter Production
+                {t('admin:addProduction')}
             </MenuItem>
 
             <MenuItem component={RouterLink} to="/admin/users" onClick={handleAdminMenuClose}>
                 <Badge badgeContent="New" color="error" fontSize="small" sx={{ mr: 1 }}>
                     <PersonAddIcon fontSize="small" />
                 </Badge>
-                Gérer Utilisateurs
+                {t('admin:userManagement')}
             </MenuItem>
         </Menu>
     );
@@ -332,7 +340,7 @@ const Layout = ({ themeToggle }) => {
                     {username}
                 </Typography>
                 <Chip
-                    label={isAdmin() ? 'Admin' : 'Utilisateur'}
+                    label={isAdmin() ? t('admin:dashboard') : t('common:welcome')}
                     size="small"
                     color={isAdmin() ? 'secondary' : 'default'}
                     sx={{ mt: 0.5 }}
@@ -342,17 +350,17 @@ const Layout = ({ themeToggle }) => {
             <Divider sx={{ my: 1 }} />
 
             <MenuItem component={RouterLink} to="/profile" onClick={handleProfileMenuClose}>
-                Mon profil
+                {t('navigation:profile')}
             </MenuItem>
 
             <MenuItem component={RouterLink} to="/favorites" onClick={handleProfileMenuClose}>
-                Mes favoris
+                {t('navigation:favorites')}
             </MenuItem>
 
             <Divider sx={{ my: 1 }} />
 
             <MenuItem onClick={handleLogout}>
-                Déconnexion
+                {t('navigation:logout')}
             </MenuItem>
         </Menu>
     );
@@ -376,40 +384,56 @@ const Layout = ({ themeToggle }) => {
                         borderBottom: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)'}`
                     }}
                 >
-                    <Container maxWidth="lg">
+                    <Container maxWidth="xl" sx={{ px: { xs: 1, sm: 2, md: 3 } }}>
                         <Toolbar disableGutters sx={{
-                            minHeight: { xs: '56px', sm: '64px' },
-                            py: { xs: 0.5, sm: 0.75 }
+                            minHeight: { xs: '56px', sm: '64px', md: '70px' },
+                            py: { xs: 0.5, sm: 0.75, md: 1 },
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            flexWrap: 'nowrap'
                         }}>
                             {/* Logo et titre */}
-                            <Typography
-                                variant={isSmallScreen ? "h6" : "h5"}
-                                component={RouterLink}
-                                to="/"
-                                sx={{
-                                    mr: { xs: 1, sm: 2 },
-                                    fontWeight: 700,
-                                    letterSpacing: { xs: '.05rem', sm: '.1rem' },
-                                    color: '#e02323', // Toujours rouge
-                                    textDecoration: 'none',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem' }
-                                }}
-                            >
-                                <Box
-                                    component="img"
-                                    src="/images/PB-removebg-preview.png"
-                                    alt="Logo POLOBEATSPROD"
+                            <Box sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                flexShrink: 0,
+                                mr: { xs: 1, sm: 2, md: 3 }
+                            }}>
+                                <Typography
+                                    variant={isSmallScreen ? "h6" : isLarge ? "h4" : "h5"}
+                                    component={RouterLink}
+                                    to="/"
                                     sx={{
-                                        mr: { xs: 0.5, sm: 1 },
-                                        width: { xs: 24, sm: 28, md: 32 },
-                                        height: { xs: 24, sm: 28, md: 32 },
-                                        objectFit: 'contain'
+                                        fontWeight: 700,
+                                        letterSpacing: { xs: '.05rem', sm: '.1rem', md: '.15rem' },
+                                        color: '#e02323',
+                                        textDecoration: 'none',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem', lg: '1.75rem' }
                                     }}
-                                />
-                                POLO<Box component="span" sx={{ color: 'text.primary', display: { xs: isExtraSmallScreen ? 'none' : 'inline', sm: 'inline' } }}>BEATSPROD</Box>
-                            </Typography>
+                                >
+                                    <Box
+                                        component="img"
+                                        src="/images/PB-removebg-preview.png"
+                                        alt="Logo POLOBEATSPROD"
+                                        sx={{
+                                            mr: { xs: 0.5, sm: 1, md: 1.5 },
+                                            width: { xs: 24, sm: 28, md: 32, lg: 36 },
+                                            height: { xs: 24, sm: 28, md: 32, lg: 36 },
+                                            objectFit: 'contain',
+                                            // Inverser les couleurs uniquement en mode clair pour rendre le logo visible
+                                            filter: theme.palette.mode === 'dark' ? 'none' : 'invert(1)',
+                                            transition: 'filter 0.3s ease'
+                                        }}
+                                    />
+                                    POLO<Box component="span" sx={{
+                                        color: 'text.primary',
+                                        display: { xs: isExtraSmallScreen ? 'none' : 'inline', sm: 'inline' }
+                                    }}>BEATSPROD</Box>
+                                </Typography>
+                            </Box>
 
                             {/* Navigation sur desktop */}
                             {!isMobile && (
@@ -421,9 +445,15 @@ const Layout = ({ themeToggle }) => {
                                             borderRadius: 2,
                                             mx: 0.5,
                                             position: 'relative',
-                                            color: textColor, // Couleur du texte adaptée
-                                            fontSize: { xs: '0.8rem', sm: '0.875rem' },
-                                            px: { xs: 1, sm: 2 },
+                                            color: textColor,
+                                            fontSize: { xs: '0.75rem', sm: '0.8rem' },
+                                            px: { xs: 0.75, sm: 1.5 },
+                                            py: { xs: 0.5, sm: 0.75 },
+                                            maxWidth: { xs: '110px', sm: '130px', md: '150px' },
+                                            minWidth: { xs: '80px', sm: '100px' },
+                                            whiteSpace: 'nowrap',
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
                                             '&::after': {
                                                 content: '""',
                                                 position: 'absolute',
@@ -444,9 +474,9 @@ const Layout = ({ themeToggle }) => {
                                                 bgcolor: hoverColor // Rouge vif en survol
                                             }
                                         }}
-                                        startIcon={<HomeIcon />}
+                                        startIcon={<HomeIcon fontSize="small" />}
                                     >
-                                        Accueil
+                                        {t('navigation:home')}
                                     </Button>
 
                                     <Button
@@ -456,9 +486,15 @@ const Layout = ({ themeToggle }) => {
                                             borderRadius: 2,
                                             mx: 0.5,
                                             position: 'relative',
-                                            color: textColor, // Couleur du texte adaptée
-                                            fontSize: { xs: '0.8rem', sm: '0.875rem' },
-                                            px: { xs: 1, sm: 2 },
+                                            color: textColor,
+                                            fontSize: { xs: '0.75rem', sm: '0.8rem' },
+                                            px: { xs: 0.75, sm: 1.5 },
+                                            py: { xs: 0.5, sm: 0.75 },
+                                            maxWidth: { xs: '110px', sm: '130px', md: '150px' },
+                                            minWidth: { xs: '80px', sm: '100px' },
+                                            whiteSpace: 'nowrap',
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
                                             '&::after': {
                                                 content: '""',
                                                 position: 'absolute',
@@ -479,9 +515,9 @@ const Layout = ({ themeToggle }) => {
                                                 bgcolor: hoverColor // Rouge vif en survol
                                             }
                                         }}
-                                        startIcon={<LibraryMusicIcon />}
+                                        startIcon={<LibraryMusicIcon fontSize="small" />}
                                     >
-                                        Productions
+                                        {t('navigation:productions')}
                                     </Button>
 
                                     {(!isAuthenticated() || !isAdmin()) && (
@@ -492,9 +528,15 @@ const Layout = ({ themeToggle }) => {
                                                 borderRadius: 2,
                                                 mx: 0.5,
                                                 position: 'relative',
-                                                color: textColor, // Couleur du texte adaptée
-                                                fontSize: { xs: '0.8rem', sm: '0.875rem' },
-                                                px: { xs: 1, sm: 2 },
+                                                color: textColor,
+                                                fontSize: { xs: '0.75rem', sm: '0.8rem' },
+                                                px: { xs: 0.75, sm: 1.5 },
+                                                py: { xs: 0.5, sm: 0.75 },
+                                                maxWidth: { xs: '110px', sm: '130px', md: '150px' },
+                                                minWidth: { xs: '80px', sm: '100px' },
+                                                whiteSpace: 'nowrap',
+                                                overflow: 'hidden',
+                                                textOverflow: 'ellipsis',
                                                 '&::after': {
                                                     content: '""',
                                                     position: 'absolute',
@@ -515,9 +557,9 @@ const Layout = ({ themeToggle }) => {
                                                     bgcolor: hoverColor // Rouge vif en survol
                                                 }
                                             }}
-                                            startIcon={<EmailIcon />}
+                                            startIcon={<EmailIcon fontSize="small" />}
                                         >
-                                            Contact
+                                            {t('navigation:contact')}
                                         </Button>
                                     )}
                                 </Box>
@@ -530,9 +572,19 @@ const Layout = ({ themeToggle }) => {
                                 </Box>
                             )}
 
-                            {/* Actions sur desktop */}
+                            {/* Sélecteur de langue */}
+                            <Box sx={{ mx: { xs: 0.5, sm: 1 } }}>
+                                <LanguageSelector size="small" />
+                            </Box>
+
+                            {/* Actions sur desktop - Version optimisée pour la responsivité */}
                             {!isMobile && (
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.25, sm: 0.5 } }}>
+                                <Box sx={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: { xs: 0.5, sm: 0.75, md: 1 },
+                                    ml: { xs: 0.5, sm: 1 }
+                                }}>
                                     {isAuthenticated() ? (
                                         <>
                                             {isAdmin() && (
@@ -582,7 +634,6 @@ const Layout = ({ themeToggle }) => {
                                                     {username ? username.charAt(0).toUpperCase() : 'U'}
                                                 </Avatar>
                                                 <Box sx={{
-                                                    display: 'flex',
                                                     flexDirection: 'column',
                                                     alignItems: 'flex-start',
                                                     display: { xs: isTablet ? 'none' : 'flex', sm: 'flex' }
@@ -605,41 +656,80 @@ const Layout = ({ themeToggle }) => {
                                             {renderProfileMenu}
                                         </>
                                     ) : (
-                                        <>
+                                        /* Boutons de connexion/inscription optimisés */
+                                        <Box sx={{
+                                            display: 'flex',
+                                            gap: { xs: 0.5, sm: 0.75, md: 1 },
+                                            alignItems: 'center'
+                                        }}>
                                             <Button
                                                 component={RouterLink}
                                                 to="/login"
                                                 color="inherit"
-                                                variant="text"
-                                                startIcon={isTablet ? null : <LockOpenIcon />}
+                                                variant="outlined"
+                                                startIcon={<LockOpenIcon />}
                                                 sx={{
                                                     borderRadius: 2,
-                                                    fontSize: { xs: '0.7rem', sm: '0.875rem' },
-                                                    px: { xs: 1, sm: 1.5 }
+                                                    fontSize: { xs: '0.7rem', sm: '0.8rem', md: '0.875rem' },
+                                                    px: { xs: 1, sm: 1.25, md: 1.5 },
+                                                    py: { xs: 0.5, sm: 0.75 },
+                                                    minWidth: { xs: '85px', sm: '100px', md: '120px' },
+                                                    minHeight: { xs: 32, sm: 36, md: 40 },
+                                                    borderColor: theme.palette.mode === 'dark'
+                                                        ? 'rgba(255, 255, 255, 0.3)'
+                                                        : 'rgba(224, 35, 35, 0.3)',
+                                                    color: theme.palette.mode === 'dark' ? '#ffffff' : '#e02323',
+                                                    fontWeight: 500,
+                                                    textTransform: 'none',
+                                                    transition: 'all 0.2s ease-in-out',
+                                                    '&:hover': {
+                                                        borderColor: theme.palette.mode === 'dark'
+                                                            ? '#ffffff'
+                                                            : '#e02323',
+                                                        bgcolor: theme.palette.mode === 'dark'
+                                                            ? 'rgba(255, 255, 255, 0.05)'
+                                                            : 'rgba(224, 35, 35, 0.05)',
+                                                        transform: 'translateY(-1px)',
+                                                        boxShadow: theme.palette.mode === 'dark'
+                                                            ? '0 4px 12px rgba(255, 255, 255, 0.1)'
+                                                            : '0 4px 12px rgba(224, 35, 35, 0.2)'
+                                                    }
                                                 }}
                                             >
-                                                Connexion
+                                                {t('navigation:login')}
                                             </Button>
 
                                             <Button
                                                 component={RouterLink}
                                                 to="/register"
                                                 variant="contained"
+                                                startIcon={<PersonAddIcon />}
                                                 sx={{
-                                                    ml: { xs: 0.5, sm: 1 },
                                                     borderRadius: 2,
                                                     bgcolor: activeTabColor,
-                                                    fontSize: { xs: '0.7rem', sm: '0.875rem' },
-                                                    px: { xs: 1, sm: 1.5 },
+                                                    fontSize: { xs: '0.7rem', sm: '0.8rem', md: '0.875rem' },
+                                                    px: { xs: 1, sm: 1.25, md: 1.5 },
+                                                    py: { xs: 0.5, sm: 0.75 },
+                                                    minWidth: { xs: '85px', sm: '100px', md: '120px' },
+                                                    minHeight: { xs: 32, sm: 36, md: 40 },
+                                                    fontWeight: 600,
+                                                    textTransform: 'none',
+                                                    transition: 'all 0.2s ease-in-out',
+                                                    boxShadow: theme.palette.mode === 'dark'
+                                                        ? '0 2px 8px rgba(224, 35, 35, 0.3)'
+                                                        : '0 2px 8px rgba(224, 35, 35, 0.2)',
                                                     '&:hover': {
-                                                        bgcolor: hoverColor
+                                                        bgcolor: hoverColor,
+                                                        transform: 'translateY(-1px)',
+                                                        boxShadow: theme.palette.mode === 'dark'
+                                                            ? '0 6px 16px rgba(224, 35, 35, 0.4)'
+                                                            : '0 6px 16px rgba(224, 35, 35, 0.3)'
                                                     }
                                                 }}
-                                                startIcon={isTablet ? null : <PersonAddIcon />}
                                             >
-                                                Inscription
+                                                {t('navigation:register')}
                                             </Button>
-                                        </>
+                                        </Box>
                                     )}
                                 </Box>
                             )}

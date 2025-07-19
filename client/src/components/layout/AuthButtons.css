@@ -1,0 +1,155 @@
+/* Styles pour les boutons de navigation - Corrections pour le texte polonais */
+.nav-button {
+    max-width: 150px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+.nav-button-small {
+    max-width: 130px !important;
+    min-width: 80px !important;
+    font-size: 0.8rem !important;
+}
+
+.auth-button {
+    max-width: 110px !important;
+    min-width: 70px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    font-size: 0.8rem !important;
+}
+
+.admin-button {
+    max-width: 100px !important;
+    min-width: 60px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .nav-button-small {
+        max-width: 110px !important;
+        min-width: 70px !important;
+        font-size: 0.75rem !important;
+    }
+
+    .auth-button {
+        max-width: 90px !important;
+        min-width: 60px !important;
+        font-size: 0.7rem !important;
+    }
+
+    .admin-button {
+        max-width: 80px !important;
+        min-width: 50px !important;
+    }
+}
+
+/* Styles pour la responsivité du header - Optimisations supplémentaires */
+.header-responsive {
+    transition: all 0.3s ease-in-out;
+}
+
+/* Breakpoints personnalisés pour le header */
+@media (max-width: 480px) {
+    .header-logo {
+        font-size: 0.9rem !important;
+    }
+
+    .header-nav-button {
+        padding: 4px 8px !important;
+        font-size: 0.7rem !important;
+        min-width: 60px !important;
+        max-width: 90px !important;
+    }
+
+    .header-auth-button {
+        padding: 4px 6px !important;
+        font-size: 0.65rem !important;
+        min-width: 55px !important;
+        max-width: 75px !important;
+    }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+    .header-logo {
+        font-size: 1.1rem !important;
+    }
+
+    .header-nav-button {
+        padding: 6px 12px !important;
+        font-size: 0.75rem !important;
+        min-width: 70px !important;
+        max-width: 110px !important;
+    }
+
+    .header-auth-button {
+        padding: 6px 10px !important;
+        font-size: 0.7rem !important;
+        min-width: 65px !important;
+        max-width: 85px !important;
+    }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    .header-nav-button {
+        padding: 8px 16px !important;
+        font-size: 0.8rem !important;
+        min-width: 80px !important;
+        max-width: 130px !important;
+    }
+
+    .header-auth-button {
+        padding: 8px 14px !important;
+        font-size: 0.8rem !important;
+        min-width: 75px !important;
+        max-width: 100px !important;
+    }
+}
+
+@media (min-width: 1025px) {
+    .header-nav-button {
+        padding: 10px 20px !important;
+        font-size: 0.875rem !important;
+        min-width: 90px !important;
+        max-width: 150px !important;
+    }
+
+    .header-auth-button {
+        padding: 10px 18px !important;
+        font-size: 0.875rem !important;
+        min-width: 85px !important;
+        max-width: 120px !important;
+    }
+}
+
+/* Optimisations pour le menu mobile */
+.mobile-menu-item {
+    padding: 12px 16px !important;
+    min-height: 48px !important;
+}
+
+.mobile-menu-item:hover {
+    background-color: rgba(224, 35, 35, 0.08) !important;
+}
+
+/* Styles pour le profil utilisateur responsive */
+.user-profile-button {
+    max-width: 200px !important;
+    overflow: hidden !important;
+}
+
+.user-profile-text {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+/* Animation smooth pour les changements de taille */
+.header-element {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}

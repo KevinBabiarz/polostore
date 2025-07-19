@@ -1,0 +1,47 @@
+{
+  "createAdmin": {
+    "creating": "🔧 Création de l'administrateur par défaut...",
+    "adminExists": "✅ Un administrateur existe déjà",
+    "createSuccess": "✅ Administrateur créé avec succès",
+    "createSuccessConsole": "🎉 Administrateur créé avec succès !",
+    "emailLabel": "Email: {{email}}",
+    "passwordLabel": "Mot de passe: {{password}}",
+    "changePasswordWarning": "⚠️  Changez ce mot de passe après la première connexion !",
+    "createError": "❌ Erreur lors de la création de l'administrateur"
+  },
+  "setAdmin": {
+    "attempting": "Tentative de définition de l'utilisateur {{email}} comme administrateur...",
+    "success": "L'utilisateur {{email}} a été défini comme administrateur avec succès.",
+    "updateSuccess": "Utilisateur mis à jour avec succès:",
+    "userNotFound": "Aucun utilisateur trouvé avec cet email",
+    "error": "Erreur lors de la mise à jour du statut administrateur",
+    "checkingRoleColumn": "Vérification de la colonne role...",
+    "roleColumnExists": "La colonne role existe, modification de la structure..."
+  },
+  "userService": {
+    "usersRetrieved": "{{count}} utilisateurs récupérés avec succès",
+    "setAdminStatus": "Définit le statut administrateur d'un utilisateur",
+    "adminStatusUpdated": "Statut administrateur mis à jour avec succès"
+  },
+  "errors": {
+    "serverError": "Erreur serveur",
+    "userNotFound": "Utilisateur non trouvé",
+    "accessDenied": "Accès refusé",
+    "invalidData": "Données invalides"
+  },
+  "addProduction": {
+    "addTitle": "Ajouter une production",
+    "editTitle": "Modifier la production",
+    "title": "Titre",
+    "artist": "Artiste",
+    "genre": "Genre",
+    "releaseDate": "Date de sortie",
+    "description": "Description",
+    "addCoverImage": "Ajouter une image de couverture",
+    "changeImage": "Changer l'image",
+    "previewAlt": "Aperçu de l'image",
+    "addAudioFiles": "Ajouter des fichiers audio",
+    "update": "Mettre à jour",
+    "add": "Ajouter"
+  }
+}

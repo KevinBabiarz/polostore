@@ -15,6 +15,7 @@ import adminRoutes from "./routes/adminRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import createTables from "./config/initDb.js";
 import logger from "./utils/logger.js";
+import { i18n } from "./utils/i18n.js";
 import { cleanExpiredTokens } from "./middleware/authMiddleware.js";
 import {
     corsConfig,
@@ -29,6 +30,10 @@ import "./models/Production.js";
 import "./models/ContactMessage.js";
 import "./models/Favorite.js";
 import "./models/RevokedToken.js";
+
+// Définir __dirname avant son utilisation (ES6 modules)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // En production (Railway), les variables d'environnement sont injectées automatiquement
 // En développement, on peut charger depuis un fichier .env
@@ -62,9 +67,9 @@ if (process.env.JWT_SECRET.length < 32) {
 
 // Afficher les variables d'environnement de base de données pour débogage (sans données sensibles)
 if (process.env.DATABASE_URL) {
-    logger.info("Configuration Railway DATABASE_URL détectée");
+    logger.info(i18n.t('server.railwayConfigDetected'));
 } else {
-    logger.info("Configuration de base de données locale", {
+    logger.info(i18n.t('server.localDbConfig'), {
         host: process.env.DB_HOST,
         database: process.env.DB_DATABASE,
         port: process.env.DB_PORT,
@@ -74,8 +79,6 @@ if (process.env.DATABASE_URL) {
 // Initialiser l'application Express
 const app = express();
 const port = process.env.PORT || 5050;
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 // Configuration trust proxy pour Railway et production
 if (process.env.NODE_ENV === 'production') {
@@ -230,7 +233,7 @@ const initializeDatabase = async () => {
     try {
         logger.info('Initialisation de la base de données');
         await testConnection();
-        logger.info("Connexion PostgreSQL établie avec succès");
+        logger.info(i18n.t('server.postgresConnected'));
 
         await sequelize.sync({ force: false });
         logger.info('Modèles Sequelize synchronisés avec la base de données');
@@ -240,7 +243,7 @@ const initializeDatabase = async () => {
 
         return true;
     } catch (err) {
-        logger.error("Erreur d'initialisation de la base de données", { error: err.message });
+        logger.error(i18n.t('server.dbInitError'), { error: err.message });
         throw err;
     }
 };
@@ -286,16 +289,16 @@ app.get("/api/db-status", async (req, res) => {
         await sequelize.authenticate();
         res.json({
             status: "ok",
-            message: "Connecté à PostgreSQL",
+            message: i18n.t('server.connectedToPostgres'),
             dbHost: process.env.DB_HOST,
             dbName: process.env.DB_DATABASE,
             environment: process.env.NODE_ENV || 'development'
         });
     } catch (error) {
-        logger.error("Erreur de connexion à la base de données", { error: error.message });
+        logger.error(i18n.t('server.dbConnectionError'), { error: error.message });
         res.status(500).json({
             status: "error",
-            message: "Échec de connexion à PostgreSQL"
+            message: i18n.t('server.postgresConnectionFailed')
         });
     }
 });

@@ -2,6 +2,7 @@
 import Favorite from '../models/Favorite.js';
 import Production from '../models/Production.js';
 import User from '../models/User.js';
+import { i18n } from '../utils/i18n.js';
 
 /**
  * Service de gestion des favoris
@@ -34,13 +35,13 @@ export const FavoriteService = {
         // Vérifier si l'utilisateur existe
         const user = await User.findByPk(userId);
         if (!user) {
-            throw new Error("Utilisateur non trouvé");
+            throw new Error(i18n.t('favoriteService.userNotFound'));
         }
 
         // Vérifier si la production existe
         const production = await Production.findByPk(productionId);
         if (!production) {
-            throw new Error("Production non trouvée");
+            throw new Error(i18n.t('favoriteService.productionNotFound'));
         }
 
         // Vérifier si la production est déjà en favoris
@@ -52,7 +53,7 @@ export const FavoriteService = {
         });
 
         if (existingFavorite) {
-            throw new Error("Cette production est déjà dans vos favoris");
+            throw new Error(i18n.t('favoriteService.alreadyInFavorites'));
         }
 
         // Ajouter aux favoris
@@ -78,7 +79,7 @@ export const FavoriteService = {
         });
 
         if (!favorite) {
-            throw new Error("Cette production n'est pas dans vos favoris");
+            throw new Error(i18n.t('favoriteService.notInFavorites'));
         }
 
         await favorite.destroy();

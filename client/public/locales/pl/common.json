@@ -1,0 +1,28 @@
+{
+  "welcome": "Witamy",
+  "loading": "Ładowanie...",
+  "error": "Błąd",
+  "success": "Sukces",
+  "save": "Zapisz",
+  "cancel": "Anuluj",
+  "delete": "Usuń",
+  "edit": "Edytuj",
+  "add": "Dodaj",
+  "search": "Szukaj",
+  "filter": "Filtruj",
+  "price": "Cena",
+  "genre": "Gatunek",
+  "artist": "Artysta",
+  "title": "Tytuł",
+  "description": "Opis",
+  "date": "Data",
+  "actions": "Akcje",
+  "back": "Wstecz",
+  "next": "Następny",
+  "previous": "Poprzedni",
+  "close": "Zamknij",
+  "confirm": "Potwierdź",
+  "yes": "Tak",
+  "no": "Nie"
+}
+

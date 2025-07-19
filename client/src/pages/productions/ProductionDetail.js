@@ -20,6 +20,7 @@ import {
 } from '@mui/icons-material';
 import config from '../../config/config';
 import { getImageUrl, getAudioUrl } from '../../utils/fileUtils';
+import { useTranslation } from 'react-i18next';
 
 // Composant pour afficher la barre de progression
 const ProgressBar = ({ audioRef, isPlaying }) => {
@@ -165,7 +166,12 @@ const TimeDisplay = ({ audioRef, isPlaying }) => {
 const ProductionDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { user, isAdmin, loading: authLoading } = useAuth();
+    const { user, isAuthenticated, isAdmin } = useAuth();
+    const { t } = useTranslation('productions'); // Spécifier le namespace productions
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+    const audioRef = useRef(null);
+
     const [production, setProduction] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -175,9 +181,6 @@ const ProductionDetail = () => {
     const [audioUrl, setAudioUrl] = useState('');
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState('');
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-    const audioRef = useRef(null);
 
     // Vérifier si l'utilisateur est admin en appelant la fonction
     const userIsAdmin = isAdmin();
@@ -189,15 +192,11 @@ const ProductionDetail = () => {
                 const data = await getProductionById(id);
                 setProduction(data);
 
-                // Log complet des données pour débugger
-                console.log('Production complète:', data);
-
-                // Correction : utiliser getAudioUrl pour gérer l'URL audio
                 if (data && data.audio_url) {
                     const audioSrc = getAudioUrl(data.audio_url);
                     setAudioUrl(audioSrc || '');
                 } else {
-                    setAudioUrl(''); // Pas d'audio
+                    setAudioUrl('');
                 }
 
                 if (user) {
@@ -205,8 +204,8 @@ const ProductionDetail = () => {
                     setIsFavorite(favoriteStatus);
                 }
             } catch (error) {
-                console.error("Erreur lors du chargement de la production:", error);
-                setError("Impossible de charger les détails de cette production");
+                console.error(t('productionDetail.errorLoading'), error);
+                setError(t('productionDetail.errorLoading'));
             } finally {
                 setLoading(false);
             }
@@ -215,8 +214,9 @@ const ProductionDetail = () => {
         fetchData();
     }, [id, user]);
 
-    const handleToggleFavorite = async () => {
-        if (!user) {
+    // Fonction pour gérer les favoris
+    const handleFavoriteToggle = async () => {
+        if (!isAuthenticated()) {
             navigate('/login');
             return;
         }
@@ -224,185 +224,114 @@ const ProductionDetail = () => {
         try {
             if (isFavorite) {
                 await removeFavorite(id);
+                setIsFavorite(false);
+                setSnackbarMessage(t('removedFromFavorites'));
             } else {
                 await addFavorite(id);
+                setIsFavorite(true);
+                setSnackbarMessage(t('addedToFavorites'));
             }
-            setIsFavorite(!isFavorite);
+            setSnackbarOpen(true);
         } catch (error) {
-            console.error("Erreur lors de la modification des favoris:", error);
+            console.error('Erreur lors de la gestion des favoris:', error);
+            setSnackbarMessage(isFavorite ? t('errorRemovingFavorite') : t('errorAddingFavorite'));
+            setSnackbarOpen(true);
         }
     };
 
-    const handleEdit = () => {
-        navigate(`/admin/productions/edit/${id}`);
-    };
-
+    // Fonction pour supprimer la production
     const handleDelete = async () => {
         try {
             await deleteProduction(id);
             navigate('/productions');
         } catch (error) {
-            console.error("Erreur lors de la suppression:", error);
-            setError("Impossible de supprimer cette production");
+            console.error('Erreur lors de la suppression:', error);
+            setSnackbarMessage(t('deleteError', { defaultValue: 'Erreur lors de la suppression' }));
+            setSnackbarOpen(true);
         }
-        setOpenConfirmDialog(false);
     };
 
-    // Gestion simple de l'audio sans dépendance sur les références React
+    // Fonction pour gérer la lecture/pause de l'audio
     const handlePlayPause = () => {
-        // Vérifier d'abord si un audioUrl est défini
-        if (!audioUrl) {
-            console.log("Aucun fichier audio disponible pour cette production");
-            setSnackbarMessage("Aucun fichier audio disponible pour cette production");
-            setSnackbarOpen(true);
-            return;
-        }
+        const audioElement = audioRef.current;
+        if (!audioElement) return;
 
-        const audio = document.getElementById('production-audio');
-
-        if (!audio) {
-            console.error("Élément audio non trouvé dans le DOM");
-            setSnackbarMessage("Erreur: Lecteur audio non disponible");
-            setSnackbarOpen(true);
-            return;
-        }
-
-        console.log("État actuel:", audio.paused ? "pausé" : "en lecture");
-
-        if (audio.paused) {
-            // Essayer de jouer l'audio
-            const playPromise = audio.play();
-
-            if (playPromise !== undefined) {
-                playPromise
-                    .then(() => {
-                        console.log("Lecture audio démarrée avec succès");
-                        setIsPlaying(true);
-                    })
-                    .catch(error => {
-                        console.error("Erreur lors de la lecture audio:", error);
-                        setSnackbarMessage("Erreur lors de la lecture: " + (error.message || "fichier audio non supporté"));
-                        setSnackbarOpen(true);
-                    });
-            }
-        } else {
-            audio.pause();
+        if (isPlaying) {
+            audioElement.pause();
             setIsPlaying(false);
-            console.log("Audio mis en pause");
+        } else {
+            audioElement.play().catch(error => {
+                console.error('Erreur lors de la lecture audio:', error);
+                setSnackbarMessage('Erreur lors de la lecture audio');
+                setSnackbarOpen(true);
+            });
+            setIsPlaying(true);
         }
     };
 
+    // Fonction appelée quand l'audio se termine
     const handleAudioEnd = () => {
-        console.log("Lecture audio terminée");
         setIsPlaying(false);
     };
 
-    // Gérer la fermeture du snackbar de notification
+    // Fonction pour gérer les favoris (alias pour handleFavoriteToggle)
+    const handleToggleFavorite = handleFavoriteToggle;
+
+    // Fonction pour modifier la production
+    const handleEdit = () => {
+        navigate(`/admin/productions/edit/${id}`);
+    };
+
+    // Fonction pour fermer le snackbar
     const handleSnackbarClose = () => {
         setSnackbarOpen(false);
     };
 
-    // Capturer les événements audio pour synchroniser l'état
-    useEffect(() => {
-        const audioElement = document.getElementById('production-audio');
-        if (!audioElement) return;
-
-        const onPlay = () => setIsPlaying(true);
-        const onPause = () => setIsPlaying(false);
-        const onEnded = () => setIsPlaying(false);
-
-        audioElement.addEventListener('play', onPlay);
-        audioElement.addEventListener('pause', onPause);
-        audioElement.addEventListener('ended', onEnded);
-
-        return () => {
-            if (audioElement) {
-                audioElement.removeEventListener('play', onPlay);
-                audioElement.removeEventListener('pause', onPause);
-                audioElement.removeEventListener('ended', onEnded);
-            }
-        };
-    }, [audioUrl]);
-
-    if (loading || authLoading) {
+    // États de chargement
+    if (loading) {
         return (
             <Container maxWidth="lg" sx={{ py: 4 }}>
-                <Fade in={true} timeout={800}>
-                    <Grid container spacing={3}>
-                        {/* Skeleton pour l'image principale */}
-                        <Grid item xs={12} md={6}>
-                            <Skeleton
-                                variant="rectangular"
-                                sx={{
-                                    height: { xs: 250, md: 400 },
-                                    width: '100%',
-                                    borderRadius: 2,
-                                    bgcolor: 'grey.100'
-                                }}
-                                animation="wave"
-                            />
-                        </Grid>
-
-                        {/* Skeleton pour les informations */}
-                        <Grid item xs={12} md={6}>
-                            <Box sx={{ height: '100%' }}>
-                                <Skeleton variant="text" width="40%" height={40} animation="wave" sx={{ mb: 1 }} />
-                                <Skeleton variant="text" width="70%" height={60} animation="wave" sx={{ mb: 2 }} />
-                                <Skeleton variant="text" width="25%" height={30} animation="wave" sx={{ mb: 3 }} />
-                                <Box sx={{ display: 'flex', my: 2, gap: 1 }}>
-                                    <Skeleton variant="rounded" width={80} height={32} animation="wave" />
-                                    <Skeleton variant="rounded" width={80} height={32} animation="wave" />
-                                </Box>
-                                <Skeleton variant="text" width="100%" height={80} animation="wave" sx={{ mb: 2 }} />
-                                <Skeleton variant="text" width="100%" height={40} animation="wave" />
-                                <Box sx={{ mt: 3 }}>
-                                    <Skeleton variant="rounded" width="100%" height={50} animation="wave" sx={{ mb: 2 }} />
-                                    <Box sx={{ display: 'flex', mt: 2, gap: 2 }}>
-                                        <Skeleton variant="circular" width={50} height={50} animation="wave" />
-                                        <Skeleton variant="circular" width={50} height={50} animation="wave" />
-                                    </Box>
-                                </Box>
-                            </Box>
-                        </Grid>
+                <Skeleton variant="text" width="30%" height={40} sx={{ mb: 2 }} />
+                <Grid container spacing={4}>
+                    <Grid item xs={12} md={6}>
+                        <Skeleton variant="rectangular" height={400} sx={{ borderRadius: 2 }} />
                     </Grid>
-                </Fade>
+                    <Grid item xs={12} md={6}>
+                        <Skeleton variant="text" width="80%" height={50} sx={{ mb: 2 }} />
+                        <Skeleton variant="text" width="40%" height={30} sx={{ mb: 3 }} />
+                        <Skeleton variant="text" width="100%" height={100} sx={{ mb: 3 }} />
+                        <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
+                            <Skeleton variant="rounded" width={120} height={40} />
+                            <Skeleton variant="rounded" width={120} height={40} />
+                        </Box>
+                    </Grid>
+                </Grid>
             </Container>
         );
     }
 
-    if (error) {
+    // Gestion des erreurs
+    if (error || !production) {
         return (
-            <Container maxWidth="lg" sx={{ py: 5 }}>
-                <Zoom in={true} timeout={500}>
-                    <Paper
-                        elevation={3}
-                        sx={{
-                            p: { xs: 3, md: 4 },
-                            textAlign: 'center',
-                            borderRadius: 3,
-                            bgcolor: 'background.paper',
-                            maxWidth: 600,
-                            mx: 'auto'
-                        }}
+            <Container maxWidth="lg" sx={{ py: 8 }}>
+                <Paper elevation={3} sx={{ p: 6, textAlign: 'center', borderRadius: 3 }}>
+                    <MusicNote sx={{ fontSize: 60, color: 'error.main', mb: 2, opacity: 0.7 }} />
+                    <Typography variant="h5" color="error" gutterBottom>
+                        {t('productionNotFound')}
+                    </Typography>
+                    <Typography variant="body1" sx={{ mb: 3 }}>
+                        {t('productionNotFoundMessage', { defaultValue: 'La production demandée est introuvable.' })}
+                    </Typography>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => navigate('/productions')}
+                        sx={{ borderRadius: 10, px: 4 }}
+                        startIcon={<ArrowBack />}
                     >
-                        <MusicNote sx={{ fontSize: 60, color: 'error.main', mb: 2, opacity: 0.7 }} />
-                        <Typography variant="h5" component="h1" gutterBottom color="error">
-                            {error}
-                        </Typography>
-                        <Typography variant="body1" sx={{ mb: 3 }}>
-                            La production demandée est introuvable ou une erreur s'est produite.
-                        </Typography>
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            startIcon={<ArrowBack />}
-                            onClick={() => navigate('/productions')}
-                            sx={{ borderRadius: 10, fontWeight: 'bold', px: 3, py: 1.2 }}
-                        >
-                            Retour aux productions
-                        </Button>
-                    </Paper>
-                </Zoom>
+                        {t('backToProductions')}
+                    </Button>
+                </Paper>
             </Container>
         );
     }
@@ -575,14 +504,19 @@ const ProductionDetail = () => {
                                             mb: 3,
                                             p: 2,
                                             borderRadius: 3,
-                                            background: 'linear-gradient(145deg, rgba(255,255,255,0.8) 0%, rgba(240,242,245,0.9) 100%)',
+                                            background: theme.palette.mode === 'dark'
+                                                ? 'linear-gradient(145deg, rgba(45,45,45,0.8) 0%, rgba(30,30,30,0.9) 100%)'
+                                                : 'linear-gradient(145deg, rgba(255,255,255,0.8) 0%, rgba(240,242,245,0.9) 100%)',
                                             border: '1px solid',
                                             borderColor: 'divider',
-                                            boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+                                            boxShadow: theme.palette.mode === 'dark'
+                                                ? '0 4px 12px rgba(0,0,0,0.3)'
+                                                : '0 4px 12px rgba(0,0,0,0.05)',
                                             position: 'relative',
                                             display: 'flex',
                                             flexDirection: 'column',
-                                            overflow: 'hidden'
+                                            overflow: 'hidden',
+                                            backdropFilter: 'blur(10px)'
                                         }}>
                                             <Box sx={{
                                                 display: 'flex',

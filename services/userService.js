@@ -2,6 +2,7 @@
 import User from '../models/User.js';
 import bcrypt from 'bcrypt';
 import { Op } from 'sequelize';  // Ajout de l'import pour Op
+import { i18n } from '../utils/i18n.js';
 
 /**
  * Service de gestion des utilisateurs
@@ -13,7 +14,7 @@ export const UserService = {
      * @returns {Promise<Object[]>} Liste des utilisateurs
      */
     getAllUsers: async (options = {}) => {
-        console.log("[USER SERVICE] Récupération des utilisateurs avec options:", options);
+        console.log(i18n.t('userService.fetchingUsers', { options: JSON.stringify(options) }));
 
         try {
             const {
@@ -45,7 +46,7 @@ export const UserService = {
             console.log(`[USER SERVICE] ${users.length} utilisateurs récupérés avec succès`);
             return users;
         } catch (error) {
-            console.error("[USER SERVICE] Erreur lors de la récupération des utilisateurs:", error.message);
+            console.error(i18n.t('userService.errorFetchingUsers', { error: error.message }));
             throw error;
         }
     },
@@ -56,22 +57,22 @@ export const UserService = {
      * @returns {Promise<Object>} L'utilisateur trouvé
      */
     getUserById: async (id) => {
-        console.log(`[USER SERVICE] Recherche de l'utilisateur avec l'ID: ${id}`);
+        console.log(i18n.t('userService.searchUser', { id }));
 
         try {
             const user = await User.findByPk(id, {
-                attributes: { exclude: ['password'] } // Exclure le mot de passe
+                attributes: { exclude: ['password'] }
             });
 
             if (!user) {
-                console.log(`[USER SERVICE] Utilisateur non trouvé avec l'ID: ${id}`);
-                throw new Error("Utilisateur non trouvé");
+                console.log(i18n.t('userService.userNotFound', { id }));
+                throw new Error(i18n.t('userService.userNotFound', { id }));
             }
 
-            console.log(`[USER SERVICE] Utilisateur trouvé avec l'ID: ${id}`);
+            console.log(i18n.t('userService.userFound', { id }));
             return user;
         } catch (error) {
-            console.error(`[USER SERVICE] Erreur lors de la récupération de l'utilisateur ${id}:`, error.message);
+            console.error(i18n.t('userService.errorFetchingUser', { id, error: error.message }));
             throw error;
         }
     },
@@ -86,7 +87,7 @@ export const UserService = {
         const user = await User.findByPk(id);
 
         if (!user) {
-            throw new Error("Utilisateur non trouvé");
+            throw new Error(i18n.t('userService.userNotFound', { id }));
         }
 
         // Si le mot de passe est fourni, le hook beforeUpdate s'occupera du hashage
@@ -108,18 +109,17 @@ export const UserService = {
         const user = await User.findByPk(id);
 
         if (!user) {
-            throw new Error("Utilisateur non trouvé");
+            throw new Error(i18n.t('userService.userNotFound', { id }));
         }
 
         // Vérifier le mot de passe actuel
         const validPassword = await user.validatePassword(currentPassword);
         if (!validPassword) {
-            throw new Error("Mot de passe actuel incorrect");
+            throw new Error(i18n.t('userService.invalidCurrentPassword'));
         }
 
         // Mettre à jour le mot de passe
         await user.update({ password: newPassword });
-        return true;
     },
 
     /**
@@ -130,13 +130,13 @@ export const UserService = {
      */
     setAdminStatus: async (id, isAdmin) => {
         if (typeof isAdmin !== 'boolean') {
-            throw new Error("Le statut administrateur doit être un booléen");
+            throw new Error(i18n.t('userService.adminStatusMustBeBoolean'));
         }
 
         const user = await User.findByPk(id);
 
         if (!user) {
-            throw new Error("Utilisateur non trouvé");
+            throw new Error(i18n.t('userService.userNotFoundSimple'));
         }
 
         await user.update({ is_admin: isAdmin });
@@ -155,7 +155,7 @@ export const UserService = {
         const user = await User.findByPk(id);
 
         if (!user) {
-            throw new Error("Utilisateur non trouvé");
+            throw new Error(i18n.t('userService.userNotFoundSimple'));
         }
 
         await user.destroy();
