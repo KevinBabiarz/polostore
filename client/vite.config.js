@@ -15,5 +15,17 @@ export default defineConfig({
       '/api': 'http://localhost:5050',
     },
   },
-  base: './'
+  base: './',
+  esbuild: {
+    loader: 'jsx',
+    include: /src\/.*\.[jt]sx?$/,
+    exclude: []
+  },
+  optimizeDeps: {
+    esbuildOptions: {
+      loader: {
+        '.js': 'jsx',
+      },
+    },
+  }
 });
