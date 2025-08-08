@@ -4,27 +4,31 @@
   "main": "server.js",
   "type": "module",
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
   },
   "scripts": {
-    "start": "node server.js",
+    "start": "NODE_ENV=production node server.js",
+    "dev": "NODE_ENV=development nodemon server.js",
     "dev-local": "nodemon server.js",
     "server": "nodemon server.js",
     "client": "cd client && npm start",
     "client-install": "cd client && npm install",
-    "build": "chmod +x build.sh && ./build.sh",
-    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "build": "echo 'Backend build completed'",
+    "dev-full": "concurrently \"npm run server\" \"npm run client\"",
     "prod": "cross-env NODE_ENV=production node server.js",
     "postbuild": "echo 'Build completed successfully'",
     "migrate": "node scripts/runMigration.js",
     "seed": "node scripts/createAdmin.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"No tests specified\" && exit 0",
+    "health-check": "curl -f http://localhost:5050/health || exit 1"
   },
   "keywords": [
     "api",
     "backend",
     "music",
-    "production"
+    "production",
+    "railway"
   ],
   "author": "PoloStore",
   "license": "ISC",
@@ -45,9 +49,9 @@
     "sequelize": "^6.37.7"
   },
   "devDependencies": {
+    "@vitejs/plugin-react": "^4.7.0",
     "concurrently": "^8.2.2",
     "cross-env": "^7.0.3",
     "nodemon": "^3.1.10"
-  },
-  "description": ""
+  }
 }

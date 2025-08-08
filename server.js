@@ -49,6 +49,13 @@ const getUploadsPath = () => {
         return process.env.RAILWAY_VOLUME_MOUNT_PATH;
     }
 
+    // En production sur Railway, utiliser le chemin du volume monté
+    if (process.env.NODE_ENV === 'production' && process.env.RAILWAY_ENVIRONMENT) {
+        const railwayUploadsPath = '/app/uploads';
+        logger.info(`Chemin uploads Railway: ${railwayUploadsPath}`);
+        return railwayUploadsPath;
+    }
+
     // Sinon, utiliser le chemin local
     return path.join(__dirname, 'public/uploads');
 };
@@ -353,87 +360,85 @@ app.all('*', (req, res) => {
     });
 
     res.status(404).json({
-        error: 'Route non trouvée'
+        error: 'Route non trouvée',
+        path: req.originalUrl,
+        message: 'La ressource demandée n\'existe pas'
     });
 });
 
-// Gestion gracieuse de l'arrêt du serveur
-let server;
-
-const gracefulShutdown = async (signal) => {
-    logger.info(`Signal ${signal} reçu, arrêt gracieux du serveur...`);
-
-    if (server) {
-        server.close(() => {
-            logger.info('Serveur HTTP fermé');
-        });
-    }
-
-    try {
-        await sequelize.close();
-        logger.info('Connexion PostgreSQL fermée');
-    } catch (error) {
-        logger.error('Erreur lors de la fermeture de la connexion PostgreSQL', { error: error.message });
-    }
-
-    process.exit(0);
-};
-
-// Gestionnaires pour l'arrêt gracieux
-process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
-process.on('SIGINT', () => gracefulShutdown('SIGINT'));
-
-// Démarrage du serveur
+// Fonction de démarrage du serveur avec gestion d'erreur robuste
 const startServer = async () => {
     try {
-        // Initialiser la base de données avant de démarrer le serveur
+        // Nettoyer les tokens expirés au démarrage
+        await cleanExpiredTokens();
+
+        // Initialiser la base de données
         await initializeDatabase();
 
-        // Démarrer le nettoyage périodique des tokens expirés après que tout soit initialisé
-        setInterval(async () => {
-            try {
-                await cleanExpiredTokens();
-                logger.info('Nettoyage des tokens expirés effectué');
-            } catch (error) {
-                logger.error('Erreur lors du nettoyage des tokens expirés', { error: error.message });
-            }
-        }, 60 * 60 * 1000); // Nettoyage toutes les heures
-
-        // Démarrer le serveur HTTP
-        server = app.listen(port, '0.0.0.0', () => {
+        // Démarrer le serveur
+        const server = app.listen(port, '0.0.0.0', () => {
             logger.info(`🚀 Serveur démarré sur le port ${port}`);
-            logger.info(`🕐 Timestamp serveur: ${new Date().toISOString()}`);
-            logger.info(`🌍 Environnement: ${process.env.NODE_ENV || 'development'}`);
-            logger.info(`📍 URL de santé: http://localhost:${port}/health`);
-        });
+            logger.info(`📍 Environnement: ${process.env.NODE_ENV || 'development'}`);
+            logger.info(`🗂️  Dossier uploads: ${UPLOADS_PATH}`);
+            logger.info(`🔗 Health check: http://localhost:${port}/health`);
 
-        // Gestion des erreurs du serveur
-        server.on('error', (error) => {
-            if (error.syscall !== 'listen') {
-                throw error;
-            }
-
-            const bind = typeof port === 'string' ? 'Pipe ' + port : 'Port ' + port;
-
-            switch (error.code) {
-                case 'EACCES':
-                    logger.error(`${bind} nécessite des privilèges élevés`);
-                    process.exit(1);
-                    break;
-                case 'EADDRINUSE':
-                    logger.error(`${bind} est déjà utilisé`);
-                    process.exit(1);
-                    break;
-                default:
-                    throw error;
+            if (process.env.NODE_ENV === 'production') {
+                logger.info('🌍 Serveur prêt pour Railway');
+            } else {
+                logger.info('🛠️  Mode développement local');
             }
         });
+
+        // Gestion gracieuse de l'arrêt du serveur
+        const gracefulShutdown = (signal) => {
+            logger.info(`🛑 Signal ${signal} reçu. Arrêt gracieux en cours...`);
+
+            server.close(async () => {
+                logger.info('🔌 Serveur HTTP fermé');
+
+                try {
+                    await sequelize.close();
+                    logger.info('🗄️  Connexion base de données fermée');
+                } catch (error) {
+                    logger.error('❌ Erreur lors de la fermeture de la base de données:', error);
+                }
+
+                logger.info('✅ Arrêt gracieux terminé');
+                process.exit(0);
+            });
+
+            // Forcer l'arrêt après 30 secondes
+            setTimeout(() => {
+                logger.error('⚠️  Arrêt forcé après timeout');
+                process.exit(1);
+            }, 30000);
+        };
+
+        // Écouter les signaux d'arrêt
+        process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+        process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+
+        // Gestion des erreurs non capturées
+        process.on('uncaughtException', (error) => {
+            logger.error('❌ Exception non capturée:', error);
+            gracefulShutdown('uncaughtException');
+        });
+
+        process.on('unhandledRejection', (reason, promise) => {
+            logger.error('❌ Promise rejetée non gérée:', reason);
+            gracefulShutdown('unhandledRejection');
+        });
+
+        return server;
 
     } catch (error) {
-        logger.error('Erreur lors du démarrage du serveur', { error: error.message });
+        logger.error('❌ Impossible de démarrer le serveur:', error);
         process.exit(1);
     }
 };
 
-// Lancer le serveur
-startServer();
+// Démarrer le serveur
+startServer().catch(error => {
+    logger.error('❌ Erreur fatale au démarrage:', error);
+    process.exit(1);
+});

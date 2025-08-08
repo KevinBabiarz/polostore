@@ -78,62 +78,77 @@ export const helmetConfig = {
     referrerPolicy: { policy: 'strict-origin-when-cross-origin' }
 };
 
-// Middleware de limitation de taux (Rate limiting)
+// Configuration de limitation du taux de requêtes pour Railway
 export const rateLimitConfig = {
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: process.env.NODE_ENV === 'production' ? 100 : 1000, // Plus strict en production
+    max: process.env.NODE_ENV === 'production' ? 100 : 1000, // Limite par IP
     message: {
-        error: 'Trop de requêtes depuis cette IP, veuillez réessayer plus tard.'
+        error: 'Trop de requêtes depuis cette IP',
+        retryAfter: '15 minutes'
     },
     standardHeaders: true,
     legacyHeaders: false,
+    // Personnaliser la génération de clé pour Railway
+    keyGenerator: (req) => {
+        return req.ip || req.connection.remoteAddress;
+    },
+    // Ignorer certaines routes pour le health check
     skip: (req) => {
-        // Ignorer la limitation pour les fichiers statiques
-        return req.path.startsWith('/uploads/') || req.path.startsWith('/api/uploads/');
+        return req.path === '/health' || req.path === '/test';
     }
 };
 
-// Headers de sécurité supplémentaires
+// Headers de sécurité personnalisés
 export const securityHeaders = (req, res, next) => {
-    // Empêcher la mise en cache des réponses sensibles
-    if (req.path.startsWith('/api/')) {
-        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
-        res.setHeader('Pragma', 'no-cache');
-        res.setHeader('Expires', '0');
-        res.setHeader('Surrogate-Control', 'no-store');
-    }
+    // Headers de sécurité supplémentaires
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
 
-    // Headers personnalisés
-    res.setHeader('X-API-Version', '1.0');
-    res.setHeader('X-Response-Time', Date.now() - req.startTime);
+    // Headers CORS personnalisés pour Railway
+    if (process.env.NODE_ENV === 'production') {
+        res.setHeader('Access-Control-Allow-Credentials', 'true');
+        res.setHeader('Access-Control-Max-Age', '86400');
+    }
 
     next();
 };
 
-// Middleware de détection d'attaques
+// Monitoring de sécurité
 export const securityMonitoring = (req, res, next) => {
+    // Détecter les tentatives d'attaque
     const suspiciousPatterns = [
-        /(<script|javascript:|vbscript:|onload=|onerror=)/i,
-        /(SELECT|INSERT|UPDATE|DELETE|DROP|UNION|CREATE|ALTER)\s+/i,
-        /(\.\.\/|\.\.\\|\/etc\/passwd|\/windows\/system32)/i,
-        /(\||\;|\`|\$\(|\$\{)/
+        /\.\./,  // Directory traversal
+        /<script/i,  // XSS
+        /union.*select/i,  // SQL injection
+        /javascript:/i,  // JavaScript injection
+        /eval\(/i,  // Code injection
+        /exec\(/i   // Command injection
     ];
 
-    const checkPayload = (data) => {
-        if (typeof data === 'string') {
-            return suspiciousPatterns.some(pattern => pattern.test(data));
-        }
-        if (typeof data === 'object' && data !== null) {
-            return Object.values(data).some(value => checkPayload(value));
-        }
-        return false;
-    };
+    const userAgent = req.get('User-Agent') || '';
+    const fullUrl = req.originalUrl;
 
-    // Vérifier les paramètres de requête
-    if (checkPayload(req.query) || checkPayload(req.body)) {
-        return res.status(400).json({
-            error: 'Requête suspecte détectée'
+    // Vérifier les patterns suspects dans l'URL et User-Agent
+    const isSuspicious = suspiciousPatterns.some(pattern =>
+        pattern.test(fullUrl) || pattern.test(userAgent)
+    );
+
+    if (isSuspicious) {
+        console.warn('🚨 Activité suspecte détectée:', {
+            ip: req.ip,
+            url: fullUrl,
+            userAgent: userAgent,
+            timestamp: new Date().toISOString()
         });
+
+        // En production, bloquer les requêtes suspectes
+        if (process.env.NODE_ENV === 'production') {
+            return res.status(403).json({
+                error: 'Requête bloquée pour des raisons de sécurité'
+            });
+        }
     }
 
     next();

@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@craco/craco": "^7.1.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@mui/icons-material": "^7.1.2",
@@ -17,19 +16,20 @@
     "i18next-browser-languagedetector": "^8.2.0",
     "i18next-http-backend": "^3.0.2",
     "jwt-decode": "^4.0.0",
+    "polostorebackend": "file:..",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-i18next": "^15.6.0",
     "react-router-dom": "^6.18.0",
     "react-scripts": "5.0.1",
+    "typescript": "^5.0.0",
     "web-vitals": "^2.1.4",
     "yup": "^1.6.1"
   },
   "scripts": {
-    "start": "craco start",
-    "build": "craco build",
-    "test": "craco test",
-    "eject": "react-scripts eject"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "eslintConfig": {
     "extends": [
