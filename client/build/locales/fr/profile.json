@@ -1,0 +1,13 @@
+{
+  "title": "Mon Profil",
+  "editProfile": "Modifier le profil",
+  "changePassword": "Changer le mot de passe",
+  "currentPassword": "Mot de passe actuel",
+  "newPassword": "Nouveau mot de passe",
+  "confirmNewPassword": "Confirmer le nouveau mot de passe",
+  "profileUpdated": "Profil mis à jour",
+  "passwordChanged": "Mot de passe modifié",
+  "invalidCurrentPassword": "Mot de passe actuel incorrect",
+  "personalInfo": "Informations personnelles",
+  "updateProfile": "Mettre à jour le profil"
+}

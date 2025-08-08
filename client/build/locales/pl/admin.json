@@ -1,0 +1,33 @@
+{
+  "createAdmin": {
+    "creating": "🔧 Tworzenie domyślnego administratora...",
+    "adminExists": "✅ Administrator już istnieje",
+    "createSuccess": "✅ Administrator utworzony pomyślnie",
+    "createSuccessConsole": "🎉 Administrator utworzony pomyślnie!",
+    "emailLabel": "Email: {{email}}",
+    "passwordLabel": "Hasło: {{password}}",
+    "changePasswordWarning": "⚠️  Zmień to hasło po pierwszym logowaniu!",
+    "createError": "❌ Błąd podczas tworzenia administratora"
+  },
+  "setAdmin": {
+    "attempting": "Próba ustawienia użytkownika {{email}} jako administratora...",
+    "success": "Użytkownik {{email}} został pomyślnie ustawiony jako administrator.",
+    "updateSuccess": "Użytkownik zaktualizowany pomyślnie:",
+    "userNotFound": "Nie znaleziono użytkownika z tym emailem",
+    "error": "Błąd podczas aktualizacji statusu administratora",
+    "checkingRoleColumn": "Sprawdzanie kolumny role...",
+    "roleColumnExists": "Kolumna role istnieje, modyfikacja struktury..."
+  },
+  "userService": {
+    "usersRetrieved": "{{count}} użytkowników pobranych pomyślnie",
+    "setAdminStatus": "Ustawia status administratora użytkownika",
+    "adminStatusUpdated": "Status administratora zaktualizowany pomyślnie"
+  },
+  "errors": {
+    "serverError": "Błąd serwera",
+    "userNotFound": "Użytkownik nie znaleziony",
+    "accessDenied": "Dostęp zabroniony",
+    "invalidData": "Nieprawidłowe dane"
+  }
+}
+
