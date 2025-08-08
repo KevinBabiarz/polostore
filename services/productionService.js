@@ -75,21 +75,27 @@ export const ProductionService = {
             // Construction des conditions WHERE
             const whereClause = {};
 
-            // Filtre par genre - traitement spécial pour la chaîne vide (qui signifie "Tous")
-            if ((genre !== null && genre !== undefined) || (category !== null && category !== undefined)) {
-                // Si genre est une chaîne vide, ne pas ajouter de filtre (équivalent à "Tous")
-                if (genre !== '' && category !== '') {
-                    whereClause.genre = genre || category;
-                }
+            // Filtre par genre - LOGIQUE CORRIGÉE
+            const genreToFilter = genre || category;
+            if (genreToFilter && genreToFilter.trim() !== '' && genreToFilter !== 'all') {
+                whereClause.genre = {
+                    [Op.like]: `%${genreToFilter.trim()}%`
+                };
+                console.log(`[PROD SERVICE] Filtre par genre appliqué: ${genreToFilter}`);
+            } else {
+                console.log('[PROD SERVICE] Aucun filtre par genre (affichage de tous les genres)');
             }
 
-            // Filtre par recherche
-            if (search) {
+            // Filtre par recherche - LOGIQUE AMÉLIORÉE
+            if (search && search.trim() !== '') {
+                const searchTerm = search.trim();
                 whereClause[Op.or] = [
-                    { title: { [Op.like]: `%${search}%` } },
-                    { description: { [Op.like]: `%${search}%` } },
-                    { artist: { [Op.like]: `%${search}%` } }
+                    { title: { [Op.iLike]: `%${searchTerm}%` } },
+                    { description: { [Op.iLike]: `%${searchTerm}%` } },
+                    { artist: { [Op.iLike]: `%${searchTerm}%` } },
+                    { genre: { [Op.iLike]: `%${searchTerm}%` } }
                 ];
+                console.log(`[PROD SERVICE] Filtre par recherche appliqué: "${searchTerm}"`);
             }
 
             // Filtre par fourchette de prix
