@@ -112,7 +112,29 @@ export const createProduction = async (productionData) => {
         return response.data;
     } catch (error) {
         console.error('Erreur lors de la création de la production:', error);
-        throw error;
+
+        // Créer un message d'erreur plus détaillé
+        let errorMessage = 'Erreur lors de la création de la production';
+
+        if (error.response?.data?.message) {
+            errorMessage = error.response.data.message;
+        } else if (error.message) {
+            errorMessage = error.message;
+        }
+
+        // Ajouter les détails si disponibles
+        if (error.response?.data?.details) {
+            errorMessage += '\nDétails: ' + (Array.isArray(error.response.data.details)
+                ? error.response.data.details.join(', ')
+                : error.response.data.details);
+        }
+
+        // Créer une nouvelle erreur avec le message complet
+        const enhancedError = new Error(errorMessage);
+        enhancedError.originalError = error;
+        enhancedError.status = error.response?.status;
+
+        throw enhancedError;
     }
 };
 

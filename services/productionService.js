@@ -242,69 +242,18 @@ export const ProductionService = {
                 throw new Error(i18n.t('productionService.productionNotFound'));
             }
 
-            // Gestion intelligente des fichiers - suppression seulement si remplacement
-            if (updateData.audio_url && production.audio_url &&
-                updateData.audio_url !== production.audio_url) {
-                // Suppression de l'ancien fichier uniquement si un nouveau est fourni
-                try {
-                    const oldAudioPath = production.audio_url.startsWith('/uploads/')
-                        ? production.audio_url.replace('/uploads/', '')
-                        : production.audio_url.replace('/api/uploads/', '');
-                    const oldFilePath = path.join(__dirname, '..', 'public', 'uploads', oldAudioPath);
-                    if (fs.existsSync(oldFilePath)) {
-                        fs.unlinkSync(oldFilePath);
-                        console.log(`[PROD SERVICE] Ancien fichier audio supprimé: ${oldFilePath}`);
-                    }
-                } catch (fileError) {
-                    console.error(`[PROD SERVICE] Erreur lors de la suppression du fichier audio:`, fileError);
-                    // On continue malgré l'erreur de suppression du fichier
-                }
-            }
+            // Mise à jour directe sans suppression de fichiers complexe
+            // (la suppression des anciens fichiers sera gérée par le contrôleur si nécessaire)
+            console.log(`[PROD SERVICE] Données pour mise à jour:`, updateData);
 
-            // Gestion intelligente de l'image - suppression seulement si remplacement
-            if (updateData.image_url && production.image_url &&
-                updateData.image_url !== production.image_url) {
-                try {
-                    const oldImagePath = production.image_url.startsWith('/uploads/')
-                        ? production.image_url.replace('/uploads/', '')
-                        : production.image_url.replace('/api/uploads/', '');
-                    const oldFilePath = path.join(__dirname, '..', 'public', 'uploads', oldImagePath);
-                    if (fs.existsSync(oldFilePath)) {
-                        fs.unlinkSync(oldFilePath);
-                        console.log(`[PROD SERVICE] Ancien fichier image supprimé: ${oldFilePath}`);
-                    }
-                } catch (fileError) {
-                    console.error(`[PROD SERVICE] Erreur lors de la suppression de l'image:`, fileError);
-                    // On continue malgré l'erreur de suppression du fichier
-                }
-            }
-
-            // Nettoyer les données avant la mise à jour pour éviter les doublons
-            const cleanUpdateData = { ...updateData };
-
-            // Supprimer les champs undefined, null ou vides (mais pas les chaînes vides légitimes)
-            Object.keys(cleanUpdateData).forEach(key => {
-                if (cleanUpdateData[key] === undefined || cleanUpdateData[key] === null) {
-                    delete cleanUpdateData[key];
-                }
-                // Pour les chaînes, supprimer seulement si complètement vides pour les champs optionnels
-                if (typeof cleanUpdateData[key] === 'string' && cleanUpdateData[key].trim() === '' &&
-                    ['description', 'genre'].includes(key)) {
-                    delete cleanUpdateData[key];
-                }
-            });
-
-            console.log(`[PROD SERVICE] Données nettoyées pour mise à jour:`, cleanUpdateData);
-
-            // Mettre à jour la production avec les données nettoyées
-            const [updatedCount] = await Production.update(cleanUpdateData, {
+            // Mettre à jour la production
+            const [updatedCount] = await Production.update(updateData, {
                 where: { id: id },
                 returning: true
             });
 
             if (updatedCount === 0) {
                 console.log(`[PROD SERVICE] Aucune mise à jour effectuée pour la production ID ${id}`);
-                // Ne pas lever d'erreur, juste retourner la production existante
                 return production;
             }
 

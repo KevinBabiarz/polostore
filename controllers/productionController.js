@@ -69,15 +69,26 @@ export const createProduction = async (req, res) => {
         console.log('[PROD CTRL] req.body:', req.body);
         console.log('[PROD CTRL] req.files:', req.files);
 
-        // Validation des données requises
+        // Validation des données requises avec messages d'erreur détaillés
         const { title, artist } = req.body;
 
-        if (!title?.trim()) {
-            console.log('[PROD CTRL] Validation échouée: titre manquant');
-            return res.status(400).json({ message: "Le titre est obligatoire" });
+        if (!title || !title.trim()) {
+            console.log('[PROD CTRL] Validation échouée: titre manquant ou vide');
+            return res.status(400).json({
+                message: "Le titre est obligatoire",
+                error: "TITLE_REQUIRED"
+            });
         }
 
-        // Récupération des champs du formulaire
+        if (!artist || !artist.trim()) {
+            console.log('[PROD CTRL] Validation échouée: artiste manquant ou vide');
+            return res.status(400).json({
+                message: "L'artiste est obligatoire",
+                error: "ARTIST_REQUIRED"
+            });
+        }
+
+        // Récupération des champs du formulaire avec valeurs par défaut sécurisées
         const description = req.body.description || '';
         const genre = req.body.genre || '';
         const release_date = req.body.release_date || null;
@@ -89,8 +100,8 @@ export const createProduction = async (req, res) => {
         const imageFile = req.files?.image?.[0] || req.files?.cover_image?.[0] || null;
 
         console.log('[PROD CTRL] Fichiers extraits:', {
-            audioFile: audioFile ? audioFile.filename : 'aucun',
-            imageFile: imageFile ? imageFile.filename : 'aucun'
+            audioFile: audioFile ? { filename: audioFile.filename, size: audioFile.size } : 'aucun',
+            imageFile: imageFile ? { filename: imageFile.filename, size: imageFile.size } : 'aucun'
         });
 
         // Construction des URLs de manière sécurisée
@@ -98,27 +109,27 @@ export const createProduction = async (req, res) => {
         let audioUrl = null;
 
         if (imageFile && imageFile.filename) {
-            // Corriger l'URL pour qu'elle pointe vers /uploads/ et non /api/uploads/
             imageUrl = `/uploads/${imageFile.filename}`;
             console.log('[PROD CTRL] URL de l\'image créée:', imageUrl);
         }
 
         if (audioFile && audioFile.filename) {
-            // Corriger l'URL pour qu'elle pointe vers /uploads/ et non /api/uploads/
             audioUrl = `/uploads/${audioFile.filename}`;
             console.log('[PROD CTRL] URL de l\'audio créée:', audioUrl);
         }
 
-        // Préparation des données pour le service
+        // Préparation des données pour le service avec validation
         const productionData = {
-            title,
-            artist: artist || '',
-            description,
-            genre,
-            release_date,
+            title: title.trim(),
+            artist: artist.trim(),
+            description: description.trim(),
+            genre: genre.trim(),
+            release_date: release_date || null,
             image_url: imageUrl,
             audio_url: audioUrl
         };
+
+        console.log('[PROD CTRL] Données préparées pour le service:', productionData);
 
         // Utiliser le service pour créer une production
         const newProduction = await ProductionService.createProduction(productionData);
@@ -127,7 +138,28 @@ export const createProduction = async (req, res) => {
         res.status(201).json(newProduction);
     } catch (error) {
         console.error('[PROD CTRL] Erreur lors de la création de la production:', error);
-        res.status(500).json({ message: 'Erreur lors de la création de la production: ' + error.message });
+
+        // Gestion des erreurs spécifiques
+        if (error.name === 'SequelizeValidationError') {
+            return res.status(400).json({
+                message: 'Erreur de validation des données',
+                details: error.errors.map(e => e.message),
+                error: 'VALIDATION_ERROR'
+            });
+        }
+
+        if (error.name === 'SequelizeUniqueConstraintError') {
+            return res.status(409).json({
+                message: 'Une production avec ce titre existe déjà',
+                error: 'DUPLICATE_TITLE'
+            });
+        }
+
+        res.status(500).json({
+            message: 'Erreur lors de la création de la production',
+            error: 'INTERNAL_ERROR',
+            details: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
     }
 };
 
@@ -139,41 +171,42 @@ export const updateProduction = async (req, res) => {
         console.log('[PROD CTRL] req.body:', req.body);
         console.log('[PROD CTRL] req.files:', req.files);
 
-        // D'abord récupérer la production existante pour conserver les fichiers actuels
+        // D'abord récupérer la production existante
         const existingProduction = await ProductionService.getProductionById(id);
         if (!existingProduction) {
             return res.status(404).json({ message: "Production non trouvée" });
         }
 
-        // Préparation des données à mettre à jour en partant des données existantes
-        const updateData = { ...req.body };
+        // COMMENCER AVEC LES DONNÉES EXISTANTES et les mettre à jour seulement si nécessaire
+        const updateData = {
+            title: req.body.title || existingProduction.title,
+            artist: req.body.artist || existingProduction.artist,
+            description: req.body.description !== undefined ? req.body.description : existingProduction.description,
+            genre: req.body.genre !== undefined ? req.body.genre : existingProduction.genre,
+            release_date: req.body.release_date !== undefined ? req.body.release_date : existingProduction.release_date,
+            // Conserver les fichiers existants par défaut
+            image_url: existingProduction.image_url,
+            audio_url: existingProduction.audio_url
+        };
 
-        // Gestion des fichiers - conserver les existants si aucun nouveau fichier n'est fourni
+        // Gestion des fichiers - remplacer seulement si de nouveaux fichiers sont fournis
         const audioFile = req.files?.audio?.[0] || req.files?.audio_files?.[0] || null;
         const imageFile = req.files?.image?.[0] || req.files?.cover_image?.[0] || null;
 
-        // Pour l'image : utiliser le nouveau fichier si fourni, sinon conserver l'existant
+        // Remplacer l'image seulement si un nouveau fichier est fourni
         if (imageFile) {
             updateData.image_url = `/uploads/${imageFile.filename}`;
             console.log(`[PROD CTRL] Nouveau fichier image: ${imageFile.filename}`);
         } else {
-            // Conserver l'image existante si elle existe
-            if (existingProduction.image_url) {
-                updateData.image_url = existingProduction.image_url;
-                console.log(`[PROD CTRL] Conservation de l'image existante: ${existingProduction.image_url}`);
-            }
+            console.log(`[PROD CTRL] Conservation de l'image existante`);
         }
 
-        // Pour l'audio : utiliser le nouveau fichier si fourni, sinon conserver l'existant
+        // Remplacer l'audio seulement si un nouveau fichier est fourni
         if (audioFile) {
             updateData.audio_url = `/uploads/${audioFile.filename}`;
             console.log(`[PROD CTRL] Nouveau fichier audio: ${audioFile.filename}`);
         } else {
-            // Conserver l'audio existant s'il existe
-            if (existingProduction.audio_url) {
-                updateData.audio_url = existingProduction.audio_url;
-                console.log(`[PROD CTRL] Conservation de l'audio existant: ${existingProduction.audio_url}`);
-            }
+            console.log(`[PROD CTRL] Conservation de l'audio existant`);
         }
 
         console.log(`[PROD CTRL] Données finales pour mise à jour:`, updateData);

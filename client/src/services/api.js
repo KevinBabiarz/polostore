@@ -61,8 +61,11 @@ api.interceptors.response.use(
             url: originalRequest?.url,
             method: originalRequest?.method,
             status: error.response?.status,
-            message: error.message
+            message: error.message,
+            data: error.response?.data
         };
+
+        console.log('Erreur API détaillée:', errorInfo);
 
         // Vérification si la requête a déjà été tentée
         if (error.message.includes('timeout') &&
@@ -79,6 +82,22 @@ api.interceptors.response.use(
 
             // Réessayer la requête
             return api(originalRequest);
+        }
+
+        // Gestion spécifique des erreurs 400 (Bad Request)
+        if (error.response?.status === 400) {
+            const errorData = error.response.data;
+            console.error('Erreur 400 - Données invalides:', errorData);
+
+            // Utiliser le message du serveur si disponible
+            if (errorData?.message) {
+                error.message = errorData.message;
+            }
+
+            // Si il y a des détails supplémentaires, les ajouter
+            if (errorData?.details) {
+                error.details = errorData.details;
+            }
         }
 
         // Personnalisation des messages d'erreur
