@@ -7,7 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#e02323" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="PoloBeatsProd" />
     <meta
       name="description"
       content="PoloBeatsProd - Beats, instrumentales et productions musicales de qualité professionnelle"
@@ -16,121 +17,122 @@
     <link rel="manifest" href="./manifest.json" />
     <title>PoloBeatsProd</title>
     <style>
-      /* Style pour l'écran de chargement initial */
       html, body {
         margin: 0;
         padding: 0;
-        background: linear-gradient(135deg, #e02323, #b01d1d) !important;
-        color: white;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+        height: 100%;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
       }
 
       #root {
-        background: linear-gradient(135deg, #e02323, #b01d1d);
         min-height: 100vh;
       }
 
-      /* Style pour l'écran de chargement avec logo centré */
-      .loading-screen {
+      /* Écran de chargement */
+      .splash-screen {
         position: fixed;
         top: 0;
         left: 0;
         width: 100%;
         height: 100vh;
-        background: linear-gradient(135deg, #e02323, #b01d1d);
+        background: linear-gradient(135deg, #e02323 0%, #b01d1d 100%);
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        z-index: 9999;
-        transition: opacity 0.5s ease-out;
+        z-index: 10000;
+        transition: opacity 0.8s ease-out;
       }
 
-      .loading-logo {
-        width: 120px;
-        height: 120px;
-        background: white;
+      .splash-logo {
+        width: 140px;
+        height: 140px;
+        background: rgba(255, 255, 255, 0.95);
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin-bottom: 20px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        animation: pulse 2s infinite;
+        margin-bottom: 30px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        animation: logoFloat 3s ease-in-out infinite;
+        overflow: hidden;
       }
 
-      .loading-logo svg {
-        width: 70px;
-        height: 70px;
-        color: #e02323;
+      .splash-logo img {
+        width: 100px;
+        height: 100px;
+        object-fit: contain;
       }
 
-      .loading-text {
+      .splash-title {
         color: white;
-        font-size: 24px;
-        font-weight: bold;
-        margin-bottom: 10px;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 8px;
+        text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        letter-spacing: 1px;
       }
 
-      .loading-subtitle {
-        color: rgba(255,255,255,0.8);
-        font-size: 14px;
-        text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+      .splash-subtitle {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 16px;
+        font-weight: 400;
+        margin-bottom: 40px;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
       }
 
-      @keyframes pulse {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.05); }
-        100% { transform: scale(1); }
-      }
-
-      .spinner {
-        margin-top: 20px;
-        width: 40px;
-        height: 40px;
-        border: 3px solid rgba(255,255,255,0.3);
-        border-top: 3px solid white;
+      .splash-spinner {
+        width: 50px;
+        height: 50px;
+        border: 4px solid rgba(255, 255, 255, 0.2);
+        border-top: 4px solid white;
         border-radius: 50%;
-        animation: spin 1s linear infinite;
+        animation: spin 1.2s linear infinite;
+      }
+
+      @keyframes logoFloat {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
       }
 
       @keyframes spin {
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
       }
+
+      .splash-screen.fade-out {
+        opacity: 0;
+        pointer-events: none;
+      }
     </style>
   </head>
   <body>
     <noscript>Vous devez activer JavaScript pour utiliser cette application.</noscript>
 
-    <!-- Écran de chargement -->
-    <div id="loading-screen" class="loading-screen">
-      <div class="loading-logo">
-        <!-- Icône musicale SVG -->
-        <svg viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
-        </svg>
+    <!-- Écran de chargement avec votre logo PB -->
+    <div id="splash-screen" class="splash-screen">
+      <div class="splash-logo">
+        <img src="./images/PB-removebg-preview.png" alt="PoloBeatsProd Logo" />
       </div>
-      <div class="loading-text">POLOBEATSPROD</div>
-      <div class="loading-subtitle">Premium Beats Producer</div>
-      <div class="spinner"></div>
+      <div class="splash-title">POLOBEATSPROD</div>
+      <div class="splash-subtitle">Premium Beats Producer</div>
+      <div class="splash-spinner"></div>
     </div>
 
     <div id="root"></div>
 
     <script>
-      // Masquer l'écran de chargement quand l'app React est prête
+      // Masquer le splash screen après chargement
       window.addEventListener('load', function() {
         setTimeout(function() {
-          const loadingScreen = document.getElementById('loading-screen');
-          if (loadingScreen) {
-            loadingScreen.style.opacity = '0';
+          const splash = document.getElementById('splash-screen');
+          if (splash) {
+            splash.classList.add('fade-out');
             setTimeout(function() {
-              loadingScreen.style.display = 'none';
-            }, 500);
+              splash.remove();
+            }, 800);
           }
-        }, 1000); // Afficher pendant au moins 1 seconde
+        }, 1500); // Affiche 1.5 secondes
       });
     </script>
   </body>
