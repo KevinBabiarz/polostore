@@ -169,6 +169,22 @@ const Footer = () => {
                                         {t('favorites')}
                                     </Button>
                                 )}
+                                <Button
+                                    component={RouterLink}
+                                    to="/cgu"
+                                    color="inherit"
+                                    size="small"
+                                    sx={{
+                                        fontSize: '0.75rem',
+                                        minWidth: 'auto',
+                                        px: 1.5,
+                                        py: 0.5,
+                                        borderRadius: 2,
+                                        opacity: 0.8
+                                    }}
+                                >
+                                    {t('termsOfService')}
+                                </Button>
                             </Stack>
                         </Box>
 
@@ -285,43 +301,18 @@ const Footer = () => {
 
                         <Divider sx={{ width: '60%' }} />
 
-                        {/* CGU et Copyright Mobile */}
-                        <Box sx={{ textAlign: 'center' }}>
-                            <Typography
-                                variant="body2"
-                                color="text.secondary"
-                                sx={{
-                                    fontSize: '0.7rem',
-                                    textAlign: 'center',
-                                    opacity: 0.8,
-                                    mb: 1
-                                }}
-                            >
-                                © {currentYear} PoloBeatsProd. {t('allRightsReserved')}
-                            </Typography>
-                            <Button
-                                component={RouterLink}
-                                to="/cgu"
-                                color="inherit"
-                                size="small"
-                                sx={{
-                                    fontSize: '0.65rem',
-                                    minWidth: 'auto',
-                                    px: 1,
-                                    py: 0.25,
-                                    opacity: 0.7,
-                                    textDecoration: 'underline',
-                                    '&:hover': {
-                                        opacity: 1,
-                                        bgcolor: 'transparent',
-                                        textDecoration: 'underline'
-                                    }
-                                }}
-                                aria-label={t('termsOfServiceAria')}
-                            >
-                                {t('termsOfService')}
-                            </Button>
-                        </Box>
+                        {/* Copyright Mobile */}
+                        <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{
+                                fontSize: '0.7rem',
+                                textAlign: 'center',
+                                opacity: 0.8
+                            }}
+                        >
+                            © {currentYear} PoloBeatsProd. {t('allRightsReserved')}
+                        </Typography>
                     </Stack>
                 ) : (
                     /* Version Desktop - Code existant */
@@ -360,6 +351,14 @@ const Footer = () => {
                                         {t('favorites')}
                                     </Button>
                                 )}
+                                <Button
+                                    component={RouterLink}
+                                    to="/cgu"
+                                    color="inherit"
+                                    sx={{ opacity: 0.8 }}
+                                >
+                                    {t('termsOfService')}
+                                </Button>
                             </Stack>
                         </Grid>
 
@@ -423,27 +422,7 @@ const Footer = () => {
                                 </IconButton>
                             </Stack>
                             <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.8rem' }}>
-                                © {currentYear} PoloBeatsProd. {t('allRightsReserved')} • {' '}
-                                <Button
-                                    component={RouterLink}
-                                    to="/cgu"
-                                    color="inherit"
-                                    size="small"
-                                    sx={{
-                                        fontSize: '0.75rem',
-                                        minWidth: 'auto',
-                                        p: 0,
-                                        textDecoration: 'underline',
-                                        textTransform: 'none',
-                                        '&:hover': {
-                                            bgcolor: 'transparent',
-                                            textDecoration: 'underline'
-                                        }
-                                    }}
-                                    aria-label={t('termsOfServiceAria')}
-                                >
-                                    {t('termsOfService')}
-                                </Button>
+                                © {currentYear} PoloBeatsProd. {t('allRightsReserved')}
                             </Typography>
                         </Grid>
                     </Grid>
@@ -454,3 +433,4 @@ const Footer = () => {
 };
 
 export default Footer;
+
