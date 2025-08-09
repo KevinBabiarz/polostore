@@ -1,57 +1,32 @@
 {
   "title": "Conditions Générales d'Utilisation",
-  "lastUpdate": "Dernière mise à jour : {{date}}",
-  "section1": {
-    "title": "1. Objet",
-    "content1": "Les présentes conditions générales d'utilisation (CGU) ont pour objet de définir les modalités et conditions d'utilisation du site web POLOBEATSPROD ainsi que les droits et obligations de ses utilisateurs.",
-    "content2": "Le site POLOBEATSPROD est une plateforme dédiée à la production musicale, proposant des beats, instrumentales et services de production musicale de haute qualité."
+  "lastUpdated": "Dernière mise à jour : Janvier 2025",
+  "introduction": {
+    "title": "1. Introduction",
+    "content": "Bienvenue sur PoloBeatsProd. En utilisant notre site web et nos services, vous acceptez de vous conformer aux présentes Conditions Générales d'Utilisation. Si vous n'acceptez pas ces conditions, veuillez ne pas utiliser nos services."
   },
-  "section2": {
-    "title": "2. Acceptation des CGU",
-    "content1": "L'utilisation du site POLOBEATSPROD implique l'acceptation pleine et entière des présentes CGU. Si vous n'acceptez pas ces conditions, vous devez vous abstenir d'utiliser le site.",
-    "content2": "Ces CGU peuvent être modifiées à tout moment. Les utilisateurs seront informés de toute modification via le site."
+  "services": {
+    "title": "2. Description des Services",
+    "content": "PoloBeatsProd propose des beats musicaux, des instrumentales et des services de production musicale. Nous offrons des licences d'utilisation pour nos créations musicales selon différents types de licences (basique, premium, exclusive)."
   },
-  "section3": {
-    "title": "3. Accès au site",
-    "content1": "Le site est accessible gratuitement en tout lieu à tout utilisateur ayant un accès à Internet. Tous les frais supportés par l'utilisateur pour accéder au service (matériel informatique, logiciels, connexion Internet, etc.) sont à sa charge.",
-    "content2": "Certaines fonctionnalités peuvent nécessiter la création d'un compte utilisateur. L'utilisateur s'engage à fournir des informations exactes et à maintenir ses informations à jour."
+  "intellectualProperty": {
+    "title": "3. Propriété Intellectuelle",
+    "content": "Tous les beats, instrumentales et contenus présents sur PoloBeatsProd sont protégés par le droit d'auteur. L'achat d'une licence vous donne certains droits d'utilisation selon le type de licence choisi, mais ne vous transfère pas la propriété du contenu."
   },
-  "section4": {
-    "title": "4. Propriété intellectuelle",
-    "content1": "Tous les contenus présents sur le site POLOBEATSPROD (textes, images, sons, vidéos, logos, etc.) sont protégés par les droits de propriété intellectuelle et appartiennent à POLOBEATSPROD ou à ses partenaires.",
-    "content2": "Toute reproduction, distribution, modification, adaptation, retransmission ou publication de ces différents éléments est strictement interdite sans l'accord exprès par écrit de POLOBEATSPROD.",
-    "content3": "Les productions musicales proposées sur le site sont soumises à des licences spécifiques détaillées lors de l'achat ou du téléchargement."
+  "acceptableUse": {
+    "title": "4. Utilisation Acceptable",
+    "content": "Vous vous engagez à utiliser nos services de manière légale et respectueuse. Il est interdit de redistribuer, revendre ou partager illégalement nos contenus sans autorisation appropriée."
   },
-  "section5": {
-    "title": "5. Utilisation du site",
-    "content1": "L'utilisateur s'engage à utiliser le site conformément aux présentes CGU et à la législation en vigueur. Il est notamment interdit de :",
-    "restriction1": "Utiliser le site à des fins illégales ou non autorisées",
-    "restriction2": "Télécharger, diffuser ou distribuer des contenus sans autorisation",
-    "restriction3": "Porter atteinte aux droits de propriété intellectuelle",
-    "restriction4": "Perturber le fonctionnement du site ou des serveurs"
+  "purchases": {
+    "title": "5. Achats et Paiements",
+    "content": "Tous les achats sont finaux. Les prix sont indiqués en euros TTC. Nous acceptons les paiements par carte bancaire et autres moyens de paiement sécurisés. Les licences sont délivrées immédiatement après confirmation du paiement."
   },
-  "section6": {
-    "title": "6. Protection des données personnelles",
-    "content1": "Les données personnelles collectées sur le site sont traitées conformément au Règlement Général sur la Protection des Données (RGPD) et à la législation française en vigueur.",
-    "content2": "Les utilisateurs disposent d'un droit d'accès, de rectification, de suppression et de portabilité de leurs données personnelles. Pour exercer ces droits, contactez-nous via la page de contact."
+  "liability": {
+    "title": "6. Limitation de Responsabilité",
+    "content": "PoloBeatsProd ne peut être tenu responsable des dommages directs ou indirects résultant de l'utilisation de nos services. Notre responsabilité est limitée au montant payé pour les services concernés."
   },
-  "section7": {
-    "title": "7. Limitation de responsabilité",
-    "content1": "POLOBEATSPROD s'efforce de fournir des informations aussi précises que possible. Toutefois, il ne pourra être tenu responsable des omissions, des inexactitudes et des carences dans la mise à jour.",
-    "content2": "L'utilisateur assume l'entière responsabilité de l'utilisation qu'il fait des informations et contenus présents sur le site."
-  },
-  "section8": {
-    "title": "8. Droit applicable et juridiction compétente",
-    "content1": "Les présentes CGU sont régies par le droit français. En cas de litige, les tribunaux français seront seuls compétents."
-  },
-  "section9": {
-    "title": "9. Contact",
-    "content1": "Pour toute question concernant ces CGU, vous pouvez nous contacter via notre",
-    "contactLink": "page de contact",
-    "content2": "ou par email."
-  },
-  "footer": {
-    "copyright": "© {{year}} POLOBEATSPROD - Tous droits réservés"
+  "contact": {
+    "title": "7. Contact",
+    "content": "Pour toute question concernant ces CGU, veuillez nous contacter via la page contact de notre site web ou par email."
   }
 }
-

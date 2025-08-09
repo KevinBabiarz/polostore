@@ -1,57 +1,32 @@
 {
-  "title": "Regulamin Użytkowania",
-  "lastUpdate": "Ostatnia aktualizacja: {{date}}",
-  "section1": {
-    "title": "1. Przedmiot",
-    "content1": "Niniejszy regulamin użytkowania ma na celu określenie warunków korzystania ze strony internetowej POLOBEATSPROD oraz praw i obowiązków jej użytkowników.",
-    "content2": "Strona POLOBEATSPROD to platforma dedykowana produkcji muzycznej, oferująca beaty, instrumentale i wysokiej jakości usługi produkcji muzycznej."
+  "title": "Regulamin Serwisu",
+  "lastUpdated": "Ostatnia aktualizacja: Styczeń 2025",
+  "introduction": {
+    "title": "1. Wprowadzenie",
+    "content": "Witamy w PoloBeatsProd. Korzystając z naszej strony internetowej i usług, zgadzasz się przestrzegać niniejszego Regulaminu. Jeśli nie akceptujesz tych warunków, prosimy o niekorzystanie z naszych usług."
   },
-  "section2": {
-    "title": "2. Akceptacja Regulaminu",
-    "content1": "Korzystanie ze strony POLOBEATSPROD oznacza pełną akceptację niniejszego regulaminu. Jeśli nie akceptujesz tych warunków, musisz powstrzymać się od korzystania ze strony.",
-    "content2": "Niniejszy regulamin może być modyfikowany w dowolnym momencie. Użytkownicy będą informowani o wszelkich zmianach za pośrednictwem strony."
+  "services": {
+    "title": "2. Opis Usług",
+    "content": "PoloBeatsProd oferuje beaty muzyczne, instrumentale i usługi produkcji muzycznej. Zapewniamy licencje na użytkowanie naszych utworów muzycznych według różnych typów licencji (podstawowa, premium, ekskluzywna)."
   },
-  "section3": {
-    "title": "3. Dostęp do strony",
-    "content1": "Strona jest dostępna bezpłatnie w każdym miejscu dla każdego użytkownika mającego dostęp do Internetu. Wszystkie koszty ponoszone przez użytkownika w celu uzyskania dostępu do usługi (sprzęt komputerowy, oprogramowanie, połączenie internetowe itp.) są na jego koszt.",
-    "content2": "Niektóre funkcje mogą wymagać utworzenia konta użytkownika. Użytkownik zobowiązuje się do podania dokładnych informacji i utrzymania ich aktualności."
+  "intellectualProperty": {
+    "title": "3. Własność Intelektualna",
+    "content": "Wszystkie beaty, instrumentale i treści na PoloBeatsProd są chronione prawem autorskim. Zakup licencji daje określone prawa użytkowania zgodnie z wybranym typem licencji, ale nie przenosi na Ciebie własności treści."
   },
-  "section4": {
-    "title": "4. Własność intelektualna",
-    "content1": "Wszystkie treści obecne na stronie POLOBEATSPROD (teksty, obrazy, dźwięki, filmy, loga itp.) są chronione prawami własności intelektualnej i należą do POLOBEATSPROD lub jego partnerów.",
-    "content2": "Wszelkie reprodukcje, dystrybucje, modyfikacje, adaptacje, retransmisje lub publikacje tych różnych elementów są surowo zabronione bez wyraźnej pisemnej zgody POLOBEATSPROD.",
-    "content3": "Produkcje muzyczne oferowane na stronie podlegają określonym licencjom szczegółowo opisanym podczas zakupu lub pobierania."
+  "acceptableUse": {
+    "title": "4. Dopuszczalne Użycie",
+    "content": "Zobowiązujesz się do korzystania z naszych usług w sposób legalny i pełen szacunku. Zabronione jest rozpowszechnianie, odsprzedawanie lub nielegalne udostępnianie naszych treści bez odpowiedniego upoważnienia."
   },
-  "section5": {
-    "title": "5. Korzystanie ze strony",
-    "content1": "Użytkownik zobowiązuje się do korzystania ze strony zgodnie z niniejszym regulaminem i obowiązującym prawem. W szczególności zabronione jest:",
-    "restriction1": "Używanie strony do celów nielegalnych lub nieautoryzowanych",
-    "restriction2": "Pobieranie, nadawanie lub dystrybucja treści bez autoryzacji",
-    "restriction3": "Naruszanie praw własności intelektualnej",
-    "restriction4": "Zakłócanie działania strony lub serwerów"
+  "purchases": {
+    "title": "5. Zakupy i Płatności",
+    "content": "Wszystkie zakupy są ostateczne. Ceny są podane w euro z VAT. Akceptujemy płatności kartą kredytową i inne bezpieczne metody płatności. Licencje są dostarczane natychmiast po potwierdzeniu płatności."
   },
-  "section6": {
-    "title": "6. Ochrona danych osobowych",
-    "content1": "Dane osobowe zbierane na stronie są przetwarzane zgodnie z Ogólnym Rozporządzeniem o Ochronie Danych (RODO) i obowiązującym prawem francuskim.",
-    "content2": "Użytkownicy mają prawo dostępu, sprostowania, usunięcia i przenoszenia swoich danych osobowych. Aby skorzystać z tych praw, skontaktuj się z nami za pośrednictwem strony kontaktowej."
+  "liability": {
+    "title": "6. Ograniczenie Odpowiedzialności",
+    "content": "PoloBeatsProd nie może być pociągnięty do odpowiedzialności za szkody bezpośrednie lub pośrednie wynikające z korzystania z naszych usług. Nasza odpowiedzialność jest ograniczona do kwoty zapłaconej za odpowiednie usługi."
   },
-  "section7": {
-    "title": "7. Ograniczenie odpowiedzialności",
-    "content1": "POLOBEATSPROD stara się dostarczać informacje tak dokładne, jak to możliwe. Jednak nie może ponosić odpowiedzialności za pominięcia, nieścisłości i braki w aktualizacjach.",
-    "content2": "Użytkownik ponosi pełną odpowiedzialność za korzystanie z informacji i treści obecnych na stronie."
-  },
-  "section8": {
-    "title": "8. Prawo właściwe i właściwość sądowa",
-    "content1": "Niniejszy regulamin podlega prawu francuskiemu. W przypadku sporu, sądy francuskie będą jedynie właściwe."
-  },
-  "section9": {
-    "title": "9. Kontakt",
-    "content1": "W przypadku jakichkolwiek pytań dotyczących tego regulaminu możesz skontaktować się z nami za pośrednictwem naszej",
-    "contactLink": "strony kontaktowej",
-    "content2": "lub przez e-mail."
-  },
-  "footer": {
-    "copyright": "© {{year}} POLOBEATSPROD - Wszelkie prawa zastrzeżone"
+  "contact": {
+    "title": "7. Kontakt",
+    "content": "W przypadku pytań dotyczących niniejszego Regulaminu, prosimy o kontakt za pośrednictwem strony kontaktowej naszej witryny lub przez e-mail."
   }
 }
-

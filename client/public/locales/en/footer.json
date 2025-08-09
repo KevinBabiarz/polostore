@@ -1,17 +1,19 @@
 {
   "navigation": "Navigation",
-  "followUs": "Follow us",
+  "followUs": "Follow Us",
   "language": "Language",
-  "slogan": "Professional quality music productions",
+  "slogan": "Your premium beats producer",
   "home": "Home",
   "productions": "Productions",
   "contact": "Contact",
   "favorites": "Favorites",
   "backToTop": "Back to top",
   "allRightsReserved": "All rights reserved",
-  "contactAria": "Contact us",
-  "facebookAria": "Facebook page",
-  "twitterAria": "Twitter account",
-  "instagramAria": "Instagram account",
-  "youtubeAria": "YouTube channel"
+  "contactAria": "Contact by email",
+  "facebookAria": "Follow on Facebook",
+  "twitterAria": "Follow on Twitter",
+  "instagramAria": "Follow on Instagram",
+  "youtubeAria": "Follow on YouTube",
+  "termsOfService": "Terms",
+  "termsOfServiceAria": "View Terms of Service"
 }

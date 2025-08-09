@@ -9,8 +9,8 @@ import {
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
-const CGU = () => {
-    const { t } = useTranslation('cgu');
+const TermsOfService = () => {
+    const { t } = useTranslation('cgu'); // Utiliser le namespace 'cgu'
     const theme = useTheme();
 
     return (
@@ -117,4 +117,4 @@ const CGU = () => {
     );
 };
 
-export default CGU;
+export default TermsOfService;

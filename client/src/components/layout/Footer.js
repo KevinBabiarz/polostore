@@ -285,18 +285,43 @@ const Footer = () => {
 
                         <Divider sx={{ width: '60%' }} />
 
-                        {/* Copyright Mobile */}
-                        <Typography
-                            variant="body2"
-                            color="text.secondary"
-                            sx={{
-                                fontSize: '0.7rem',
-                                textAlign: 'center',
-                                opacity: 0.8
-                            }}
-                        >
-                            © {currentYear} PoloBeatsProd. {t('allRightsReserved')}
-                        </Typography>
+                        {/* CGU et Copyright Mobile */}
+                        <Box sx={{ textAlign: 'center' }}>
+                            <Typography
+                                variant="body2"
+                                color="text.secondary"
+                                sx={{
+                                    fontSize: '0.7rem',
+                                    textAlign: 'center',
+                                    opacity: 0.8,
+                                    mb: 1
+                                }}
+                            >
+                                © {currentYear} PoloBeatsProd. {t('allRightsReserved')}
+                            </Typography>
+                            <Button
+                                component={RouterLink}
+                                to="/cgu"
+                                color="inherit"
+                                size="small"
+                                sx={{
+                                    fontSize: '0.65rem',
+                                    minWidth: 'auto',
+                                    px: 1,
+                                    py: 0.25,
+                                    opacity: 0.7,
+                                    textDecoration: 'underline',
+                                    '&:hover': {
+                                        opacity: 1,
+                                        bgcolor: 'transparent',
+                                        textDecoration: 'underline'
+                                    }
+                                }}
+                                aria-label={t('termsOfServiceAria')}
+                            >
+                                {t('termsOfService')}
+                            </Button>
+                        </Box>
                     </Stack>
                 ) : (
                     /* Version Desktop - Code existant */
@@ -398,7 +423,27 @@ const Footer = () => {
                                 </IconButton>
                             </Stack>
                             <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.8rem' }}>
-                                © {currentYear} PoloBeatsProd. {t('allRightsReserved')}
+                                © {currentYear} PoloBeatsProd. {t('allRightsReserved')} • {' '}
+                                <Button
+                                    component={RouterLink}
+                                    to="/cgu"
+                                    color="inherit"
+                                    size="small"
+                                    sx={{
+                                        fontSize: '0.75rem',
+                                        minWidth: 'auto',
+                                        p: 0,
+                                        textDecoration: 'underline',
+                                        textTransform: 'none',
+                                        '&:hover': {
+                                            bgcolor: 'transparent',
+                                            textDecoration: 'underline'
+                                        }
+                                    }}
+                                    aria-label={t('termsOfServiceAria')}
+                                >
+                                    {t('termsOfService')}
+                                </Button>
                             </Typography>
                         </Grid>
                     </Grid>
