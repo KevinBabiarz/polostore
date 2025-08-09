@@ -81,10 +81,24 @@ export const getProductionById = async (id) => {
 // Fonction pour créer une nouvelle production
 export const createProduction = async (productionData) => {
     try {
-        // Vérifier si productionData est déjà un FormData
-        const formData = productionData instanceof FormData
-            ? productionData
-            : createFormDataFromObject(productionData);
+        const formData = new FormData();
+
+        // Ajouter chaque champ au formData avec les bons noms de champs
+        for (const key in productionData) {
+            if (productionData[key] !== null && productionData[key] !== undefined) {
+                // Mapper les noms de champs pour correspondre à ce que le backend attend
+                if (key === 'cover_image') {
+                    formData.append('image', productionData[key]);
+                } else if (key === 'audio_file') {
+                    formData.append('audio', productionData[key]);
+                } else {
+                    formData.append(key, productionData[key]);
+                }
+            }
+        }
+
+        console.log('Envoi de création de production');
+        console.log('Données envoyées:', Object.fromEntries(formData.entries()));
 
         const response = await api.post('/productions', formData, {
             headers: {
@@ -118,12 +132,22 @@ export const updateProduction = async (id, productionData) => {
     try {
         const formData = new FormData();
 
-        // Ajouter chaque champ au formData
+        // Ajouter chaque champ au formData avec les bons noms de champs
         for (const key in productionData) {
             if (productionData[key] !== null && productionData[key] !== undefined) {
-                formData.append(key, productionData[key]);
+                // Mapper les noms de champs pour correspondre à ce que le backend attend
+                if (key === 'cover_image') {
+                    formData.append('image', productionData[key]);
+                } else if (key === 'audio_file') {
+                    formData.append('audio', productionData[key]);
+                } else {
+                    formData.append(key, productionData[key]);
+                }
             }
         }
+
+        console.log('Envoi de mise à jour pour production ID:', id);
+        console.log('Données envoyées:', Object.fromEntries(formData.entries()));
 
         const response = await api.put(`/productions/${id}`, formData, {
             headers: {
