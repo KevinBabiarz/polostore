@@ -10,7 +10,7 @@ import {
     IconButton
 } from '@mui/material';
 import { PhotoCamera, ArrowBack, Save, AudioFile } from '@mui/icons-material';
-import { getProduction, createProduction, updateProduction } from '../../services/productionService';
+import { getProductionById, createProduction, updateProduction } from '../../services/productionService';
 import config from '../../config/config';
 import { useTranslation } from 'react-i18next';
 
@@ -77,7 +77,7 @@ const ProductionForm = () => {
             const fetchProduction = async () => {
                 try {
                     setLoading(true);
-                    const data = await getProduction(id);
+                    const data = await getProductionById(id);
                     setCurrentData(data);
 
                     // Format de la date pour l'input date

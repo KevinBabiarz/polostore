@@ -227,7 +227,7 @@ export const ProductionService = {
     /**
      * Met à jour une production existante
      * @param {number} id - ID de la production à mettre à jour
-     * @param {Object} updateData - Nouvelles données
+     * @param {Object} updateData - Données de mise à jour
      * @returns {Promise<Object>} La production mise à jour
      */
     updateProduction: async (id, updateData) => {
@@ -242,12 +242,11 @@ export const ProductionService = {
                 throw new Error(i18n.t('productionService.productionNotFound'));
             }
 
-            // Gestion du fichier audio si un nouveau fichier est envoyé
+            // Gestion intelligente des fichiers - suppression seulement si remplacement
             if (updateData.audio_url && production.audio_url &&
                 updateData.audio_url !== production.audio_url) {
-                // Suppression de l'ancien fichier
+                // Suppression de l'ancien fichier uniquement si un nouveau est fourni
                 try {
-                    // Corriger le chemin pour la suppression de fichier
                     const oldAudioPath = production.audio_url.startsWith('/uploads/')
                         ? production.audio_url.replace('/uploads/', '')
                         : production.audio_url.replace('/api/uploads/', '');
@@ -262,11 +261,10 @@ export const ProductionService = {
                 }
             }
 
-            // Gestion du fichier image si un nouveau fichier est envoyé
+            // Gestion intelligente de l'image - suppression seulement si remplacement
             if (updateData.image_url && production.image_url &&
                 updateData.image_url !== production.image_url) {
                 try {
-                    // Corriger le chemin pour la suppression de fichier
                     const oldImagePath = production.image_url.startsWith('/uploads/')
                         ? production.image_url.replace('/uploads/', '')
                         : production.image_url.replace('/api/uploads/', '');
@@ -284,9 +282,14 @@ export const ProductionService = {
             // Nettoyer les données avant la mise à jour pour éviter les doublons
             const cleanUpdateData = { ...updateData };
 
-            // Supprimer les champs undefined ou null
+            // Supprimer les champs undefined, null ou vides (mais pas les chaînes vides légitimes)
             Object.keys(cleanUpdateData).forEach(key => {
-                if (cleanUpdateData[key] === undefined || cleanUpdateData[key] === null || cleanUpdateData[key] === '') {
+                if (cleanUpdateData[key] === undefined || cleanUpdateData[key] === null) {
+                    delete cleanUpdateData[key];
+                }
+                // Pour les chaînes, supprimer seulement si complètement vides pour les champs optionnels
+                if (typeof cleanUpdateData[key] === 'string' && cleanUpdateData[key].trim() === '' &&
+                    ['description', 'genre'].includes(key)) {
                     delete cleanUpdateData[key];
                 }
             });
@@ -300,7 +303,9 @@ export const ProductionService = {
             });
 
             if (updatedCount === 0) {
-                throw new Error(i18n.t('productionService.noUpdatePerformed'));
+                console.log(`[PROD SERVICE] Aucune mise à jour effectuée pour la production ID ${id}`);
+                // Ne pas lever d'erreur, juste retourner la production existante
+                return production;
             }
 
             // Récupérer la production mise à jour

@@ -139,21 +139,44 @@ export const updateProduction = async (req, res) => {
         console.log('[PROD CTRL] req.body:', req.body);
         console.log('[PROD CTRL] req.files:', req.files);
 
-        // Préparation des données à mettre à jour
+        // D'abord récupérer la production existante pour conserver les fichiers actuels
+        const existingProduction = await ProductionService.getProductionById(id);
+        if (!existingProduction) {
+            return res.status(404).json({ message: "Production non trouvée" });
+        }
+
+        // Préparation des données à mettre à jour en partant des données existantes
         const updateData = { ...req.body };
 
-        // Gestion des fichiers
+        // Gestion des fichiers - conserver les existants si aucun nouveau fichier n'est fourni
         const audioFile = req.files?.audio?.[0] || req.files?.audio_files?.[0] || null;
         const imageFile = req.files?.image?.[0] || req.files?.cover_image?.[0] || null;
 
-        // Construction des URLs si des fichiers sont fournis
+        // Pour l'image : utiliser le nouveau fichier si fourni, sinon conserver l'existant
         if (imageFile) {
             updateData.image_url = `/uploads/${imageFile.filename}`;
+            console.log(`[PROD CTRL] Nouveau fichier image: ${imageFile.filename}`);
+        } else {
+            // Conserver l'image existante si elle existe
+            if (existingProduction.image_url) {
+                updateData.image_url = existingProduction.image_url;
+                console.log(`[PROD CTRL] Conservation de l'image existante: ${existingProduction.image_url}`);
+            }
         }
 
+        // Pour l'audio : utiliser le nouveau fichier si fourni, sinon conserver l'existant
         if (audioFile) {
             updateData.audio_url = `/uploads/${audioFile.filename}`;
+            console.log(`[PROD CTRL] Nouveau fichier audio: ${audioFile.filename}`);
+        } else {
+            // Conserver l'audio existant s'il existe
+            if (existingProduction.audio_url) {
+                updateData.audio_url = existingProduction.audio_url;
+                console.log(`[PROD CTRL] Conservation de l'audio existant: ${existingProduction.audio_url}`);
+            }
         }
+
+        console.log(`[PROD CTRL] Données finales pour mise à jour:`, updateData);
 
         // Utiliser le service pour mettre à jour une production
         const updatedProduction = await ProductionService.updateProduction(id, updateData);
