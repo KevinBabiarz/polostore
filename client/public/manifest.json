@@ -1,25 +1,26 @@
 {
   "short_name": "PoloBeatsProd",
-  "name": "PoloBeatsProd",
+  "name": "PoloBeatsProd - Premium Beats Producer",
   "icons": [
     {
-      "src": "images/PB-removebg-preview.png",
+      "src": "favicon.ico",
       "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/png"
+      "type": "image/x-icon"
     },
     {
-      "src": "images/PB-removebg-preview.png",
+      "src": "logo192.png",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "images/PB-removebg-preview.png",
+      "src": "logo512.png",
       "type": "image/png",
       "sizes": "512x512"
     }
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#000000"
+  "theme_color": "#e02323",
+  "background_color": "#e02323",
+  "orientation": "portrait"
 }
