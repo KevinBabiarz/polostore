@@ -136,7 +136,7 @@ function App() {
         <BrowserRouter>
           <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
             <Layout themeToggle={<ThemeToggle toggleColorMode={colorMode.toggleColorMode} />} />
-            <Box component="main" sx={{ flexGrow: 1 }}>
+            <Box component="main" sx={{ flexGrow: 1, width: '100%', maxWidth: '100vw', overflowX: 'hidden' }}>
               <Routes>
                 {/* Routes publiques - accessibles à tous */}
                 <Route path="/" element={<Home />} />
