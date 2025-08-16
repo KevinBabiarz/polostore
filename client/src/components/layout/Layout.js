@@ -216,12 +216,32 @@ const Layout = ({ themeToggle }) => {
             {isAuthenticated() ? (
                 <>
                     {isAdmin() && (
-                        <MenuItem component={RouterLink} to="/admin/dashboard" onClick={handleMobileMenuClose}>
-                            <IconButton size="small" color="inherit">
-                                <DashboardIcon />
-                            </IconButton>
-                            <Typography sx={{ ml: 1 }}>{t('admin:dashboard')}</Typography>
-                        </MenuItem>
+                        <>
+                            <Divider sx={{ my: 1 }} />
+                            <Typography variant="caption" sx={{ px: 2, py: 0.5, color: 'text.secondary' }}>
+                                {t('admin:dashboard.title')}
+                            </Typography>
+                            <MenuItem component={RouterLink} to="/admin/dashboard" onClick={handleMobileMenuClose}>
+                                <DashboardIcon fontSize="small" />
+                                <Typography sx={{ ml: 1 }}>{t('admin:dashboard.title')}</Typography>
+                            </MenuItem>
+                            <MenuItem component={RouterLink} to="/admin/productions" onClick={handleMobileMenuClose}>
+                                <LibraryMusicIcon fontSize="small" />
+                                <Typography sx={{ ml: 1 }}>{t('admin:productionManagement.title')}</Typography>
+                            </MenuItem>
+                            <MenuItem component={RouterLink} to="/admin/productions/add" onClick={handleMobileMenuClose}>
+                                <AddCircleIcon fontSize="small" />
+                                <Typography sx={{ ml: 1 }}>{t('admin:dashboard.addProduction')}</Typography>
+                            </MenuItem>
+                            <MenuItem component={RouterLink} to="/admin/users" onClick={handleMobileMenuClose}>
+                                <PersonAddIcon fontSize="small" />
+                                <Typography sx={{ ml: 1 }}>{t('admin:userManagement.title')}</Typography>
+                            </MenuItem>
+                            <MenuItem component={RouterLink} to="/admin/messages" onClick={handleMobileMenuClose}>
+                                <EmailIcon fontSize="small" />
+                                <Typography sx={{ ml: 1 }}>{t('admin:messages.title')}</Typography>
+                            </MenuItem>
+                        </>
                     )}
 
                     <MenuItem component={RouterLink} to="/profile" onClick={handleMobileMenuClose}>
@@ -284,24 +304,24 @@ const Layout = ({ themeToggle }) => {
         >
             <MenuItem component={RouterLink} to="/admin/dashboard" onClick={handleAdminMenuClose}>
                 <DashboardIcon fontSize="small" sx={{ mr: 1 }} />
-                {t('admin:dashboard')}
+                {t('admin:dashboard.title')}
             </MenuItem>
 
             <MenuItem component={RouterLink} to="/admin/productions" onClick={handleAdminMenuClose}>
                 <LibraryMusicIcon fontSize="small" sx={{ mr: 1 }} />
-                {t('admin:productionsManagement')}
+                {t('admin:productionManagement.title')}
             </MenuItem>
 
             <MenuItem component={RouterLink} to="/admin/productions/add" onClick={handleAdminMenuClose}>
                 <AddCircleIcon fontSize="small" sx={{ mr: 1 }} />
-                {t('admin:addProduction')}
+                {t('admin:dashboard.addProduction')}
             </MenuItem>
 
             <MenuItem component={RouterLink} to="/admin/users" onClick={handleAdminMenuClose}>
                 <Badge badgeContent="New" color="error" fontSize="small" sx={{ mr: 1 }}>
                     <PersonAddIcon fontSize="small" />
                 </Badge>
-                {t('admin:userManagement')}
+                {t('admin:userManagement.title')}
             </MenuItem>
         </Menu>
     );
@@ -343,7 +363,7 @@ const Layout = ({ themeToggle }) => {
                     {username}
                 </Typography>
                 <Chip
-                    label={isAdmin() ? t('admin:dashboard') : t('common:welcome')}
+                    label={isAdmin() ? t('admin:dashboard.title') : t('common:welcome')}
                     size="small"
                     color={isAdmin() ? 'secondary' : 'default'}
                     sx={{ mt: 0.5 }}
@@ -400,7 +420,7 @@ const Layout = ({ themeToggle }) => {
                             <Box sx={{
                                 display: 'flex',
                                 alignItems: 'center',
-                                flexShrink: 0,
+                                flexShrink: { xs: 1, sm: 0 },
                                 mr: { xs: 1, sm: 2, md: 3 }
                             }}>
                                 <Typography
@@ -570,13 +590,13 @@ const Layout = ({ themeToggle }) => {
 
                             {/* Insérer le bouton de changement de thème ici */}
                             {themeToggle && (
-                                <Box sx={{ mx: { xs: 0.5, sm: 1 } }}>
+                                <Box sx={{ mx: { xs: 0.5, sm: 1 }, display: { xs: 'none', md: 'block' } }}>
                                     {themeToggle}
                                 </Box>
                             )}
 
                             {/* Sélecteur de langue */}
-                            <Box sx={{ mx: { xs: 0.5, sm: 1 } }}>
+                            <Box sx={{ mx: { xs: 0.5, sm: 1 }, display: { xs: 'none', md: 'block' } }}>
                                 <LanguageSelector size="small" />
                             </Box>
 
@@ -604,7 +624,7 @@ const Layout = ({ themeToggle }) => {
                                                             px: { xs: 1, sm: 1.5 },
                                                         }}
                                                     >
-                                                        Admin
+                                                        {t('admin:dashboard.title')}
                                                     </Button>
                                                     {renderAdminMenu}
                                                 </>
@@ -740,18 +760,7 @@ const Layout = ({ themeToggle }) => {
                             {/* Menu hamburger pour mobile */}
                             {isMobile && (
                                 <Box sx={{ display: 'flex', ml: 'auto' }}>
-                                    {isAuthenticated() && isAdmin() && (
-                                        <IconButton
-                                            color="inherit"
-                                            onClick={handleAdminMenuOpen}
-                                            sx={{ mr: 1 }}
-                                        >
-                                            <Badge color="secondary" variant="dot">
-                                                <DashboardIcon />
-                                            </Badge>
-                                        </IconButton>
-                                    )}
-
+                                    {/* Icône admin retirée en mobile, liens admin intégrés au menu hamburger */}
                                     <IconButton
                                         size="large"
                                         color="inherit"
