@@ -4,16 +4,16 @@
     <meta charset="utf-8" />
     <link rel="icon" type="image/png" href="./images/PB-removebg-preview.png" />
     <link rel="shortcut icon" type="image/png" href="./images/PB-removebg-preview.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#e02323" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="PoloBeatsProd" />
     <meta
       name="description"
       content="PoloBeatsProd - Beats, instrumentales et productions musicales de qualité professionnelle"
     />
-    <link rel="apple-touch-icon" href="./images/PB-removebg-preview.png" />
+    <link rel="apple-touch-icon" href="./images/apple-touch-icon-180x180.png" />
     <link rel="manifest" href="./manifest.json" />
     <title>PoloBeatsProd</title>
     <style>
@@ -22,6 +22,8 @@
         padding: 0;
         height: 100%;
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+        /* Évite le flash blanc initial avant le CSS/app */
+        background: #e02323;
       }
 
       #root {
