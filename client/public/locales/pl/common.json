@@ -18,11 +18,22 @@
   "date": "Data",
   "actions": "Akcje",
   "back": "Wstecz",
+  "backToList": "Powrót do listy",
   "next": "Następny",
   "previous": "Poprzedni",
   "close": "Zamknij",
   "confirm": "Potwierdź",
   "yes": "Tak",
-  "no": "Nie"
+  "no": "Nie",
+  "genres": {
+    "rock": "Rock",
+    "pop": "Pop",
+    "jazz": "Jazz",
+    "hiphop": "Hip-Hop",
+    "electronic": "Elektroniczna",
+    "classical": "Klasyczna",
+    "rnb": "R&B",
+    "reggae": "Reggae",
+    "other": "Inny"
+  }
 }
-

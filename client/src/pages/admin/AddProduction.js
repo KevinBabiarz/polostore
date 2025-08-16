@@ -4,7 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
     Container, Typography, TextField, Button, Box, Paper, Grid,
     FormControl, InputLabel, Select, MenuItem, CircularProgress,
-    Alert, Chip, IconButton
+    Alert, Chip
 } from '@mui/material';
 import { CloudUpload, ArrowBack, Delete } from '@mui/icons-material';
 import { createProduction, getProductionById } from '../../services/productionService';
@@ -103,7 +103,9 @@ const AddProduction = () => {
         try {
             // Valider les données avant envoi
             if (!formData.title.trim() || !formData.artist.trim()) {
-                throw new Error("admin.addProduction.requiredFields");
+                setError('addProduction.requiredFields');
+                setLoading(false);
+                return;
             }
 
             // Préparer les données pour l'envoi
@@ -133,10 +135,7 @@ const AddProduction = () => {
             // Envoi des données à l'API
             await createProduction(productionData, isEditMode ? 'put' : 'post');
 
-            setSuccess(isEditMode ?
-                'admin.addProduction.updated' :
-                'admin.addProduction.added'
-            );
+            setSuccess(isEditMode ? 'addProduction.updated' : 'addProduction.added');
 
             // Redirection après un court délai
             setTimeout(() => {
@@ -145,7 +144,7 @@ const AddProduction = () => {
 
         } catch (error) {
             console.error("Erreur lors de l'enregistrement:", error);
-            setError(error.message || "admin.addProduction.error");
+            setError(error.message || 'addProduction.error');
         } finally {
             setLoading(false);
         }
@@ -166,7 +165,7 @@ const AddProduction = () => {
                 onClick={() => navigate(-1)}
                 sx={{ mb: 3 }}
             >
-                {t('common.back')}
+                {t('common:back')}
             </Button>
 
             <Paper sx={{ p: 3 }}>
@@ -207,15 +206,16 @@ const AddProduction = () => {
                                     value={formData.genre}
                                     label="Genre"
                                     onChange={handleChange}
+                                    variant="outlined"
                                 >
-                                    <MenuItem value="Rock">{t('genres.rock')}</MenuItem>
-                                    <MenuItem value="Hip-Hop">{t('genres.hiphop')}</MenuItem>
-                                    <MenuItem value="Jazz">{t('genres.jazz')}</MenuItem>
-                                    <MenuItem value="Classique">{t('genres.classical')}</MenuItem>
-                                    <MenuItem value="Electronic">{t('genres.electronic')}</MenuItem>
-                                    <MenuItem value="Pop">{t('genres.pop')}</MenuItem>
-                                    <MenuItem value="R&B">{t('genres.rnb')}</MenuItem>
-                                    <MenuItem value="Autre">{t('genres.other')}</MenuItem>
+                                    <MenuItem value="Rock">{t('common:genres.rock')}</MenuItem>
+                                    <MenuItem value="Hip-Hop">{t('common:genres.hiphop')}</MenuItem>
+                                    <MenuItem value="Jazz">{t('common:genres.jazz')}</MenuItem>
+                                    <MenuItem value="Classique">{t('common:genres.classical')}</MenuItem>
+                                    <MenuItem value="Electronic">{t('common:genres.electronic')}</MenuItem>
+                                    <MenuItem value="Pop">{t('common:genres.pop')}</MenuItem>
+                                    <MenuItem value="R&B">{t('common:genres.rnb')}</MenuItem>
+                                    <MenuItem value="Autre">{t('common:genres.other')}</MenuItem>
                                 </Select>
                             </FormControl>
                         </Grid>
@@ -227,7 +227,7 @@ const AddProduction = () => {
                                 value={formData.release_date}
                                 onChange={handleChange}
                                 fullWidth
-                                InputLabelProps={{ shrink: true }}
+                                slotProps={{ inputLabel: { shrink: true } }}
                             />
                         </Grid>
                         <Grid item xs={12}>
@@ -323,4 +323,3 @@ const AddProduction = () => {
 };
 
 export default AddProduction;
-

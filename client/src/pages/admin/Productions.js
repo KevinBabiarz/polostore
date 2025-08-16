@@ -203,7 +203,7 @@ const AdminProductions = () => {
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleCloseDialog}>{t('common.cancel')}</Button>
+                    <Button onClick={handleCloseDialog}>{t('common:cancel')}</Button>
                     <Button onClick={handleConfirmDelete} color="error" autoFocus>
                         {t('productionManagement.delete')}
                     </Button>
@@ -214,4 +214,3 @@ const AdminProductions = () => {
 };
 
 export default AdminProductions;
-

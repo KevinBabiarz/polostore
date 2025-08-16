@@ -23,11 +23,11 @@ const ProductionForm = () => {
     const [audioPreview, setAudioPreview] = useState('');
     const [currentData, setCurrentData] = useState(null); // Stocker les données actuelles
     const isEditing = Boolean(id);
-    const { t } = useTranslation();
+    const { t } = useTranslation('admin');
 
     const validationSchema = Yup.object({
-        title: Yup.string().required(t('admin.productionForm.validation.titleRequired')),
-        artist: Yup.string().required(t('admin.productionForm.validation.artistRequired')),
+        title: Yup.string().required(t('productionForm.validation.titleRequired')),
+        artist: Yup.string().required(t('productionForm.validation.artistRequired')),
         genre: Yup.string(),
         release_date: Yup.date().nullable(),
         description: Yup.string()
@@ -166,12 +166,12 @@ const ProductionForm = () => {
                     startIcon={<ArrowBack />}
                     onClick={() => navigate('/admin/productions')}
                 >
-                    {t('common.backToList')}
+                    {t('common:backToList')}
                 </Button>
             </Box>
 
             <Typography variant="h4" component="h1" gutterBottom>
-                {isEditing ? t('admin.productionForm.editTitle') : t('admin.productionForm.newTitle')}
+                {isEditing ? t('productionForm.editTitle') : t('productionForm.newTitle')}
             </Typography>
 
             {error && <Alert severity="error" sx={{ mb: 3 }}>{t(error)}</Alert>}
@@ -184,7 +184,7 @@ const ProductionForm = () => {
                                 fullWidth
                                 id="title"
                                 name="title"
-                                label={t('admin.productionForm.title')}
+                                label={t('productionForm.title')}
                                 value={formik.values.title}
                                 onChange={formik.handleChange}
                                 onBlur={formik.handleBlur}
@@ -197,7 +197,7 @@ const ProductionForm = () => {
                                 fullWidth
                                 id="artist"
                                 name="artist"
-                                label={t('admin.productionForm.artist')}
+                                label={t('productionForm.artist')}
                                 value={formik.values.artist}
                                 onChange={formik.handleChange}
                                 onBlur={formik.handleBlur}
@@ -207,7 +207,7 @@ const ProductionForm = () => {
                         </Grid>
                         <Grid item xs={12} md={6}>
                             <FormControl fullWidth>
-                                <InputLabel id="genre-label">{t('admin.productionForm.genre')}</InputLabel>
+                                <InputLabel id="genre-label">{t('productionForm.genre')}</InputLabel>
                                 <Select
                                     labelId="genre-label"
                                     id="genre"
@@ -216,16 +216,16 @@ const ProductionForm = () => {
                                     onChange={formik.handleChange}
                                     label="Genre"
                                 >
-                                    <MenuItem value="">{t('admin.productionForm.genreNotSpecified')}</MenuItem>
-                                    <MenuItem value="Rock">{t('genres.rock')}</MenuItem>
-                                    <MenuItem value="Pop">{t('genres.pop')}</MenuItem>
-                                    <MenuItem value="Jazz">{t('genres.jazz')}</MenuItem>
-                                    <MenuItem value="Hip-Hop">{t('genres.hiphop')}</MenuItem>
-                                    <MenuItem value="Électronique">{t('genres.electronic')}</MenuItem>
-                                    <MenuItem value="Classique">{t('genres.classical')}</MenuItem>
-                                    <MenuItem value="R&B">{t('genres.rnb')}</MenuItem>
-                                    <MenuItem value="Reggae">{t('genres.reggae')}</MenuItem>
-                                    <MenuItem value="Autre">{t('genres.other')}</MenuItem>
+                                    <MenuItem value="">{t('productionForm.genreNotSpecified')}</MenuItem>
+                                    <MenuItem value="Rock">{t('common:genres.rock')}</MenuItem>
+                                    <MenuItem value="Pop">{t('common:genres.pop')}</MenuItem>
+                                    <MenuItem value="Jazz">{t('common:genres.jazz')}</MenuItem>
+                                    <MenuItem value="Hip-Hop">{t('common:genres.hiphop')}</MenuItem>
+                                    <MenuItem value="Électronique">{t('common:genres.electronic')}</MenuItem>
+                                    <MenuItem value="Classique">{t('common:genres.classical')}</MenuItem>
+                                    <MenuItem value="R&B">{t('common:genres.rnb')}</MenuItem>
+                                    <MenuItem value="Reggae">{t('common:genres.reggae')}</MenuItem>
+                                    <MenuItem value="Autre">{t('common:genres.other')}</MenuItem>
                                 </Select>
                             </FormControl>
                         </Grid>
@@ -234,7 +234,7 @@ const ProductionForm = () => {
                                 fullWidth
                                 id="release_date"
                                 name="release_date"
-                                label={t('admin.productionForm.releaseDate')}
+                                label={t('productionForm.releaseDate')}
                                 type="date"
                                 value={formik.values.release_date}
                                 onChange={formik.handleChange}
@@ -246,7 +246,7 @@ const ProductionForm = () => {
                                 fullWidth
                                 id="description"
                                 name="description"
-                                label={t('admin.productionForm.description')}
+                                label={t('productionForm.description')}
                                 multiline
                                 rows={4}
                                 value={formik.values.description}
@@ -258,7 +258,7 @@ const ProductionForm = () => {
                         <Grid item xs={12}>
                             <Box sx={{ mb: 2 }}>
                                 <Typography variant="subtitle1" gutterBottom>
-                                    {t('admin.productionForm.coverImage')}
+                                    {t('productionForm.coverImage')}
                                 </Typography>
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                                     <Button
@@ -266,7 +266,7 @@ const ProductionForm = () => {
                                         component="label"
                                         startIcon={<PhotoCamera />}
                                     >
-                                        {t('admin.productionForm.chooseImage')}
+                                        {t('productionForm.chooseImage')}
                                         <input
                                             type="file"
                                             accept="image/*"
@@ -278,8 +278,8 @@ const ProductionForm = () => {
                                         {formik.values.cover_image
                                             ? formik.values.cover_image.name
                                             : (isEditing && currentData?.image_url
-                                                ? t('admin.productionForm.currentFile')
-                                                : t('admin.productionForm.noFileSelected'))}
+                                                ? t('productionForm.currentFile')
+                                                : t('productionForm.noFileSelected'))}
                                     </Typography>
                                 </Box>
                             </Box>
@@ -304,7 +304,7 @@ const ProductionForm = () => {
                         <Grid item xs={12}>
                             <Box sx={{ mb: 2 }}>
                                 <Typography variant="subtitle1" gutterBottom>
-                                    {t('admin.productionForm.audioFile')}
+                                    {t('productionForm.audioFile')}
                                 </Typography>
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                                     <Button
@@ -312,7 +312,7 @@ const ProductionForm = () => {
                                         component="label"
                                         startIcon={<AudioFile />}
                                     >
-                                        {t('admin.productionForm.chooseAudio')}
+                                        {t('productionForm.chooseAudio')}
                                         <input
                                             type="file"
                                             accept="audio/*"
@@ -324,8 +324,8 @@ const ProductionForm = () => {
                                         {formik.values.audio_file
                                             ? formik.values.audio_file.name
                                             : (isEditing && currentData?.audio_url
-                                                ? t('admin.productionForm.currentFile')
-                                                : t('admin.productionForm.noFileSelected'))}
+                                                ? t('productionForm.currentFile')
+                                                : t('productionForm.noFileSelected'))}
                                     </Typography>
                                 </Box>
                             </Box>
@@ -346,7 +346,7 @@ const ProductionForm = () => {
                                     onClick={() => navigate('/admin/productions')}
                                     sx={{ mr: 1 }}
                                 >
-                                    {t('common.cancel')}
+                                    {t('common:cancel')}
                                 </Button>
                                 <Button
                                     type="submit"
@@ -354,7 +354,7 @@ const ProductionForm = () => {
                                     startIcon={<Save />}
                                     disabled={formik.isSubmitting}
                                 >
-                                    {formik.isSubmitting ? t('admin.productionForm.saving') : isEditing ? t('admin.productionForm.update') : t('admin.productionForm.create')}
+                                    {formik.isSubmitting ? t('productionForm.saving') : isEditing ? t('productionForm.update') : t('productionForm.create')}
                                 </Button>
                             </Box>
                         </Grid>
@@ -366,3 +366,4 @@ const ProductionForm = () => {
 };
 
 export default ProductionForm;
+

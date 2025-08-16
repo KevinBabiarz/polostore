@@ -5,12 +5,12 @@ import { getProductions } from '../../services/productionService';
 import { getContactMessages } from '../../services/contactService';
 import {
     Container, Grid, Paper, Typography, Box, Button,
-    Card, CardContent, CircularProgress, Divider, List,
+    Card, CardContent, CircularProgress, List,
     ListItem, ListItemIcon, ListItemText
 } from '@mui/material';
 import {
     Album, Message, Dashboard as DashboardIcon,
-    Add, MusicNote, Email, Settings, People
+    Add, Email, People
 } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
@@ -60,7 +60,7 @@ const AdminDashboard = () => {
         return (
             <Container sx={{ py: 4, display: 'flex', justifyContent: 'center' }}>
                 <CircularProgress />
-                <Typography sx={{ ml: 2 }}>{t('admin:common.loading')}</Typography>
+                <Typography sx={{ ml: 2 }}>{t('common:loading')}</Typography>
             </Container>
         );
     }

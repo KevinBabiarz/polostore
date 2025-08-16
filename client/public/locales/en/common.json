@@ -29,5 +29,17 @@
   "description": "Description",
   "date": "Date",
   "actions": "Actions",
-  "back": "Back"
+  "back": "Back",
+  "backToList": "Back to list",
+  "genres": {
+    "rock": "Rock",
+    "pop": "Pop",
+    "jazz": "Jazz",
+    "hiphop": "Hip-Hop",
+    "electronic": "Electronic",
+    "classical": "Classical",
+    "rnb": "R&B",
+    "reggae": "Reggae",
+    "other": "Other"
+  }
 }

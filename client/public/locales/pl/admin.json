@@ -13,21 +13,170 @@
     "attempting": "Próba ustawienia użytkownika {{email}} jako administratora...",
     "success": "Użytkownik {{email}} został pomyślnie ustawiony jako administrator.",
     "updateSuccess": "Użytkownik zaktualizowany pomyślnie:",
-    "userNotFound": "Nie znaleziono użytkownika z tym emailem",
+    "userNotFound": "Nie znaleziono użytkownika z tym adresem email",
     "error": "Błąd podczas aktualizacji statusu administratora",
-    "checkingRoleColumn": "Sprawdzanie kolumny role...",
-    "roleColumnExists": "Kolumna role istnieje, modyfikacja struktury..."
+    "checkingRoleColumn": "Sprawdzanie kolumny roli...",
+    "roleColumnExists": "Kolumna roli istnieje, modyfikacja struktury..."
   },
   "userService": {
-    "usersRetrieved": "{{count}} użytkowników pobranych pomyślnie",
+    "usersRetrieved": "Pobrano pomyślnie {{count}} użytkowników",
     "setAdminStatus": "Ustawia status administratora użytkownika",
     "adminStatusUpdated": "Status administratora zaktualizowany pomyślnie"
   },
   "errors": {
     "serverError": "Błąd serwera",
-    "userNotFound": "Użytkownik nie znaleziony",
+    "userNotFound": "Nie znaleziono użytkownika",
     "accessDenied": "Dostęp zabroniony",
     "invalidData": "Nieprawidłowe dane"
+  },
+
+  "dashboard": {
+    "title": "Panel administracyjny",
+    "welcome": "Witaj, {{username}}!",
+    "statistics": "Statystyki",
+    "totalProductions": "Łączna liczba produkcji",
+    "manageProductions": "Zarządzaj produkcjami",
+    "totalMessages": "Łączna liczba wiadomości",
+    "unreadMessages": "{{count}} nieprzeczytana(-e) wiadomość(i)",
+    "viewMessages": "Zobacz wiadomości",
+    "totalUsers": "Łączna liczba użytkowników",
+    "manageUsers": "Zarządzaj użytkownikami",
+    "quickActions": "Szybkie akcje",
+    "addProduction": "Dodaj produkcję",
+    "recentActivity": "Ostatnia aktywność",
+    "noRecentActivity": "Brak ostatniej aktywności",
+    "errors": {
+      "loadData": "Błąd podczas ładowania danych panelu"
+    }
+  },
+
+  "userManagement": {
+    "title": "Zarządzanie użytkownikami",
+    "search": "Szukaj użytkownika",
+    "sortBy": "Sortuj według",
+    "order": "Kolejność",
+    "asc": "Rosnąco",
+    "desc": "Malejąco",
+    "refresh": "Odśwież",
+    "user": "Użytkownik",
+    "username": "Nazwa użytkownika",
+    "email": "Email",
+    "role": "Rola",
+    "status": "Status",
+    "createdAt": "Utworzono",
+    "actions": "Akcje",
+    "admin": "Admin",
+    "active": "Aktywny",
+    "inactive": "Nieaktywny",
+    "edit": "Edytuj",
+    "delete": "Usuń",
+    "promote": "Nadaj uprawnienia admina",
+    "demote": "Odbierz uprawnienia admina",
+    "activate": "Aktywuj",
+    "deactivate": "Dezaktywuj",
+    "noUsers": "Nie znaleziono użytkowników",
+    "currentAccount": "Twoje konto",
+    "tableAriaLabel": "Tabela użytkowników",
+    "rowsPerPage": "Wierszy na stronę",
+    "displayedRows": "{{from}}-{{to}} z {{count}}",
+    "editDialogTitle": "Edytuj użytkownika",
+    "confirmDeleteTitle": "Potwierdź usunięcie",
+    "confirmDeleteText": "Czy na pewno chcesz usunąć użytkownika {{username}}? Tej operacji nie można cofnąć.",
+    "errors": {
+      "loadUsers": "Nie można załadować użytkowników. Spróbuj ponownie później.",
+      "loadUser": "Nie można pobrać szczegółów użytkownika",
+      "updateUser": "Nie można zaktualizować użytkownika",
+      "deleteUser": "Nie można usunąć użytkownika",
+      "changeStatus": "Nie można zmienić statusu użytkownika",
+      "changeRole": "Nie można zmienić roli użytkownika"
+    }
+  },
+
+  "productionManagement": {
+    "title": "Zarządzanie produkcjami",
+    "newProduction": "Nowa produkcja",
+    "image": "Obraz",
+    "titleCol": "Tytuł",
+    "artist": "Artysta",
+    "genre": "Gatunek",
+    "releaseDate": "Data wydania",
+    "actions": "Akcje",
+    "edit": "Edytuj",
+    "delete": "Usuń",
+    "view": "Podgląd",
+    "genreNotSpecified": "Nie określono",
+    "releaseDateNotSpecified": "Nie określono",
+    "noProductions": "Nie znaleziono produkcji",
+    "rowsPerPage": "Wierszy na stronę",
+    "confirmDeleteTitle": "Potwierdź usunięcie",
+    "confirmDeleteText": "Czy na pewno chcesz usunąć tę produkcję? Tej operacji nie można cofnąć.",
+    "errors": {
+      "loadProductions": "Nie można załadować produkcji",
+      "deleteProduction": "Nie można usunąć produkcji"
+    }
+  },
+
+  "addProduction": {
+    "added": "Produkcja dodana pomyślnie!",
+    "updated": "Produkcja zaktualizowana pomyślnie!",
+    "requiredFields": "Wymagane są tytuł i artysta.",
+    "error": "Wystąpił błąd podczas zapisywania.",
+    "addTitle": "Dodaj produkcję",
+    "editTitle": "Edytuj produkcję",
+    "title": "Tytuł",
+    "artist": "Artysta",
+    "genre": "Gatunek",
+    "releaseDate": "Data wydania",
+    "description": "Opis",
+    "addCoverImage": "Dodaj okładkę",
+    "changeImage": "Zmień okładkę",
+    "previewAlt": "Podgląd okładki",
+    "addAudioFiles": "Dodaj pliki audio",
+    "add": "Dodaj",
+    "update": "Zaktualizuj"
+  },
+
+  "messages": {
+    "title": "Wiadomości kontaktowe",
+    "state": "Status",
+    "date": "Data",
+    "from": "Od",
+    "subject": "Temat",
+    "message": "Wiadomość",
+    "actions": "Akcje",
+    "read": "Przeczytane",
+    "unread": "Nieprzeczytane",
+    "markAsRead": "Oznacz jako przeczytane",
+    "noMessages": "Nie znaleziono wiadomości",
+    "rowsPerPage": "Wierszy na stronę",
+    "loadError": "Nie można załadować wiadomości"
+  },
+
+  "productionForm": {
+    "newTitle": "Dodaj produkcję",
+    "editTitle": "Edytuj produkcję",
+    "title": "Tytuł",
+    "artist": "Artysta",
+    "genre": "Gatunek",
+    "genreNotSpecified": "Nie określono",
+    "releaseDate": "Data wydania",
+    "description": "Opis",
+    "coverImage": "Obraz okładki",
+    "chooseImage": "Wybierz obraz",
+    "noFileSelected": "Nie wybrano pliku",
+    "audioFile": "Plik audio",
+    "chooseAudio": "Wybierz audio",
+    "currentFile": "Aktualny plik",
+    "saving": "Zapisywanie...",
+    "update": "Zaktualizuj",
+    "create": "Utwórz",
+    "validation": {
+      "titleRequired": "Tytuł jest wymagany",
+      "artistRequired": "Artysta jest wymagany"
+    },
+    "errors": {
+      "loadFailed": "Nie można załadować danych produkcji",
+      "saveFailed": "Nie udało się zapisać"
+    }
   }
 }
-

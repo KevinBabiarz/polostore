@@ -264,20 +264,23 @@ const Layout = ({ themeToggle }) => {
     const renderAdminMenu = (
         <Menu
             anchorEl={adminMenuAnchorEl}
-            anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-            transformOrigin={{ vertical: 'top', horizontal: 'center' }}
+            anchorOrigin={{ vertical: 'bottom', horizontal: isMobile ? 'right' : 'center' }}
+            transformOrigin={{ vertical: 'top', horizontal: isMobile ? 'right' : 'center' }}
             open={isAdminMenuOpen}
             onClose={handleAdminMenuClose}
+            keepMounted
             slotProps={{
                 paper: {
                     elevation: 3,
                     sx: {
                         borderRadius: 2,
                         width: { xs: '90vw', sm: 'auto' },
-                        maxWidth: { xs: '95vw', sm: '400px' }
+                        maxWidth: { xs: '95vw', sm: '400px' },
+                        overflowX: 'hidden'
                     }
                 }
             }}
+            MenuListProps={{ dense: isMobile }}
         >
             <MenuItem component={RouterLink} to="/admin/dashboard" onClick={handleAdminMenuClose}>
                 <DashboardIcon fontSize="small" sx={{ mr: 1 }} />

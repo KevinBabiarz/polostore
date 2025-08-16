@@ -153,7 +153,7 @@ const UserManagement = () => {
       setEditDialogOpen(true);
     } catch (err) {
       console.error("Erreur lors de la récupération des détails de l'utilisateur:", err);
-      setError("Impossible de récupérer les détails de l'utilisateur");
+      setError('userManagement.errors.loadUser');
     } finally {
       setLoading(false);
     }
@@ -196,7 +196,7 @@ const UserManagement = () => {
       loadUsers(); // Recharger la liste des utilisateurs
     } catch (err) {
       console.error("Erreur lors de la mise à jour de l'utilisateur:", err);
-      setError("Impossible de mettre à jour l'utilisateur");
+      setError('userManagement.errors.updateUser');
     } finally {
       setLoading(false);
     }
@@ -220,7 +220,7 @@ const UserManagement = () => {
       loadUsers(); // Recharger la liste des utilisateurs
     } catch (err) {
       console.error("Erreur lors de la suppression de l'utilisateur:", err);
-      setError("Impossible de supprimer l'utilisateur");
+      setError('userManagement.errors.deleteUser');
     } finally {
       setLoading(false);
     }
@@ -238,7 +238,7 @@ const UserManagement = () => {
       loadUsers(); // Recharger la liste des utilisateurs
     } catch (err) {
       console.error("Erreur lors du changement de statut:", err);
-      setError("Impossible de changer le statut de l'utilisateur");
+      setError('userManagement.errors.changeStatus');
     } finally {
       setLoading(false);
     }
@@ -253,7 +253,7 @@ const UserManagement = () => {
       loadUsers(); // Recharger la liste des utilisateurs
     } catch (err) {
       console.error("Erreur lors du changement de rôle:", err);
-      setError("Impossible de changer le rôle de l'utilisateur");
+      setError('userManagement.errors.changeRole');
     } finally {
       setLoading(false);
     }
@@ -504,9 +504,9 @@ const UserManagement = () => {
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setEditDialogOpen(false)}>{t('common.cancel')}</Button>
+          <Button onClick={() => setEditDialogOpen(false)}>{t('common:cancel')}</Button>
           <Button onClick={handleSaveUser} color="primary" variant="contained">
-            {t('common.save')}
+            {t('common:save')}
           </Button>
         </DialogActions>
       </Dialog>
@@ -520,7 +520,7 @@ const UserManagement = () => {
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeleteDialogOpen(false)}>{t('common.cancel')}</Button>
+          <Button onClick={() => setDeleteDialogOpen(false)}>{t('common:cancel')}</Button>
           <Button onClick={handleConfirmDelete} color="error" variant="contained">
             {t('userManagement.delete')}
           </Button>

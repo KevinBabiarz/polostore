@@ -12,6 +12,8 @@
     "manageUsers": "Gérer les utilisateurs",
     "quickActions": "Actions rapides",
     "addProduction": "Ajouter une production",
+    "recentActivity": "Activité récente",
+    "noRecentActivity": "Aucune activité récente",
     "errors": {
       "loadData": "Erreur lors du chargement des données du tableau de bord"
     }
@@ -150,7 +152,8 @@
     "unread": "Non lu",
     "markAsRead": "Marquer comme lu",
     "noMessages": "Aucun message trouvé",
-    "rowsPerPage": "Lignes par page"
+    "rowsPerPage": "Lignes par page",
+    "loadError": "Impossible de charger les messages"
   },
   "common": {
     "loading": "Chargement...",
@@ -193,12 +196,19 @@
     "coverImage": "Image de couverture",
     "chooseImage": "Choisir une image",
     "noFileSelected": "Aucun fichier sélectionné",
+    "audioFile": "Fichier audio",
+    "chooseAudio": "Choisir un audio",
+    "currentFile": "Fichier actuel",
     "saving": "Enregistrement...",
     "update": "Mettre à jour",
     "create": "Créer",
     "validation": {
       "titleRequired": "Le titre est requis",
       "artistRequired": "L'artiste est requis"
+    },
+    "errors": {
+      "loadFailed": "Impossible de charger les données de la production",
+      "saveFailed": "Échec de l'enregistrement"
     }
   }
 }
