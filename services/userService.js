@@ -1,7 +1,6 @@
 // services/userService.js
--import bcrypt from 'bcrypt';  // Ajout de l'import pour Op
-+// (bcrypt supprimé – non utilisé ici)
-import { Op } from 'sequelize';  // Ajout de l'import pour Op
+import User from '../models/User.js';
+import { Op } from 'sequelize';
 import { i18n } from '../utils/i18n.js';
 
 /**
