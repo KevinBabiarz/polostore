@@ -99,7 +99,7 @@ export const protect = async (req, res, next) => {
 
                 // Vérifier si l'utilisateur existe toujours
                 const user = await User.findByPk(decoded.id, {
-                    attributes: ['id', 'email', 'is_admin', 'created_at', 'role']
+                    attributes: ['id', 'email', 'is_admin', 'created_at']
                 });
 
                 if (!user) {

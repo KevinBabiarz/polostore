@@ -241,7 +241,7 @@ export const AuthService = {
     getUserById: async (userId) => {
         try {
             const user = await User.findByPk(userId, {
-                attributes: ['id', 'username', 'email', 'role', 'is_admin', 'is_active']
+                attributes: ['id', 'username', 'email', 'is_admin', 'is_active']
             });
 
             if (!user) return null;
@@ -251,7 +251,7 @@ export const AuthService = {
                 id: user.id,
                 username: user.username,
                 email: user.email,
-                role: user.role || (user.is_admin ? 'admin' : 'user'),
+                role: user.is_admin ? 'admin' : 'user',
                 isActive: Boolean(user.is_active),
                 isAdmin: Boolean(user.is_admin)
             };
