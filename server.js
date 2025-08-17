@@ -68,8 +68,14 @@ if (!process.env.JWT_SECRET) {
     process.exit(1);
 }
 
-if (process.env.JWT_SECRET.length < 32) {
-    logger.warn('JWT_SECRET trop courte, recommandation: minimum 32 caractères');
+// Diagnostic: log de la longueur (pas la valeur) du secret
+const JWT_SECRET_LENGTH = process.env.JWT_SECRET?.length || 0;
+logger.info(`JWT_SECRET longueur: ${JWT_SECRET_LENGTH}`);
+
+// Enforcer une longueur minimale stricte pour éviter des erreurs 500 plus tard
+if (JWT_SECRET_LENGTH < 32) {
+    logger.error('JWT_SECRET trop courte (minimum 32 caractères requis). Arrêt du serveur.');
+    process.exit(1);
 }
 
 // Afficher les variables d'environnement de base de données pour débogage (sans données sensibles)

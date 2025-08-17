@@ -60,18 +60,21 @@ export const login = async (req, res) => {
     const body = req.body || {};
     const { email, password } = body;
 
+    console.log('[AUTH CONTROLLER] Tentative de connexion pour:', email);
+
     // Validation des champs
     if (!email?.trim() || !password) {
+        console.log('[AUTH CONTROLLER] Données manquantes:', { email: !!email, password: !!password });
         return res.status(400).json({ message: "Email et mot de passe requis" });
     }
 
     try {
-        logger.info('Tentative de connexion', { email: email.toLowerCase() });
+        console.log('[AUTH CONTROLLER] Appel du service de login...');
 
         // Utiliser le service d'authentification sécurisé pour la connexion
         const result = await AuthService.login(email.toLowerCase().trim(), password);
 
-        logger.info('Connexion réussie', { userId: result.user.id });
+        console.log('[AUTH CONTROLLER] Login réussi pour utilisateur ID:', result.user.id);
 
         // Renvoyer les informations utilisateur et le token
         res.json({
@@ -80,9 +83,10 @@ export const login = async (req, res) => {
             token: result.token
         });
     } catch (error) {
-        logger.warn('Échec de connexion', {
+        console.error('[AUTH CONTROLLER] Erreur de connexion:', {
             email: email?.toLowerCase(),
-            error: error.message
+            error: error.message,
+            stack: error.stack
         });
 
         // Gestion des erreurs spécifiques
@@ -92,6 +96,10 @@ export const login = async (req, res) => {
 
         if (error.message === "Compte désactivé" || error.message === "Compte suspendu") {
             return res.status(403).json({ message: error.message });
+        }
+
+        if (error.message === "Configuration serveur incomplète") {
+            return res.status(500).json({ message: "Erreur de configuration serveur" });
         }
 
         res.status(500).json({ message: "Erreur serveur lors de la connexion" });
