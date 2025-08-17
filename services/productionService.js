@@ -9,6 +9,11 @@ import { i18n } from '../utils/i18n.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Base des uploads (Railway volume si défini, sinon public/uploads local)
+const UPLOADS_BASE = process.env.RAILWAY_VOLUME_MOUNT_PATH
+    ? process.env.RAILWAY_VOLUME_MOUNT_PATH
+    : path.join(__dirname, '..', 'public', 'uploads');
+
 /**
  * Service de gestion des productions musicales
  */
@@ -35,6 +40,8 @@ export const ProductionService = {
                 releaseDateRange = 'all'
             } = options;
 
+            const hasPrice = Boolean(Production.rawAttributes?.price);
+
             // Calculer l'offset à partir de la page si fournie
             if (page && page > 1) {
                 offset = (page - 1) * limit;
@@ -51,21 +58,33 @@ export const ProductionService = {
                     orderDirection = 'DESC';
                     break;
                 case 'popular':
-                    // Comme "views" n'existe pas dans le modèle, on utilise created_at comme fallback
                     orderField = 'created_at';
                     orderDirection = 'DESC';
                     break;
                 case 'price_asc':
-                    orderField = 'price';
-                    orderDirection = 'ASC';
+                    if (hasPrice) {
+                        orderField = 'price';
+                        orderDirection = 'ASC';
+                    } else {
+                        console.log('[PROD SERVICE] Tri par prix ignoré (colonne price absente). Fallback created_at DESC');
+                        orderField = 'created_at';
+                        orderDirection = 'DESC';
+                    }
                     break;
                 case 'price_desc':
-                    orderField = 'price';
-                    orderDirection = 'DESC';
+                    if (hasPrice) {
+                        orderField = 'price';
+                        orderDirection = 'DESC';
+                    } else {
+                        console.log('[PROD SERVICE] Tri par prix ignoré (colonne price absente). Fallback created_at DESC');
+                        orderField = 'created_at';
+                        orderDirection = 'DESC';
+                    }
                     break;
                 default:
-                    // Si sortBy est un nom de champ valide, l'utiliser directement
-                    const validFields = ['id', 'title', 'artist', 'genre', 'created_at', 'price'];
+                    const validFields = hasPrice
+                        ? ['id', 'title', 'artist', 'genre', 'created_at', 'price']
+                        : ['id', 'title', 'artist', 'genre', 'created_at'];
                     if (validFields.includes(sortBy)) {
                         orderField = sortBy;
                         orderDirection = sortOrder || 'DESC';
@@ -99,7 +118,7 @@ export const ProductionService = {
             }
 
             // Filtre par fourchette de prix
-            if (priceRange !== 'all') {
+            if (priceRange !== 'all' && hasPrice) {
                 switch(priceRange) {
                     case 'free':
                         whereClause.price = 0;
@@ -114,6 +133,8 @@ export const ProductionService = {
                         whereClause.price = { [Op.gt]: 50 };
                         break;
                 }
+            } else if (priceRange !== 'all' && !hasPrice) {
+                console.log('[PROD SERVICE] Filtre prix ignoré (colonne price absente)');
             }
 
             // Filtre par date de sortie
@@ -242,13 +263,59 @@ export const ProductionService = {
                 throw new Error(i18n.t('productionService.productionNotFound'));
             }
 
-            // Mise à jour directe sans suppression de fichiers complexe
-            // (la suppression des anciens fichiers sera gérée par le contrôleur si nécessaire)
-            console.log(`[PROD SERVICE] Données pour mise à jour:`, updateData);
+            // Gestion de la suppression/remplacement des fichiers
+            const normalizeUploadPath = (p) => {
+                if (!p) return null;
+                if (p.startsWith('/uploads/')) return p.replace('/uploads/', '');
+                if (p.startsWith('/api/uploads/')) return p.replace('/api/uploads/', '');
+                return p; // déjà relatif
+            };
 
-            // Mettre à jour la production
-            const [updatedCount] = await Production.update(updateData, {
-                where: { id: id },
+            // Supprimer l'ancien audio uniquement si un nouveau est fourni et différent
+            if (updateData.audio_url && production.audio_url && updateData.audio_url !== production.audio_url) {
+                try {
+                    const oldAudioRel = normalizeUploadPath(production.audio_url);
+                    const oldAudioAbs = oldAudioRel ? path.join(UPLOADS_BASE, oldAudioRel) : null;
+                    if (oldAudioAbs && fs.existsSync(oldAudioAbs)) {
+                        fs.unlinkSync(oldAudioAbs);
+                        console.log(`[PROD SERVICE] Ancien fichier audio supprimé: ${oldAudioAbs}`);
+                    }
+                } catch (fileError) {
+                    console.error(`[PROD SERVICE] Erreur lors de la suppression du fichier audio:`, fileError);
+                }
+            }
+
+            // Supprimer l'ancienne image uniquement si une nouvelle est fournie et différente
+            if (updateData.image_url && production.image_url && updateData.image_url !== production.image_url) {
+                try {
+                    const oldImageRel = normalizeUploadPath(production.image_url);
+                    const oldImageAbs = oldImageRel ? path.join(UPLOADS_BASE, oldImageRel) : null;
+                    if (oldImageAbs && fs.existsSync(oldImageAbs)) {
+                        fs.unlinkSync(oldImageAbs);
+                        console.log(`[PROD SERVICE] Ancien fichier image supprimé: ${oldImageAbs}`);
+                    }
+                } catch (fileError) {
+                    console.error(`[PROD SERVICE] Erreur lors de la suppression de l'image:`, fileError);
+                }
+            }
+
+            // Nettoyer les données avant la mise à jour
+            const cleanUpdateData = { ...updateData };
+            Object.keys(cleanUpdateData).forEach(key => {
+                if (cleanUpdateData[key] === undefined || cleanUpdateData[key] === null) {
+                    delete cleanUpdateData[key];
+                    return;
+                }
+                if (typeof cleanUpdateData[key] === 'string' && cleanUpdateData[key].trim() === '' && ['description', 'genre'].includes(key)) {
+                    delete cleanUpdateData[key];
+                }
+            });
+
+            console.log(`[PROD SERVICE] Données nettoyées pour mise à jour:`, cleanUpdateData);
+
+            // Mettre à jour
+            const [updatedCount] = await Production.update(cleanUpdateData, {
+                where: { id },
                 returning: true
             });
 
@@ -257,10 +324,8 @@ export const ProductionService = {
                 return production;
             }
 
-            // Récupérer la production mise à jour
             const updatedProduction = await Production.findByPk(id);
             console.log(`[PROD SERVICE] Production mise à jour avec succès, ID: ${id}`);
-
             return updatedProduction;
         } catch (error) {
             console.error(`[PROD SERVICE] Erreur lors de la mise à jour de la production ${id}:`, error.message);
@@ -284,30 +349,37 @@ export const ProductionService = {
                 throw new Error(i18n.t('productionService.productionNotFound'));
             }
 
+            const normalizeUploadPath = (p) => {
+                if (!p) return null;
+                if (p.startsWith('/uploads/')) return p.replace('/uploads/', '');
+                if (p.startsWith('/api/uploads/')) return p.replace('/api/uploads/', '');
+                return p; // déjà relatif
+            };
+
             // Suppression des fichiers associés
             if (production.audio_url) {
                 try {
-                    const audioPath = path.join(__dirname, '..', 'public', production.audio_url);
-                    if (fs.existsSync(audioPath)) {
+                    const rel = normalizeUploadPath(production.audio_url);
+                    const audioPath = rel ? path.join(UPLOADS_BASE, rel) : null;
+                    if (audioPath && fs.existsSync(audioPath)) {
                         fs.unlinkSync(audioPath);
                         console.log(`[PROD SERVICE] Fichier audio supprimé: ${audioPath}`);
                     }
                 } catch (fileError) {
                     console.error(`[PROD SERVICE] Erreur lors de la suppression du fichier audio:`, fileError);
-                    // On continue malgré l'erreur de suppression du fichier
                 }
             }
 
             if (production.image_url) {
                 try {
-                    const imagePath = path.join(__dirname, '..', 'public', production.image_url);
-                    if (fs.existsSync(imagePath)) {
+                    const rel = normalizeUploadPath(production.image_url);
+                    const imagePath = rel ? path.join(UPLOADS_BASE, rel) : null;
+                    if (imagePath && fs.existsSync(imagePath)) {
                         fs.unlinkSync(imagePath);
                         console.log(`[PROD SERVICE] Fichier image supprimé: ${imagePath}`);
                     }
                 } catch (fileError) {
                     console.error(`[PROD SERVICE] Erreur lors de la suppression de l'image:`, fileError);
-                    // On continue malgré l'erreur de suppression du fichier
                 }
             }
 
