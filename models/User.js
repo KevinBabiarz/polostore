@@ -1,6 +1,6 @@
 // models/User.js
 import { DataTypes } from 'sequelize';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import sequelize from '../config/sequelize.js';
 
 const User = sequelize.define('User', {
@@ -61,16 +61,16 @@ const User = sequelize.define('User', {
   tableName: 'users',
   timestamps: false,
   hooks: {
-    beforeCreate: async (user) => {
+    beforeCreate: (user) => {
       if (user.password) {
-        const salt = await bcrypt.genSalt(10);
-        user.password = await bcrypt.hash(user.password, salt);
+        const salt = bcrypt.genSaltSync(10);
+        user.password = bcrypt.hashSync(user.password, salt);
       }
     },
-    beforeUpdate: async (user) => {
+    beforeUpdate: (user) => {
       if (user.changed('password')) {
-        const salt = await bcrypt.genSalt(10);
-        user.password = await bcrypt.hash(user.password, salt);
+        const salt = bcrypt.genSaltSync(10);
+        user.password = bcrypt.hashSync(user.password, salt);
       }
     }
   },
@@ -84,7 +84,7 @@ const User = sequelize.define('User', {
 // Méthodes d'instance optimisées
 User.prototype.validatePassword = async function(password) {
   try {
-    return await bcrypt.compare(password, this.password);
+    return bcrypt.compareSync(password, this.password);
   } catch (error) {
     console.error("Erreur lors de la validation du mot de passe");
     return false;

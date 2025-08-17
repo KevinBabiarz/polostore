@@ -1,6 +1,6 @@
 // services/authService.js
 import jwt from 'jsonwebtoken';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import User from '../models/User.js';
 import { createTokenWithJTI, revokeToken } from '../middleware/authMiddleware.js';
 import logger from '../utils/logger.js';

@@ -1,5 +1,5 @@
 // scripts/createAdmin.js
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import User from '../models/User.js';
 import sequelize, { testConnection } from '../config/sequelize.js';
 import logger from '../utils/logger.js';
@@ -46,7 +46,7 @@ const createAdmin = async () => {
             email: admin.email
         });
 
-        console.log(i18n.t('admin.createAdmin.createSuccessConsole'));
+        console.log(i18n.t('admin.createAdmin.createSuccess'));
         console.log(i18n.t('admin.createAdmin.emailLabel', { email: admin.email }));
         console.log(i18n.t('admin.createAdmin.passwordLabel', { password: defaultAdmin.password }));
         console.log(i18n.t('admin.createAdmin.changePasswordWarning'));
