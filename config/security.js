@@ -17,6 +17,7 @@ export const corsConfig = {
             'https://polobeatsprod.com', // Domaine sans www
             'https://polostore-frontend.vercel.app', // Ancien domaine Vercel
             'https://polostore-five.vercel.app', // Domaine Vercel actuel
+            'https://polostore-production.up.railway.app',
             /\.vercel\.app$/ // Autoriser tous les sous-domaines Vercel
         ];
 
@@ -37,7 +38,7 @@ export const corsConfig = {
             callback(new Error('Non autorisé par la politique CORS'));
         }
     },
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
     allowedHeaders: [
         'Content-Type',
         'Authorization',

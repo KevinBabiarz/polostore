@@ -99,7 +99,7 @@ export const protect = async (req, res, next) => {
 
                 // Vérifier si l'utilisateur existe toujours
                 const user = await User.findByPk(decoded.id, {
-                    attributes: ['id', 'email', 'is_admin', 'created_at']
+                    attributes: ['id', 'email', 'is_admin', 'created_at', 'role']
                 });
 
                 if (!user) {
@@ -108,14 +108,17 @@ export const protect = async (req, res, next) => {
                     });
                 }
 
+                // Dériver correctement le statut admin depuis is_admin OU role
+                const isAdminFlag = Boolean(user.is_admin) || (user.role === 'admin');
+                const resolvedRole = isAdminFlag ? 'admin' : (user.role || 'user');
 
                 // Ajouter les informations de l'utilisateur à la requête
                 req.user = {
                     id: decoded.id,
                     email: user.email,
-                    is_admin: user.is_admin,
-                    isAdmin: user.is_admin || false,
-                    role: user.is_admin ? 'admin' : 'user',
+                    is_admin: Boolean(user.is_admin),
+                    isAdmin: isAdminFlag,
+                    role: resolvedRole,
                     jti: decoded.jti
                 };
 
@@ -157,7 +160,8 @@ export const admin = (req, res, next) => {
         return res.status(401).json({ message: "Authentification requise" });
     }
 
-    if (req.user.role !== 'admin') {
+    const isAdminFlag = req.user.isAdmin === true || req.user.is_admin === true || req.user.role === 'admin';
+    if (!isAdminFlag) {
         return res.status(403).json({ message: "Accès refusé : privilèges administrateur requis" });
     }
 
