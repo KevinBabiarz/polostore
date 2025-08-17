@@ -1,0 +1,11 @@
+{
+  "jwtSecretNotDefined": "JWT_SECRET nie jest zdefiniowany w zmiennych środowiskowych",
+  "tokenGenerated": "Token wygenerowany pomyślnie",
+  "tokenRevoked": "Token został unieważniony",
+  "allFieldsRequired": "Wszystkie pola są wymagane",
+  "passwordTooShort": "Hasło musi mieć co najmniej 8 znaków",
+  "invalidEmailFormat": "Nieprawidłowy format adresu e-mail",
+  "emailAlreadyUsed": "Ten adres e-mail jest już używany",
+  "usernameAlreadyTaken": "Ta nazwa użytkownika jest już zajęta"
+}
+

@@ -1,0 +1,10 @@
+{
+  "checkingRoleColumn": "Checking role column...",
+  "noAdminColumns": "Neither is_admin nor role exist in users table",
+  "admin.setAdmin.attempting": "Attempting to set user {{email}} as administrator...",
+  "admin.setAdmin.userNotFound": "User not found.",
+  "admin.setAdmin.success": "User successfully set as administrator.",
+  "admin.setAdmin.alreadyAdmin": "User is already an administrator.",
+  "admin.setAdmin.error": "Error setting user as administrator."
+}
+

@@ -51,5 +51,12 @@
   "allDates": "Wszystkie daty",
   "thisWeek": "Ten tydzień",
   "thisMonth": "Ten miesiąc",
-  "thisYear": "Ten rok"
+  "thisYear": "Ten rok",
+  "buyNow": "Kup teraz",
+  "deleteError": "Błąd podczas usuwania",
+  "audioPlayError": "Błąd podczas odtwarzania audio",
+  "productionNotFoundMessage": "Żądana produkcja nie została znaleziona.",
+  "by": "przez",
+  "deleteConfirmationTitle": "Potwierdź usunięcie",
+  "deleteConfirmationText": "Czy na pewno chcesz usunąć tę produkcję? Tej operacji nie można cofnąć."
 }

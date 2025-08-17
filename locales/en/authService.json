@@ -1,0 +1,11 @@
+{
+  "jwtSecretNotDefined": "JWT_SECRET is not defined in environment variables",
+  "tokenGenerated": "Token generated successfully",
+  "tokenRevoked": "Token revoked successfully",
+  "allFieldsRequired": "All fields are required",
+  "passwordTooShort": "Password must be at least 8 characters long",
+  "invalidEmailFormat": "Invalid email format",
+  "emailAlreadyUsed": "This email address is already in use",
+  "usernameAlreadyTaken": "This username is already taken"
+}
+

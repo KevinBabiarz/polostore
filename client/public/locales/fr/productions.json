@@ -51,5 +51,12 @@
   "allDates": "Toutes dates",
   "thisWeek": "Cette semaine",
   "thisMonth": "Ce mois-ci",
-  "thisYear": "Cette année"
+  "thisYear": "Cette année",
+  "buyNow": "Acheter maintenant",
+  "deleteError": "Erreur lors de la suppression",
+  "audioPlayError": "Erreur lors de la lecture audio",
+  "productionNotFoundMessage": "La production demandée est introuvable.",
+  "by": "par",
+  "deleteConfirmationTitle": "Confirmer la suppression",
+  "deleteConfirmationText": "Êtes-vous sûr de vouloir supprimer cette production ? Cette action est irréversible."
 }

@@ -1,0 +1,12 @@
+{
+  "fetchingProductions": "Fetching productions with options: {{options}}",
+  "executingQuery": "Executing query: {{query}}",
+  "productionsFetched": "{{fetched}} productions fetched out of {{total}} total",
+  "errorFetchingProductions": "Error fetching productions: {{error}}",
+  "productionNotFound": "Production not found",
+  "dataReceivedForCreation": "[PROD SERVICE] Data received for creation: {{data}}",
+  "dataReadyForCreation": "[PROD SERVICE] Data ready for creation: {{data}}",
+  "errorCreatingProduction": "[PROD SERVICE] Error creating production: {{error}}",
+  "noUpdatePerformed": "No update performed"
+}
+

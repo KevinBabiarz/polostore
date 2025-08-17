@@ -1,0 +1,12 @@
+{
+  "searchUser": "Searching user with ID: {{id}}",
+  "userNotFound": "User not found with ID: {{id}}",
+  "userFound": "User found with ID: {{id}}",
+  "errorFetchingUser": "Error fetching user {{id}}: {{error}}",
+  "invalidCurrentPassword": "Invalid current password",
+  "fetchingUsers": "[USER SERVICE] Fetching users with options: {{options}}",
+  "errorFetchingUsers": "[USER SERVICE] Error fetching users: {{error}}",
+  "adminStatusMustBeBoolean": "Admin status must be a boolean",
+  "userNotFoundSimple": "User not found"
+}
+

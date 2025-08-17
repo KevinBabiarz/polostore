@@ -1,0 +1,10 @@
+{
+  "railwayConfigDetected": "Wykryto konfigurację DATABASE_URL Railway",
+  "localDbConfig": "Lokalna konfiguracja bazy danych",
+  "postgresConnected": "Pomyślnie nawiązano połączenie z PostgreSQL",
+  "dbInitError": "Błąd inicjalizacji bazy danych",
+  "connectedToPostgres": "Połączono z PostgreSQL",
+  "dbConnectionError": "Błąd połączenia z bazą danych",
+  "postgresConnectionFailed": "Nie udało się połączyć z PostgreSQL"
+}
+

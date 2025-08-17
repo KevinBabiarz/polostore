@@ -1,0 +1,12 @@
+{
+  "searchUser": "Wyszukiwanie użytkownika o ID: {{id}}",
+  "userNotFound": "Nie znaleziono użytkownika o ID: {{id}}",
+  "userFound": "Znaleziono użytkownika o ID: {{id}}",
+  "errorFetchingUser": "Błąd podczas pobierania użytkownika {{id}}: {{error}}",
+  "invalidCurrentPassword": "Nieprawidłowe obecne hasło",
+  "fetchingUsers": "[USER SERVICE] Pobieranie użytkowników z opcjami: {{options}}",
+  "errorFetchingUsers": "[USER SERVICE] Błąd podczas pobierania użytkowników: {{error}}",
+  "adminStatusMustBeBoolean": "Status administratora musi być typu boolean",
+  "userNotFoundSimple": "Nie znaleziono użytkownika"
+}
+
