@@ -24,8 +24,8 @@ export const AuthService = {
             id: user.id,
             role: user.is_admin ? 'admin' : 'user',
             email: user.email,
-            isActive: user.isActive,
-            isAdmin: user.is_admin || false
+            isActive: Boolean(user.is_active),
+            isAdmin: Boolean(user.is_admin)
         };
 
         return createTokenWithJTI(payload);
@@ -125,13 +125,10 @@ export const AuthService = {
             throw new Error("Identifiants invalides");
         }
 
-        // Vérifier si l'utilisateur est banni
-        if (user.isBanned) {
-            logger.warn('Tentative de connexion sur compte banni', {
-                userId: user.id,
-                email
-            });
-            throw new Error("Compte suspendu");
+        // Vérifier si le compte est désactivé
+        if (user.is_active === false) {
+            logger.warn('Tentative de connexion sur compte désactivé', { userId: user.id, email });
+            throw new Error("Compte désactivé");
         }
 
         // Vérifier le mot de passe
@@ -145,11 +142,7 @@ export const AuthService = {
             throw new Error("Identifiants invalides");
         }
 
-        // Mettre à jour la dernière connexion
-        await user.update({
-            lastLoginAt: new Date(),
-            loginCount: (user.loginCount || 0) + 1
-        });
+        // Ne pas mettre à jour des colonnes inexistantes (lastLoginAt, loginCount)
 
         // Générer le token sécurisé
         const { token, jti } = AuthService.generateSecureToken(user);
@@ -165,9 +158,9 @@ export const AuthService = {
                 username: user.username,
                 email: user.email,
                 role: user.is_admin ? 'admin' : 'user',
-                isActive: user.isActive,
-                isAdmin: user.is_admin || false,
-                is_admin: user.is_admin || false
+                isActive: Boolean(user.is_active),
+                isAdmin: Boolean(user.is_admin),
+                is_admin: Boolean(user.is_admin)
             },
             token,
             jti
@@ -227,10 +220,20 @@ export const AuthService = {
     getUserById: async (userId) => {
         try {
             const user = await User.findByPk(userId, {
-                attributes: ['id', 'username', 'email', 'role', 'isActive', 'isBanned']
+                attributes: ['id', 'username', 'email', 'role', 'is_admin', 'is_active']
             });
 
-            return user;
+            if (!user) return null;
+
+            // Normaliser l'objet renvoyé
+            return {
+                id: user.id,
+                username: user.username,
+                email: user.email,
+                role: user.role || (user.is_admin ? 'admin' : 'user'),
+                isActive: Boolean(user.is_active),
+                isAdmin: Boolean(user.is_admin)
+            };
         } catch (error) {
             logger.error('Erreur lors de la récupération de l\'utilisateur', {
                 userId,
