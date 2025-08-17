@@ -64,7 +64,7 @@ export const getUserById = async (req, res) => {
     } catch (error) {
         console.error('[USER CTRL] Erreur:', error);
 
-        if (error.message === "Utilisateur non trouvé") {
+        if (error?.message && error.message.includes("Utilisateur non trouvé")) {
             return res.status(404).json({ message: error.message });
         }
 
@@ -75,7 +75,7 @@ export const getUserById = async (req, res) => {
 export const updateUser = async (req, res) => {
     try {
         const { id } = req.params;
-        const updateData = req.body;
+        const updateData = { ...req.body };
 
         // Vérifier si l'utilisateur qui fait la demande a les droits
         const requestingUserId = req.user.id;
@@ -86,6 +86,17 @@ export const updateUser = async (req, res) => {
             return res.status(403).json({ message: "Accès refusé" });
         }
 
+        // Empêcher les mises à jour de champs sensibles
+        delete updateData.id;
+        delete updateData.created_at;
+        delete updateData.password; // le changement de mdp passe par /:id/password
+
+        // Bloquer l'escalade de privilèges pour les non-admins
+        if (!isAdmin) {
+            delete updateData.is_admin;
+            delete updateData.is_active;
+        }
+
         // Utiliser le service utilisateur pour mettre à jour un utilisateur
         const updatedUser = await UserService.updateUser(id, updateData);
 
@@ -93,7 +104,7 @@ export const updateUser = async (req, res) => {
     } catch (error) {
         console.error(error);
 
-        if (error.message === "Utilisateur non trouvé") {
+        if (error?.message && error.message.includes("Utilisateur non trouvé")) {
             return res.status(404).json({ message: error.message });
         }
 
@@ -126,9 +137,9 @@ export const changePassword = async (req, res) => {
     } catch (error) {
         console.error(error);
 
-        if (error.message === "Utilisateur non trouvé") {
+        if (error?.message && error.message.includes("Utilisateur non trouvé")) {
             return res.status(404).json({ message: error.message });
-        } else if (error.message === "Mot de passe actuel incorrect") {
+        } else if (error?.message && error.message.toLowerCase().includes("mot de passe actuel")) {
             return res.status(400).json({ message: error.message });
         }
 
@@ -158,7 +169,7 @@ export const setAdminStatus = async (req, res) => {
     } catch (error) {
         console.error(error);
 
-        if (error.message === "Utilisateur non trouvé") {
+        if (error?.message && error.message.includes("Utilisateur non trouvé")) {
             return res.status(404).json({ message: error.message });
         }
 
@@ -186,7 +197,7 @@ export const deleteUser = async (req, res) => {
     } catch (error) {
         console.error(error);
 
-        if (error.message === "Utilisateur non trouvé") {
+        if (error?.message && error.message.includes("Utilisateur non trouvé")) {
             return res.status(404).json({ message: error.message });
         }
 
@@ -210,7 +221,7 @@ export const setActiveStatus = async (req, res) => {
     } catch (error) {
         console.error(error);
 
-        if (error.message === "Utilisateur non trouvé") {
+        if (error?.message && error.message.includes("Utilisateur non trouvé")) {
             return res.status(404).json({ message: error.message });
         }
 

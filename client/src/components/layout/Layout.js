@@ -765,7 +765,6 @@ const Layout = ({ themeToggle }) => {
                                             {themeToggle}
                                         </Box>
                                     )}
-
                                     <IconButton
                                         size="large"
                                         color="inherit"

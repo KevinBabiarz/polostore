@@ -138,7 +138,8 @@ export const UserService = {
             throw new Error(i18n.t('userService.userNotFoundSimple'));
         }
 
-        await user.update({ is_admin: isAdmin, role: isAdmin ? 'admin' : 'user' });
+        // Mettre à jour uniquement le champ existant is_admin
+        await user.update({ is_admin: isAdmin });
 
         // Retourner l'utilisateur sans le mot de passe
         const { password, ...userWithoutPassword } = user.get();

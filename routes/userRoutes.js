@@ -13,7 +13,7 @@ import { protect, admin } from "../middleware/authMiddleware.js";
 const router = express.Router();
 
 // Route pour obtenir tous les utilisateurs (pour les admins)
-router.get("/", protect, getUsers);
+router.get("/", protect, admin, getUsers);
 
 // Route pour obtenir un utilisateur par ID
 router.get("/:id", protect, getUserById);
