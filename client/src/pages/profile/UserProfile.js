@@ -15,11 +15,12 @@ import {
   ListItemText
 } from '@mui/material';
 import { useAuth } from '../../contexts/AuthContext';
+import * as userService from '../../services/userService';
 
 const UserProfile = () => {
-  const { user, updateUser } = useAuth();
+  const { user, refreshUser } = useAuth();
   const [userData, setUserData] = useState({
-    name: '',
+    username: '',
     email: '',
     currentPassword: '',
     newPassword: '',
@@ -33,7 +34,7 @@ const UserProfile = () => {
     if (user) {
       setUserData(prevState => ({
         ...prevState,
-        name: user.name || '',
+        username: user.username || '',
         email: user.email || ''
       }));
     }
@@ -52,6 +53,11 @@ const UserProfile = () => {
     setError('');
     setSuccess('');
 
+    if (!user) {
+      setError('Utilisateur non connecté.');
+      return;
+    }
+
     // Validation des mots de passe si l'utilisateur veut les changer
     if (userData.newPassword) {
       if (userData.newPassword !== userData.confirmPassword) {
@@ -63,13 +69,32 @@ const UserProfile = () => {
     }
 
     try {
-      // Simuler la mise à jour du profil - à remplacer par votre API réelle
-      // await updateUser({ ...userData });
-      console.log('Profil mis à jour avec:', userData);
-      setSuccess('Profil mis à jour avec succès!');
+      // Mise à jour username/email si modifiés
+      const updates = {};
+      if (userData.username && userData.username !== (user.username || '')) {
+        updates.username = userData.username;
+      }
+      if (userData.email && userData.email !== (user.email || '')) {
+        updates.email = userData.email;
+      }
+      if (Object.keys(updates).length > 0) {
+        await userService.updateUser(user.id, updates);
+      }
+
+      // Changement de mot de passe si demandé
+      if (userData.newPassword) {
+        await userService.changePassword(user.id, userData.currentPassword, userData.newPassword);
+      }
+
+      // Rafraîchir les infos du contexte
+      await refreshUser();
+
+      setSuccess('Profil mis à jour avec succès.');
       setIsEditing(false);
+      // Nettoyer les champs de mots de passe
+      setUserData(prev => ({ ...prev, currentPassword: '', newPassword: '', confirmPassword: '' }));
     } catch (err) {
-      setError(err.message || 'Une erreur est survenue lors de la mise à jour du profil.');
+      setError(err.response?.data?.message || err.message || 'Une erreur est survenue lors de la mise à jour du profil.');
     }
   };
 
@@ -81,7 +106,7 @@ const UserProfile = () => {
             Mon profil
           </Typography>
           <Avatar
-            alt={userData.name}
+            alt={userData.username}
             src="/static/images/avatar/default.jpg"
             sx={{ width: 80, height: 80 }}
           />
@@ -98,8 +123,8 @@ const UserProfile = () => {
               <TextField
                 fullWidth
                 label="Nom"
-                name="name"
-                value={userData.name}
+                name="username"
+                value={userData.username}
                 onChange={handleChange}
                 disabled={!isEditing}
                 variant={isEditing ? "outlined" : "filled"}

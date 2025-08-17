@@ -147,6 +147,28 @@ export const UserService = {
     },
 
     /**
+     * Définit le statut actif d'un utilisateur
+     * @param {number} id - ID de l'utilisateur
+     * @param {boolean} isActive - Nouveau statut actif
+     * @returns {Promise<Object>} L'utilisateur mis à jour
+     */
+    setActiveStatus: async (id, isActive) => {
+        if (typeof isActive !== 'boolean') {
+            throw new Error('Le statut actif doit être un booléen');
+        }
+
+        const user = await User.findByPk(id);
+        if (!user) {
+            throw new Error(i18n.t('userService.userNotFoundSimple'));
+        }
+
+        await user.update({ is_active: isActive });
+
+        const { password, ...userWithoutPassword } = user.get();
+        return userWithoutPassword;
+    },
+
+    /**
      * Supprime un utilisateur
      * @param {number} id - ID de l'utilisateur à supprimer
      * @returns {Promise<boolean>} true si la suppression a réussi

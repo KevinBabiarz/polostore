@@ -29,6 +29,7 @@ export const getUsers = async (req, res) => {
             username: user.username,
             email: user.email,
             isAdmin: user.is_admin,
+            isActive: user.is_active,
             created_at: user.created_at
         }));
 
@@ -55,6 +56,7 @@ export const getUserById = async (req, res) => {
             username: user.username,
             email: user.email,
             isAdmin: user.is_admin,
+            isActive: user.is_active,
             created_at: user.created_at
         };
 
@@ -181,6 +183,30 @@ export const deleteUser = async (req, res) => {
         await UserService.deleteUser(id);
 
         res.status(200).json({ message: "Utilisateur supprimé avec succès" });
+    } catch (error) {
+        console.error(error);
+
+        if (error.message === "Utilisateur non trouvé") {
+            return res.status(404).json({ message: error.message });
+        }
+
+        res.status(500).json({ message: "Erreur serveur" });
+    }
+};
+
+// Nouveau: changer le statut actif/inactif (admin uniquement)
+export const setActiveStatus = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { isActive } = req.body;
+
+        // Vérifier si l'utilisateur qui fait la demande est admin (déjà garanti par le middleware côté route)
+        if (typeof isActive !== 'boolean') {
+            return res.status(400).json({ message: "Le statut actif doit être un booléen" });
+        }
+
+        const updatedUser = await UserService.setActiveStatus(id, isActive);
+        res.status(200).json(updatedUser);
     } catch (error) {
         console.error(error);
 

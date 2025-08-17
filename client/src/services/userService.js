@@ -162,6 +162,17 @@ export const deleteUser = async (id) => {
   }
 };
 
+// Changer le mot de passe de l'utilisateur connecté
+export const changePassword = async (id, currentPassword, newPassword) => {
+  try {
+    const response = await api.patch(`/users/${id}/password`, { currentPassword, newPassword });
+    return response.data;
+  } catch (error) {
+    console.error(`[CLIENT] Erreur lors du changement de mot de passe pour l'utilisateur ${id}:`, error);
+    throw error;
+  }
+};
+
 // Fonction pour nettoyer le cache
 export const clearUsersCache = () => {
   cache.users.clear();

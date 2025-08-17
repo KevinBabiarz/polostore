@@ -759,8 +759,13 @@ const Layout = ({ themeToggle }) => {
 
                             {/* Menu hamburger pour mobile */}
                             {isMobile && (
-                                <Box sx={{ display: 'flex', ml: 'auto' }}>
-                                    {/* Icône admin retirée en mobile, liens admin intégrés au menu hamburger */}
+                                <Box sx={{ display: 'flex', ml: 'auto', alignItems: 'center' }}>
+                                    {themeToggle && (
+                                        <Box sx={{ mr: 0.5, display: { xs: 'inline-flex', md: 'none' } }}>
+                                            {themeToggle}
+                                        </Box>
+                                    )}
+
                                     <IconButton
                                         size="large"
                                         color="inherit"

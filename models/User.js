@@ -39,6 +39,12 @@ const User = sequelize.define('User', {
     defaultValue: false,
     field: 'is_admin' // S'assurer que Sequelize utilise exactement ce nom de colonne
   },
+  is_active: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: true,
+    field: 'is_active' // S'assurer que Sequelize utilise exactement ce nom de colonne
+  },
   created_at: {
     type: DataTypes.DATE,
     allowNull: true,

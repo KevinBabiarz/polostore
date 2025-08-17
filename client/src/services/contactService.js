@@ -27,3 +27,21 @@ export const markMessageAsRead = async (id) => {
         throw error;
     }
 };
+
+export const getContactMessage = async (id) => {
+    try {
+        const response = await api.get(`/contact/${id}`);
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const deleteContactMessage = async (id) => {
+    try {
+        const response = await api.delete(`/contact/${id}`);
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};

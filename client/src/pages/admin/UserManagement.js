@@ -183,8 +183,8 @@ const UserManagement = () => {
         await userService.changeUserRole(selectedUser.id, editFormData.isAdmin);
       }
 
-      // Mettre à jour le statut si nécessaire
-      if (editFormData.isActive !== selectedUser.isActive) {
+      // Mettre à jour le statut actif si nécessaire (API disponible)
+      if (typeof editFormData.isActive === 'boolean' && editFormData.isActive !== (selectedUser.isActive === true)) {
         if (editFormData.isActive) {
           await userService.enableUser(selectedUser.id);
         } else {
@@ -193,7 +193,7 @@ const UserManagement = () => {
       }
 
       setEditDialogOpen(false);
-      loadUsers(); // Recharger la liste des utilisateurs
+      loadUsers();
     } catch (err) {
       console.error("Erreur lors de la mise à jour de l'utilisateur:", err);
       setError('userManagement.errors.updateUser');
@@ -376,7 +376,7 @@ const UserManagement = () => {
                       />
                     </TableCell>
                     <TableCell>
-                      {new Date(user.createdAt).toLocaleDateString('fr-FR')}
+                      {new Date((user.created_at || user.createdAt || user.createdOn || Date.now())).toLocaleDateString('fr-FR')}
                     </TableCell>
                     <TableCell align="center">
                       <Box sx={{ display: 'flex', justifyContent: 'center' }}>

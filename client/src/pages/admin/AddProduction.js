@@ -7,8 +7,9 @@ import {
     Alert, Chip
 } from '@mui/material';
 import { CloudUpload, ArrowBack, Delete } from '@mui/icons-material';
-import { createProduction, getProductionById } from '../../services/productionService';
+import { createProduction, getProductionById, updateProduction } from '../../services/productionService';
 import { useTranslation } from 'react-i18next';
+import config from '../../config/config';
 
 const AddProduction = () => {
     const { id } = useParams();
@@ -44,17 +45,18 @@ const AddProduction = () => {
                         description: data.description || '',
                         genre: data.genre || '',
                         release_date: data.release_date ? data.release_date.split('T')[0] : '',
-                        cover_image: null, // L'image existante est affichée mais pas chargée dans le state
-                        audio_files: [] // Les fichiers existants sont affichés mais pas chargés dans le state
+                        cover_image: null,
+                        audio_files: []
                     });
 
-                    // Si une image existe, la prévisualiser
-                    if (data.cover_image) {
-                        setPreview(`${process.env.REACT_APP_API_URL}/uploads/${data.cover_image}`);
+                    // Aperçu de l'image existante via image_url
+                    if (data.image_url) {
+                        const base = config.UPLOADS_URL || '';
+                        setPreview(data.image_url.startsWith('http') ? data.image_url : `${base}${data.image_url}`);
                     }
                 } catch (error) {
-                    console.error("Erreur lors du chargement de la production:", error);
-                    setError("Impossible de charger les données de cette production");
+                    console.error('Erreur lors du chargement de la production:', error);
+                    setError('Impossible de charger les données de cette production');
                 } finally {
                     setLoadingData(false);
                 }
@@ -74,11 +76,8 @@ const AddProduction = () => {
         if (file) {
             setFormData({ ...formData, cover_image: file });
 
-            // Créer une URL pour prévisualiser l'image
             const reader = new FileReader();
-            reader.onload = () => {
-                setPreview(reader.result);
-            };
+            reader.onload = () => setPreview(reader.result);
             reader.readAsDataURL(file);
         }
     };
@@ -101,47 +100,33 @@ const AddProduction = () => {
         setSuccess('');
 
         try {
-            // Valider les données avant envoi
+            // Validation minimale
             if (!formData.title.trim() || !formData.artist.trim()) {
                 setError('addProduction.requiredFields');
                 setLoading(false);
                 return;
             }
 
-            // Préparer les données pour l'envoi
-            const productionData = new FormData();
-            Object.keys(formData).forEach(key => {
-                if (key === 'cover_image') {
-                    if (formData[key]) {
-                        productionData.append(key, formData[key]);
-                    }
-                } else if (key === 'audio_files') {
-                    // Les fichiers audio sont gérés séparément
-                } else {
-                    productionData.append(key, formData[key]);
-                }
-            });
+            // Construire un payload simple (le service fera la conversion en FormData)
+            const payload = {
+                title: formData.title,
+                artist: formData.artist,
+                description: formData.description,
+                genre: formData.genre,
+                release_date: formData.release_date,
+                cover_image: formData.cover_image || undefined,
+                audio_files: formData.audio_files || []
+            };
 
-            // Ajouter les fichiers audio
-            formData.audio_files.forEach(file => {
-                productionData.append('audio_files', file);
-            });
-
-            // ID pour le mode édition
             if (isEditMode) {
-                productionData.append('id', id);
+                await updateProduction(id, payload);
+                setSuccess('addProduction.updated');
+            } else {
+                await createProduction(payload);
+                setSuccess('addProduction.added');
             }
 
-            // Envoi des données à l'API
-            await createProduction(productionData, isEditMode ? 'put' : 'post');
-
-            setSuccess(isEditMode ? 'addProduction.updated' : 'addProduction.added');
-
-            // Redirection après un court délai
-            setTimeout(() => {
-                navigate('/productions');
-            }, 2000);
-
+            setTimeout(() => navigate('/productions'), 1500);
         } catch (error) {
             console.error("Erreur lors de l'enregistrement:", error);
             setError(error.message || 'addProduction.error');

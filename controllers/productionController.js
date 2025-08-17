@@ -74,7 +74,7 @@ export const createProduction = async (req, res) => {
 
         if (!title || !title.trim()) {
             console.log('[PROD CTRL] Validation échouée: titre manquant ou vide');
-            return res.status(400).json({
+            return res.status(400).json({ 
                 message: "Le titre est obligatoire",
                 error: "TITLE_REQUIRED"
             });
@@ -82,7 +82,7 @@ export const createProduction = async (req, res) => {
 
         if (!artist || !artist.trim()) {
             console.log('[PROD CTRL] Validation échouée: artiste manquant ou vide');
-            return res.status(400).json({
+            return res.status(400).json({ 
                 message: "L'artiste est obligatoire",
                 error: "ARTIST_REQUIRED"
             });
@@ -138,24 +138,24 @@ export const createProduction = async (req, res) => {
         res.status(201).json(newProduction);
     } catch (error) {
         console.error('[PROD CTRL] Erreur lors de la création de la production:', error);
-
+        
         // Gestion des erreurs spécifiques
         if (error.name === 'SequelizeValidationError') {
-            return res.status(400).json({
+            return res.status(400).json({ 
                 message: 'Erreur de validation des données',
                 details: error.errors.map(e => e.message),
                 error: 'VALIDATION_ERROR'
             });
         }
-
+        
         if (error.name === 'SequelizeUniqueConstraintError') {
-            return res.status(409).json({
+            return res.status(409).json({ 
                 message: 'Une production avec ce titre existe déjà',
                 error: 'DUPLICATE_TITLE'
             });
         }
 
-        res.status(500).json({
+        res.status(500).json({ 
             message: 'Erreur lors de la création de la production',
             error: 'INTERNAL_ERROR',
             details: process.env.NODE_ENV === 'development' ? error.message : undefined

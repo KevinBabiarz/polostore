@@ -37,9 +37,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     useEffect(() => {
-        // Supprimer le token pour forcer la connexion à chaque démarrage de l'application
-        localStorage.removeItem('token');
-        delete api.defaults.headers.common['Authorization'];
+        // Ne pas supprimer le token au démarrage. Préserver la session si un token existe.
 
         // Vérifier si l'utilisateur est déjà connecté au chargement
         const checkLoggedIn = async () => {
@@ -169,6 +167,27 @@ export const AuthProvider = ({ children }) => {
         setAdminStatus(false);
     };
 
+    // Rafraîchir les infos utilisateur depuis l'API
+    const refreshUser = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) return null;
+            api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+            const response = await api.get('/auth/me');
+            const userData = response.data.user || response.data;
+            const isUserAdmin = checkAdminStatus(userData);
+            setAdminStatus(isUserAdmin);
+            if (isUserAdmin && userData.isAdmin === undefined) {
+                userData.isAdmin = true;
+            }
+            setUser(userData);
+            return userData;
+        } catch (e) {
+            console.error('Erreur lors du rafraîchissement utilisateur:', e);
+            return null;
+        }
+    };
+
     const isAuthenticated = () => !!user;
 
     // Fonction améliorée pour vérifier si l'utilisateur est administrateur
@@ -197,7 +216,8 @@ export const AuthProvider = ({ children }) => {
         isAuthenticated,
         isAdmin,
         loading,
-        adminStatus // Exposer directement le statut admin pour les composants qui en ont besoin
+        adminStatus,
+        refreshUser
     };
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

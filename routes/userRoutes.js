@@ -5,7 +5,8 @@ import {
     updateUser,
     changePassword,
     setAdminStatus,
-    deleteUser
+    deleteUser,
+    setActiveStatus
 } from "../controllers/userController.js";
 import { protect, admin } from "../middleware/authMiddleware.js";
 
@@ -25,6 +26,9 @@ router.patch("/:id/password", protect, changePassword);
 
 // Route pour changer le statut admin (admin seulement)
 router.patch("/:id/role", protect, admin, setAdminStatus);
+
+// Nouveau: Route pour activer/désactiver un utilisateur (admin seulement)
+router.patch("/:id/status", protect, admin, setActiveStatus);
 
 // Route pour supprimer un utilisateur
 router.delete("/:id", protect, deleteUser);
