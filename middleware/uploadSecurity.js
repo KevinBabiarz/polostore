@@ -6,11 +6,14 @@ import fs from 'fs';
 
 // Configuration du chemin des uploads pour Railway avec volume persistant
 const getUploadsPath = () => {
-    // Si on est sur Railway avec un volume monté
+    // Volume explicitement défini
     if (process.env.RAILWAY_VOLUME_MOUNT_PATH) {
         return process.env.RAILWAY_VOLUME_MOUNT_PATH;
     }
-
+    // En production sur Railway, utiliser le chemin du volume monté
+    if (process.env.NODE_ENV === 'production' && process.env.RAILWAY_ENVIRONMENT) {
+        return '/app/uploads';
+    }
     // Sinon, utiliser le chemin local
     return './public/uploads/';
 };
