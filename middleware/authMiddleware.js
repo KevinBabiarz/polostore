@@ -4,6 +4,7 @@ import RevokedToken from "../models/RevokedToken.js";
 import User from "../models/User.js";
 import crypto from "crypto";
 import { Op } from "sequelize";
+import sequelize from "../config/sequelize.js";
 
 // Fonction pour générer un JTI (JWT ID) unique
 const generateJTI = () => {
@@ -103,23 +104,30 @@ export const protect = async (req, res, next) => {
                 });
 
                 if (!user) {
-                    return res.status(401).json({
-                        message: "Utilisateur non trouvé"
-                    });
+                    return res.status(401).json({ message: "Utilisateur non trouvé" });
                 }
 
-                // Dériver correctement le statut admin depuis is_admin OU role
-                const isAdminFlag = Boolean(user.is_admin) || (user.role === 'admin');
-                const resolvedRole = isAdminFlag ? 'admin' : (user.role || 'user');
+                // Lire le champ 'role' directement depuis la base sans modifier le modèle
+                let roleValue = null;
+                try {
+                    const roleRow = await sequelize.query(
+                        'SELECT role FROM users WHERE id = :id LIMIT 1',
+                        { replacements: { id: decoded.id }, plain: true }
+                    );
+                    roleValue = roleRow?.role || null;
+                } catch (e) {
+                    // ignorer si la colonne n'existe pas ou autre erreur
+                    roleValue = null;
+                }
 
-                // Ajouter les informations de l'utilisateur à la requête
+                const isAdminFlag = Boolean(user.is_admin) || roleValue === 'admin';
+
                 req.user = {
                     id: decoded.id,
                     email: user.email,
                     is_admin: Boolean(user.is_admin),
                     isAdmin: isAdminFlag,
-                    role: resolvedRole,
-                    jti: decoded.jti
+                    role: isAdminFlag ? 'admin' : (roleValue || 'user')
                 };
 
                 if (process.env.NODE_ENV !== 'production') {
@@ -160,8 +168,7 @@ export const admin = (req, res, next) => {
         return res.status(401).json({ message: "Authentification requise" });
     }
 
-    const isAdminFlag = req.user.isAdmin === true || req.user.is_admin === true || req.user.role === 'admin';
-    if (!isAdminFlag) {
+    if (!req.user.isAdmin) {
         return res.status(403).json({ message: "Accès refusé : privilèges administrateur requis" });
     }
 

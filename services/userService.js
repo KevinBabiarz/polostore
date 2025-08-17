@@ -2,6 +2,8 @@
 import User from '../models/User.js';
 import { Op } from 'sequelize';
 import { i18n } from '../utils/i18n.js';
+import Favorite from '../models/Favorite.js';
+import sequelize from '../config/sequelize.js';
 
 /**
  * Service de gestion des utilisateurs
@@ -174,14 +176,19 @@ export const UserService = {
      * @returns {Promise<boolean>} true si la suppression a réussi
      */
     deleteUser: async (id) => {
-        const user = await User.findByPk(id);
+        return await sequelize.transaction(async (t) => {
+            const user = await User.findByPk(id, { transaction: t });
 
-        if (!user) {
-            throw new Error(i18n.t('userService.userNotFoundSimple'));
-        }
+            if (!user) {
+                throw new Error(i18n.t('userService.userNotFoundSimple'));
+            }
 
-        await user.destroy();
-        return true;
+            // Supprimer d'abord les enregistrements dépendants (ex: favoris)
+            await Favorite.destroy({ where: { user_id: id }, transaction: t });
+
+            await user.destroy({ transaction: t });
+            return true;
+        });
     }
 };
 
