@@ -17,7 +17,13 @@ export const AuthService = {
      */
     generateSecureToken: (user) => {
         if (!process.env.JWT_SECRET) {
-            throw new Error(i18n.t('authService.jwtSecretNotDefined'));
+            console.error('[AUTH SERVICE] JWT_SECRET manquant dans les variables d\'environnement');
+            throw new Error('Configuration serveur incomplète');
+        }
+
+        if (process.env.JWT_SECRET.length < 32) {
+            console.error('[AUTH SERVICE] JWT_SECRET trop courte:', process.env.JWT_SECRET.length, 'caractères');
+            throw new Error('Configuration serveur incomplète');
         }
 
         const payload = {
@@ -28,7 +34,12 @@ export const AuthService = {
             isAdmin: Boolean(user.is_admin)
         };
 
-        return createTokenWithJTI(payload);
+        try {
+            return createTokenWithJTI(payload);
+        } catch (error) {
+            console.error('[AUTH SERVICE] Erreur création token:', error.message);
+            throw new Error('Erreur lors de la génération du token');
+        }
     },
 
     /**
