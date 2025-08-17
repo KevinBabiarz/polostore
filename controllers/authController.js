@@ -5,7 +5,8 @@ import User from "../models/User.js";
 
 // Inscription d'utilisateur
 export const register = async (req, res) => {
-    const { username, email, password, confirmPassword } = req.body;
+    const body = req.body || {};
+    const { username, email, password, confirmPassword } = body;
 
     // Validation des champs améliorée
     if (!username?.trim() || !email?.trim() || !password || !confirmPassword) {
@@ -56,7 +57,8 @@ export const register = async (req, res) => {
 
 // Connexion d'utilisateur
 export const login = async (req, res) => {
-    const { email, password } = req.body;
+    const body = req.body || {};
+    const { email, password } = body;
 
     // Validation des champs
     if (!email?.trim() || !password) {

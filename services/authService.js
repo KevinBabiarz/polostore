@@ -131,8 +131,20 @@ export const AuthService = {
             throw new Error("Compte désactivé");
         }
 
-        // Vérifier le mot de passe
-        const isPasswordValid = await bcrypt.compare(password, user.password);
+        // Vérifier la présence d'un hash valide
+        if (!user.password || typeof user.password !== 'string' || user.password.length < 20) {
+            logger.error('Hash de mot de passe invalide ou manquant', { userId: user.id, email });
+            throw new Error("Identifiants invalides");
+        }
+
+        // Vérifier le mot de passe (gestion sûre des erreurs)
+        let isPasswordValid = false;
+        try {
+            isPasswordValid = await bcrypt.compare(password, user.password);
+        } catch (e) {
+            logger.error('Erreur bcrypt.compare', { userId: user.id, email, error: e.message });
+            throw new Error("Identifiants invalides");
+        }
 
         if (!isPasswordValid) {
             logger.warn('Tentative de connexion avec mot de passe incorrect', {
@@ -141,8 +153,6 @@ export const AuthService = {
             });
             throw new Error("Identifiants invalides");
         }
-
-        // Ne pas mettre à jour des colonnes inexistantes (lastLoginAt, loginCount)
 
         // Générer le token sécurisé
         const { token, jti } = AuthService.generateSecureToken(user);
